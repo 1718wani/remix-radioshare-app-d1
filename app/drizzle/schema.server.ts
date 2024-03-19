@@ -3,4 +3,5 @@ export const resources = sqliteTable("resources", {
   id: integer("id").primaryKey(),
   title: text("title").notNull(),
   href: text("href").notNull(),
+  description:text("description")
 });
