@@ -18,8 +18,9 @@ export async function action({ request, context }: ActionFunctionArgs) {
   const formData = await request.formData();
   const title = formData.get("title") as string;
   const href = formData.get("href") as string;
+  const description = formData.get("description") as string;
   const db = drizzle(context.cloudflare.env.DB);
-  await db.insert(resources).values({ title, href }).execute();
+  await db.insert(resources).values({ title, href, description }).execute();
   return json({ message: "Resource added" }, { status: 201 });
 }
 export async function loader({ context }: LoaderFunctionArgs) {
@@ -59,6 +60,11 @@ export default function Index() {
         <div>
           <label>
             URL: <input type="url" name="href" required />
+          </label>
+        </div>
+        <div>
+          <label>
+            Description: <input type="text" name="description" required />
           </label>
         </div>
         <button type="submit">Add Resource</button>
