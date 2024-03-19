@@ -13,6 +13,7 @@
     "typegen": "wrangler types",
     "drizzle:update": "drizzle-kit generate:sqlite --out ./app/drizzle/migrations --schema ./app/drizzle/schema.server.ts",
     "db:migrate:local": "npm run drizzle:update && npx wrangler d1 migrations apply db --local",
+    "db:migrate:remote": "npm run drizzle:update && npx wrangler d1 migrations apply db --remote",
     "db:migrate": "npm run drizzle:update && npx wrangler d1 migrations apply db"
   },
   "dependencies": {
