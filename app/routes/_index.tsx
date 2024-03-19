@@ -1,13 +1,7 @@
-import {
-  json,
-  type MetaFunction,
-} from "@remix-run/cloudflare"
-import type {
-  LoaderFunctionArgs,
-  ActionFunctionArgs,
-} from "@remix-run/node"
-import { Form, useLoaderData } from "@remix-run/react"
-import { drizzle } from "drizzle-orm/d1"
+import { json, type MetaFunction } from "@remix-run/cloudflare";
+import type { LoaderFunctionArgs, ActionFunctionArgs } from "@remix-run/node";
+import { Form, useLoaderData } from "@remix-run/react";
+import { drizzle } from "drizzle-orm/d1";
 import { resources } from "~/drizzle/schema.server";
 
 export const meta: MetaFunction = () => {
@@ -20,27 +14,16 @@ export const meta: MetaFunction = () => {
   ];
 };
 
-export async function action({
-  request,
-  context,
-}: ActionFunctionArgs) {
-  const formData = await request.formData()
-  const title = formData.get("title") as string
-  const href = formData.get("href") as string
-  const db = drizzle(context.cloudflare.env.DB)
-  await db
-    .insert(resources)
-    .values({ title, href })
-    .execute()
-  return json(
-    { message: "Resource added" },
-    { status: 201 },
-  )
+export async function action({ request, context }: ActionFunctionArgs) {
+  const formData = await request.formData();
+  const title = formData.get("title") as string;
+  const href = formData.get("href") as string;
+  const db = drizzle(context.cloudflare.env.DB);
+  await db.insert(resources).values({ title, href }).execute();
+  return json({ message: "Resource added" }, { status: 201 });
 }
-export async function loader({
-  context,
-}: LoaderFunctionArgs) {
-  const db = drizzle(context.cloudflare.env.DB)
+export async function loader({ context }: LoaderFunctionArgs) {
+  const db = drizzle(context.cloudflare.env.DB);
   const resourceList = await db
     .select({
       id: resources.id,
@@ -48,27 +31,20 @@ export async function loader({
       href: resources.href,
     })
     .from(resources)
-    .orderBy(resources.id)
+    .orderBy(resources.id);
   return json({
     resourceList,
-  })
+  });
 }
 export default function Index() {
-  const { resourceList } = useLoaderData<typeof loader>()
+  const { resourceList } = useLoaderData<typeof loader>();
   return (
     <div>
-      <h1>
-        Welcome to Remix (with Drizzle, Vite and Cloudflare
-        D1)
-      </h1>
+      <h1>Welcome to Remix (with Drizzle, Vite and Cloudflare D1)</h1>
       <ul>
         {resourceList.map((resource) => (
           <li key={resource.id}>
-            <a
-              target="_blank"
-              href={resource.href}
-              rel="noreferrer"
-            >
+            <a target="_blank" href={resource.href} rel="noreferrer">
               {resource.title}
             </a>
           </li>
@@ -77,8 +53,7 @@ export default function Index() {
       <Form method="POST">
         <div>
           <label>
-            Title:{" "}
-            <input type="text" name="title" required />
+            Title: <input type="text" name="title" required />
           </label>
         </div>
         <div>
@@ -89,5 +64,5 @@ export default function Index() {
         <button type="submit">Add Resource</button>
       </Form>
     </div>
-  )
+  );
 }
