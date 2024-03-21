@@ -1,0 +1,15 @@
+:global(.pulse-button) {
+  animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+  0% {
+    box-shadow: 0 0 0 0 rgba(7, 104, 201, 0.7);
+  }
+  70% {
+    box-shadow: 0 0 0 10px rgba(29, 78, 125, 0);
+  }
+  100% {
+    box-shadow: 0 0 0 0 rgba(3, 144, 245, 0);
+  }
+}
