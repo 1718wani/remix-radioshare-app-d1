@@ -32,7 +32,7 @@ export const getLotsReplayedHighlights = async (
           imageUrl: radioshows.imageUrl,
         },
         userHighlight: {
-          played: userHighlights.replayed,
+          replayed: userHighlights.replayed,
           liked: userHighlights.liked,
           saved: userHighlights.saved,
         },

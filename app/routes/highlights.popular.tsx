@@ -79,7 +79,7 @@ export default function HightlightsPopular() {
                   createdAt={highlightData.highlight.createdAt ?? ""}
                   liked={highlightData.userHighlight?.liked ?? false}
                   saved={highlightData.userHighlight?.saved ?? false}
-                  played={highlightData.userHighlight?.played ?? false}
+                  played={highlightData.userHighlight?.replayed ?? false}
                   totalReplayTimes={
                     highlightData.highlight.totalReplayTimes ?? 0
                   }
