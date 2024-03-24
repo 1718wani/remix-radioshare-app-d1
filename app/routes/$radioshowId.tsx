@@ -13,6 +13,7 @@ import { RadioShowHeader } from "~/features/Highlight/components/RadioShowHeader
 import { updateHighlight } from "~/features/Highlight/apis/updateHighlight";
 import { useDisclosure } from "@mantine/hooks";
 import { LoginNavigateModal } from "~/features/Auth/components/LoginNavigateModal";
+import { incrementTotalReplayTimes } from "~/features/Highlight/apis/incrementTotalReplayTimes";
 
 export const loader = async ({
   params,
@@ -39,8 +40,8 @@ export const loader = async ({
 
 export const action = async ({ request, context }: ActionFunctionArgs) => {
   const formData = await request.formData();
-  const played = formData.has("played")
-    ? formData.get("played") === "true"
+  const replayed = formData.has("replayed")
+    ? formData.get("replayed") === "true"
     : undefined;
   const saved = formData.has("saved")
     ? formData.get("saved") === "true"
@@ -52,12 +53,16 @@ export const action = async ({ request, context }: ActionFunctionArgs) => {
   const highlightId = formData.get("id") as string;
   invariant(highlightId, "highlightId not found");
 
+  if (replayed) {
+    await incrementTotalReplayTimes(highlightId, context);
+  }
+
   try {
     const updateResult = await updateHighlight(
       highlightId,
       context,
       request,
-      played,
+      replayed,
       saved,
       liked
     );
