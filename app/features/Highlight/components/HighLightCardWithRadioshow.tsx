@@ -23,7 +23,7 @@ type props = {
   createdAt: string;
   liked: boolean;
   saved: boolean;
-  played: boolean;
+  replayed: boolean;
   imageUrl: string;
   radioshowId: string;
   totalReplayTimes: number;
@@ -42,7 +42,7 @@ export const HighLightCardWithRadioshow = (props: props) => {
     createdAt,
     liked,
     saved,
-    played,
+    replayed,
     imageUrl,
     radioshowId,
     totalReplayTimes,
@@ -50,7 +50,7 @@ export const HighLightCardWithRadioshow = (props: props) => {
     open,
   } = props;
   const theme = useMantineTheme();
-  console.log(radioshowId,"radioshowIdです")
+  console.log(radioshowId, "radioshowIdです");
 
   // formDataから値を取得する前に、キーが存在するか確認
   const likedState =
@@ -84,13 +84,13 @@ export const HighLightCardWithRadioshow = (props: props) => {
         </Card.Section>
         <Flex justify={"space-between"}>
           <Group>
-            {played && (
+            {replayed && (
               <Badge w="fit-content" variant="light" c={"gray"}>
                 再生済み
               </Badge>
             )}
 
-            {isWithinAWeek(createdAt) && !played && (
+            {isWithinAWeek(createdAt) && !replayed && (
               <Badge w="fit-content" variant="light">
                 NEW !
               </Badge>
@@ -186,20 +186,23 @@ export const HighLightCardWithRadioshow = (props: props) => {
               {totalReplayTimes}
             </Text>
           </Flex>
-          <Button
-            radius="xl"
-            component="a"
-            href={replayUrl}
-            target="_blank"
-            variant="gradient"
-            gradient={{
-              from: "rgba(4, 201, 47, 1)",
-              to: "rgba(87, 70, 70, 1)",
-              deg: 158,
-            }}
-          >
-            Spotifyで再生する
-          </Button>
+          <fetcher.Form method="post">
+            <input type="hidden" name="id" value={id} />
+            <input type="hidden" name="replayed" value="true" />
+            <Button
+              type="submit"
+              onClick={() => window.open(replayUrl, "_blank")}
+              radius="xl"
+              variant="gradient"
+              gradient={{
+                from: "rgba(4, 201, 47, 1)",
+                to: "rgba(87, 70, 70, 1)",
+                deg: 158,
+              }}
+            >
+              Spotifyで再生する
+            </Button>
+          </fetcher.Form>
         </Flex>
       </Card>
     </>

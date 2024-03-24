@@ -24,7 +24,7 @@ export const createHighlight = async (
         description,
         replayUrl,
         createdBy: userId,
-        radioshow: radioshowData,
+        radioshowId: radioshowData,
       })
       .execute();
 

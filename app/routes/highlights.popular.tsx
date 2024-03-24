@@ -8,11 +8,12 @@ import { useDisclosure } from "@mantine/hooks";
 import { LoginNavigateModal } from "~/features/Auth/components/LoginNavigateModal";
 import { authenticator } from "~/features/Auth/services/authenticator";
 import { EmptyHighlight } from "~/features/Highlight/components/EmptyHighlight";
+import { incrementTotalReplayTimes } from "~/features/Highlight/apis/incrementTotalReplayTimes";
 
 export const action = async ({ request, context }: ActionFunctionArgs) => {
   const formData = await request.formData();
-  const played = formData.has("played")
-    ? formData.get("played") === "true"
+  const replayed = formData.has("replayed")
+    ? formData.get("replayed") === "true"
     : undefined;
   const saved = formData.has("saved")
     ? formData.get("saved") === "true"
@@ -23,13 +24,16 @@ export const action = async ({ request, context }: ActionFunctionArgs) => {
 
   const highlightId = formData.get("id") as string;
 
+  if (replayed) {
+    await incrementTotalReplayTimes(highlightId, context);
+  }
+
   try {
     const updateResult = await updateHighlight(
-      // highlightId,
       highlightId,
       context,
       request,
-      played,
+      replayed,
       saved,
       liked
     );
@@ -79,7 +83,7 @@ export default function HightlightsPopular() {
                   createdAt={highlightData.highlight.createdAt ?? ""}
                   liked={highlightData.userHighlight?.liked ?? false}
                   saved={highlightData.userHighlight?.saved ?? false}
-                  played={highlightData.userHighlight?.played ?? false}
+                  replayed={highlightData.userHighlight?.replayed ?? false}
                   totalReplayTimes={
                     highlightData.highlight.totalReplayTimes ?? 0
                   }

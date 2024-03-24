@@ -3,3 +3,4 @@ binding = "DB" # i.e. available in your Worker on env.DB
 database_name = "db"
 database_id = "600ea953-2b1e-411c-879e-608388bf2042"
 migrations_dir="./app/drizzle/migrations"
+compatibility_flags = [ "nodejs_compat" ]

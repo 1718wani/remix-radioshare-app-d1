@@ -4,7 +4,7 @@ import { userHighlights } from "~/drizzle/schema.server";
 import { authenticator } from "~/features/Auth/services/authenticator";
 
 type SetValuesType = {
-  played?: boolean;
+  replayed?: boolean;
   saved?: boolean;
   liked?: boolean;
 };
@@ -13,7 +13,7 @@ export const updateHighlight = async (
   highlightId: string,
   context: AppLoadContext,
   request: Request,
-  played?: boolean,
+  replayed?: boolean,
   saved?: boolean,
   liked?: boolean
 ) => {
@@ -25,7 +25,7 @@ export const updateHighlight = async (
   try {
     const db = drizzle(context.cloudflare.env.DB);
     const setValues: SetValuesType = {};
-    if (played !== undefined) setValues.played = played;
+    if (replayed !== undefined) setValues.replayed = replayed;
     if (saved !== undefined) setValues.saved = saved;
     if (liked !== undefined) setValues.liked = liked;
     await db
@@ -33,7 +33,7 @@ export const updateHighlight = async (
       .values({
         userId: userId,
         highlightId: highlightId,
-        replayed: played ?? false,
+        replayed: replayed ?? false,
         saved: saved ?? false,
         liked: liked ?? false,
       })

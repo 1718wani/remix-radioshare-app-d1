@@ -11,6 +11,9 @@ import { ShareButton } from "~/features/Highlight/components/ShareButton";
 import { HighLightCard } from "~/features/Highlight/components/HighLightCard";
 import { RadioShowHeader } from "~/features/Highlight/components/RadioShowHeader";
 import { updateHighlight } from "~/features/Highlight/apis/updateHighlight";
+import { useDisclosure } from "@mantine/hooks";
+import { LoginNavigateModal } from "~/features/Auth/components/LoginNavigateModal";
+import { incrementTotalReplayTimes } from "~/features/Highlight/apis/incrementTotalReplayTimes";
 
 export const loader = async ({
   params,
@@ -23,22 +26,22 @@ export const loader = async ({
   const radioshow = await getRadioshowById(radioshowId, context);
   invariant(radioshow, "Radioshow not found");
 
-  const highlights = await getHighlightsForRadioshow(
+  const highlightsData = await getHighlightsForRadioshow(
     radioshowId,
     context,
     request,
     0
   );
-  if (!highlights) {
+  if (!highlightsData) {
     throw new Response("Not Found", { status: 404 });
   }
-  return json({ radioshow, highlights, userId });
+  return json({ radioshow, highlightsData, userId });
 };
 
 export const action = async ({ request, context }: ActionFunctionArgs) => {
   const formData = await request.formData();
-  const played = formData.has("played")
-    ? formData.get("played") === "true"
+  const replayed = formData.has("replayed")
+    ? formData.get("replayed") === "true"
     : undefined;
   const saved = formData.has("saved")
     ? formData.get("saved") === "true"
@@ -50,13 +53,16 @@ export const action = async ({ request, context }: ActionFunctionArgs) => {
   const highlightId = formData.get("id") as string;
   invariant(highlightId, "highlightId not found");
 
+  if (replayed) {
+    await incrementTotalReplayTimes(highlightId, context);
+  }
+
   try {
     const updateResult = await updateHighlight(
-      // highlightId,
       highlightId,
       context,
       request,
-      played,
+      replayed,
       saved,
       liked
     );
@@ -68,7 +74,10 @@ export const action = async ({ request, context }: ActionFunctionArgs) => {
 
 // userId一致だけ抜き出しているので、今は0番目だけ抜き出して表示している。
 export default function Highlights() {
-  const { radioshow, highlights, userId } = useLoaderData<typeof loader>();
+  const { radioshow, highlightsData, userId } = useLoaderData<typeof loader>();
+  const isEnabledUserAction = userId ? true : false;
+
+  const [opened, { open, close }] = useDisclosure(false);
   return (
     <>
       <RadioShowHeader
@@ -76,34 +85,39 @@ export default function Highlights() {
         radioshowTitle={radioshow.title}
       />
       <>
-        {highlights.length > 0 ? (
+        {highlightsData.length > 0 ? (
           <Grid mt={10} mx={"sm"}>
-            {highlights.map((highlight) => (
+            {highlightsData.map((highlightData) => (
               <Grid.Col
-                key={highlight.highlights.id}
+                key={highlightData.highlight.id}
                 span={{ base: 12, md: 6, lg: 3 }}
               >
                 <HighLightCard
-                  id={highlight.highlights.id}
-                  title={highlight.highlights.title}
-                  description={highlight.highlights.description ?? ""}
-                  playUrl={highlight.highlights.replayUrl}
-                  createdAt={highlight.highlights.createdAt ?? ""}
+                  id={highlightData.highlight.id}
+                  title={highlightData.highlight.title}
+                  description={highlightData.highlight.description ?? ""}
+                  replayUrl={highlightData.highlight.replayUrl}
+                  createdAt={highlightData.highlight.createdAt ?? ""}
                   liked={
-                    highlight.userHighlights?.liked
-                      ? highlight.userHighlights?.liked
+                    highlightData.userHighlight?.liked
+                      ? highlightData.userHighlight?.liked
                       : false
                   }
                   saved={
-                    highlight.userHighlights?.saved
-                      ? highlight.userHighlights.saved
+                    highlightData.userHighlight?.saved
+                      ? highlightData.userHighlight.saved
                       : false
                   }
-                  played={
-                    highlight.userHighlights?.replayed
-                      ? highlight.userHighlights.replayed
+                  replayed={
+                    highlightData.userHighlight?.replayed
+                      ? highlightData.userHighlight.replayed
                       : false
                   }
+                  totalReplayTimes={
+                    highlightData.highlight.totalReplayTimes ?? 0
+                  }
+                  isEnabledUserAction={isEnabledUserAction}
+                  open={open}
                 />
               </Grid.Col>
             ))}
@@ -112,6 +126,7 @@ export default function Highlights() {
           <EmptyHighlight />
         )}
       </>
+      <LoginNavigateModal opened={opened} close={close} />
 
       <ShareButton userId={userId} />
     </>
