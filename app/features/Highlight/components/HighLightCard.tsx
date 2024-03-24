@@ -8,26 +8,41 @@ import {
   useMantineTheme,
   Button,
   Badge,
+  rem,
 } from "@mantine/core";
 import { useFetcher } from "@remix-run/react";
-import { IconBookmark, IconHeart } from "@tabler/icons-react";
+import { IconBookmark, IconHeadphones, IconHeart } from "@tabler/icons-react";
 import { parseISO, isWithinInterval, add } from "date-fns";
 
 type props = {
   id: string;
   title: string;
   description: string;
-  playUrl: string;
+  replayUrl: string;
   createdAt: string;
   liked: boolean;
   saved: boolean;
-  played: boolean;
+  replayed: boolean;
+  totalReplayTimes: number;
+  isEnabledUserAction: boolean;
+  open: () => void;
 };
 
 export const HighLightCard = (props: props) => {
   const fetcher = useFetcher();
-  const { id, title, description, playUrl, createdAt, liked, saved, played } =
-    props;
+  const {
+    id,
+    title,
+    description,
+    replayUrl,
+    createdAt,
+    liked,
+    saved,
+    replayed,
+    totalReplayTimes,
+    isEnabledUserAction,
+    open,
+  } = props;
   const theme = useMantineTheme();
 
   // formDataから値を取得する前に、キーが存在するか確認
@@ -51,24 +66,36 @@ export const HighLightCard = (props: props) => {
   return (
     <>
       <Card withBorder padding="md" radius="md" mx={"sm"}>
-        {played && (
-          <Badge w="fit-content" variant="light">
-            再生済み
-          </Badge>
-        )}
+        <Flex justify={"space-between"}>
+          <Group>
+            {replayed && (
+              <Badge w="fit-content" variant="light" c={"gray"}>
+                再生済み
+              </Badge>
+            )}
 
-        {isWithinAWeek(createdAt) && !played && (
-          <Badge w="fit-content" variant="light">
-            NEW !
-          </Badge>
-        )}
+            {isWithinAWeek(createdAt) && !replayed && (
+              <Badge w="fit-content" variant="light">
+                NEW !
+              </Badge>
+            )}
+          </Group>
+        </Flex>
 
-        <Flex justify={"space-between"} mx={"sm"}>
+        <Flex justify={"space-between"} align={"baseline"} mx={"sm"}>
           <Text truncate fz="xl" fw={700} mt="sm">
             {title}
           </Text>
-          <Group gap={6}>
-            <fetcher.Form method="post">
+          <Group align={"center"} gap={6}>
+            <fetcher.Form
+              method="post"
+              onClick={(e) => {
+                if (!isEnabledUserAction) {
+                  e.preventDefault();
+                  open();
+                }
+              }}
+            >
               <input type="hidden" name="id" value={id} />
               <button
                 name="liked"
@@ -89,7 +116,15 @@ export const HighLightCard = (props: props) => {
               </button>
             </fetcher.Form>
 
-            <fetcher.Form method="post">
+            <fetcher.Form
+              method="post"
+              onClick={(e) => {
+                if (!isEnabledUserAction) {
+                  e.preventDefault(); // フォームの送信を防ぐ
+                  open(); // ログインモーダルを開く
+                }
+              }}
+            >
               <input type="hidden" name="id" value={id} />
               <button
                 type="submit"
@@ -123,21 +158,33 @@ export const HighLightCard = (props: props) => {
           </Accordion.Item>
         </Accordion>
 
-        <Button
-          component="a"
-          href={playUrl}
-          target="_blank"
-          variant="gradient"
-          gradient={{
-            from: "rgba(4, 201, 47, 1)",
-            to: "rgba(87, 70, 70, 1)",
-            deg: 158,
-          }}
-          mt={"sm"}
-          mx={"lg"}
+        <Flex
+          justify="space-between"
+          align={"center"}
+          mt={"md"}
+          style={{ width: "100%" }}
         >
-          Spotifyで再生する
-        </Button>
+          <Flex justify={"left"} pl={"sm"} align={"center"} gap={rem(3)}>
+            <IconHeadphones size={20} stroke={2} color="gray" />
+            <Text mt={2} size="sm" c={"gray"}>
+              {totalReplayTimes}
+            </Text>
+          </Flex>
+          <Button
+            radius="xl"
+            component="a"
+            href={replayUrl}
+            target="_blank"
+            variant="gradient"
+            gradient={{
+              from: "rgba(4, 201, 47, 1)",
+              to: "rgba(87, 70, 70, 1)",
+              deg: 158,
+            }}
+          >
+            Spotifyで再生する
+          </Button>
+        </Flex>
       </Card>
     </>
   );

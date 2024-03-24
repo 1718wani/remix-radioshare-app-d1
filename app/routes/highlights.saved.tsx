@@ -78,7 +78,7 @@ export default function HightlightsSaved() {
                   createdAt={highlightData.highlight.createdAt ?? ""}
                   liked={highlightData.userHighlight?.liked ?? false}
                   saved={highlightData.userHighlight?.saved ?? false}
-                  played={highlightData.userHighlight?.replayed ?? false}
+                  replayed={highlightData.userHighlight?.replayed ?? false}
                   totalReplayTimes={
                     highlightData.highlight.totalReplayTimes ?? 0
                   }
