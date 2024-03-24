@@ -11,6 +11,8 @@ import { ShareButton } from "~/features/Highlight/components/ShareButton";
 import { HighLightCard } from "~/features/Highlight/components/HighLightCard";
 import { RadioShowHeader } from "~/features/Highlight/components/RadioShowHeader";
 import { updateHighlight } from "~/features/Highlight/apis/updateHighlight";
+import { useDisclosure } from "@mantine/hooks";
+import { LoginNavigateModal } from "~/features/Auth/components/LoginNavigateModal";
 
 export const loader = async ({
   params,
@@ -52,7 +54,6 @@ export const action = async ({ request, context }: ActionFunctionArgs) => {
 
   try {
     const updateResult = await updateHighlight(
-      // highlightId,
       highlightId,
       context,
       request,
@@ -69,6 +70,9 @@ export const action = async ({ request, context }: ActionFunctionArgs) => {
 // userId一致だけ抜き出しているので、今は0番目だけ抜き出して表示している。
 export default function Highlights() {
   const { radioshow, highlightsData, userId } = useLoaderData<typeof loader>();
+  const isEnabledUserAction = userId ? true : false;
+
+  const [opened, { open, close }] = useDisclosure(false);
   return (
     <>
       <RadioShowHeader
@@ -87,7 +91,7 @@ export default function Highlights() {
                   id={highlightData.highlight.id}
                   title={highlightData.highlight.title}
                   description={highlightData.highlight.description ?? ""}
-                  playUrl={highlightData.highlight.replayUrl}
+                  replayUrl={highlightData.highlight.replayUrl}
                   createdAt={highlightData.highlight.createdAt ?? ""}
                   liked={
                     highlightData.userHighlight?.liked
@@ -99,11 +103,16 @@ export default function Highlights() {
                       ? highlightData.userHighlight.saved
                       : false
                   }
-                  played={
+                  replayed={
                     highlightData.userHighlight?.replayed
                       ? highlightData.userHighlight.replayed
                       : false
                   }
+                  totalReplayTimes={
+                    highlightData.highlight.totalReplayTimes ?? 0
+                  }
+                  isEnabledUserAction={isEnabledUserAction}
+                  open={open}
                 />
               </Grid.Col>
             ))}
@@ -112,6 +121,7 @@ export default function Highlights() {
           <EmptyHighlight />
         )}
       </>
+      <LoginNavigateModal opened={opened} close={close} />
 
       <ShareButton userId={userId} />
     </>

@@ -23,7 +23,7 @@ type props = {
   createdAt: string;
   liked: boolean;
   saved: boolean;
-  played: boolean;
+  replayed: boolean;
   imageUrl: string;
   radioshowId: string;
   totalReplayTimes: number;
@@ -42,7 +42,7 @@ export const HighLightCardWithRadioshow = (props: props) => {
     createdAt,
     liked,
     saved,
-    played,
+    replayed,
     imageUrl,
     radioshowId,
     totalReplayTimes,
@@ -50,7 +50,7 @@ export const HighLightCardWithRadioshow = (props: props) => {
     open,
   } = props;
   const theme = useMantineTheme();
-  console.log(radioshowId,"radioshowIdです")
+  console.log(radioshowId, "radioshowIdです");
 
   // formDataから値を取得する前に、キーが存在するか確認
   const likedState =
@@ -84,13 +84,13 @@ export const HighLightCardWithRadioshow = (props: props) => {
         </Card.Section>
         <Flex justify={"space-between"}>
           <Group>
-            {played && (
+            {replayed && (
               <Badge w="fit-content" variant="light" c={"gray"}>
                 再生済み
               </Badge>
             )}
 
-            {isWithinAWeek(createdAt) && !played && (
+            {isWithinAWeek(createdAt) && !replayed && (
               <Badge w="fit-content" variant="light">
                 NEW !
               </Badge>
