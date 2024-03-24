@@ -11,7 +11,8 @@ export const createUser = async (
   try {
     const { email, password, name } = user;
     const db = drizzle(context.cloudflare.env.DB);
-    const passwordHash = await bcrypt.hash(password, 12);
+    // const passwordHash = await bcrypt.hash(password, 12);
+     const passwordHash = await bcrypt.hash(password, 12);
     await db
       .insert(users)
       .values({ email, password: passwordHash, name })
