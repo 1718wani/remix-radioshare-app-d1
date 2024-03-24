@@ -186,20 +186,23 @@ export const HighLightCardWithRadioshow = (props: props) => {
               {totalReplayTimes}
             </Text>
           </Flex>
-          <Button
-            radius="xl"
-            component="a"
-            href={replayUrl}
-            target="_blank"
-            variant="gradient"
-            gradient={{
-              from: "rgba(4, 201, 47, 1)",
-              to: "rgba(87, 70, 70, 1)",
-              deg: 158,
-            }}
-          >
-            Spotifyで再生する
-          </Button>
+          <fetcher.Form method="post">
+            <input type="hidden" name="id" value={id} />
+            <input type="hidden" name="replayed" value="true" />
+            <Button
+              type="submit"
+              onClick={() => window.open(replayUrl, "_blank")}
+              radius="xl"
+              variant="gradient"
+              gradient={{
+                from: "rgba(4, 201, 47, 1)",
+                to: "rgba(87, 70, 70, 1)",
+                deg: 158,
+              }}
+            >
+              Spotifyで再生する
+            </Button>
+          </fetcher.Form>
         </Flex>
       </Card>
     </>

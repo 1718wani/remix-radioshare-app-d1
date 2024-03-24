@@ -11,8 +11,8 @@ import { getSavedHighlights } from "~/features/Highlight/apis/getSavedHighlights
 
 export const action = async ({ request, context }: ActionFunctionArgs) => {
   const formData = await request.formData();
-  const played = formData.has("played")
-    ? formData.get("played") === "true"
+  const replayed = formData.has("replayed")
+    ? formData.get("replayed") === "true"
     : undefined;
   const saved = formData.has("saved")
     ? formData.get("saved") === "true"
@@ -25,11 +25,10 @@ export const action = async ({ request, context }: ActionFunctionArgs) => {
 
   try {
     const updateResult = await updateHighlight(
-      // highlightId,
       highlightId,
       context,
       request,
-      played,
+      replayed,
       saved,
       liked
     );
