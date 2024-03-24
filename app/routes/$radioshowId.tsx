@@ -23,16 +23,16 @@ export const loader = async ({
   const radioshow = await getRadioshowById(radioshowId, context);
   invariant(radioshow, "Radioshow not found");
 
-  const highlights = await getHighlightsForRadioshow(
+  const highlightsData = await getHighlightsForRadioshow(
     radioshowId,
     context,
     request,
     0
   );
-  if (!highlights) {
+  if (!highlightsData) {
     throw new Response("Not Found", { status: 404 });
   }
-  return json({ radioshow, highlights, userId });
+  return json({ radioshow, highlightsData, userId });
 };
 
 export const action = async ({ request, context }: ActionFunctionArgs) => {
@@ -68,7 +68,7 @@ export const action = async ({ request, context }: ActionFunctionArgs) => {
 
 // userId一致だけ抜き出しているので、今は0番目だけ抜き出して表示している。
 export default function Highlights() {
-  const { radioshow, highlights, userId } = useLoaderData<typeof loader>();
+  const { radioshow, highlightsData, userId } = useLoaderData<typeof loader>();
   return (
     <>
       <RadioShowHeader
@@ -76,32 +76,32 @@ export default function Highlights() {
         radioshowTitle={radioshow.title}
       />
       <>
-        {highlights.length > 0 ? (
+        {highlightsData.length > 0 ? (
           <Grid mt={10} mx={"sm"}>
-            {highlights.map((highlight) => (
+            {highlightsData.map((highlightData) => (
               <Grid.Col
-                key={highlight.highlights.id}
+                key={highlightData.highlight.id}
                 span={{ base: 12, md: 6, lg: 3 }}
               >
                 <HighLightCard
-                  id={highlight.highlights.id}
-                  title={highlight.highlights.title}
-                  description={highlight.highlights.description ?? ""}
-                  playUrl={highlight.highlights.replayUrl}
-                  createdAt={highlight.highlights.createdAt ?? ""}
+                  id={highlightData.highlight.id}
+                  title={highlightData.highlight.title}
+                  description={highlightData.highlight.description ?? ""}
+                  playUrl={highlightData.highlight.replayUrl}
+                  createdAt={highlightData.highlight.createdAt ?? ""}
                   liked={
-                    highlight.userHighlights?.liked
-                      ? highlight.userHighlights?.liked
+                    highlightData.userHighlight?.liked
+                      ? highlightData.userHighlight?.liked
                       : false
                   }
                   saved={
-                    highlight.userHighlights?.saved
-                      ? highlight.userHighlights.saved
+                    highlightData.userHighlight?.saved
+                      ? highlightData.userHighlight.saved
                       : false
                   }
                   played={
-                    highlight.userHighlights?.replayed
-                      ? highlight.userHighlights.replayed
+                    highlightData.userHighlight?.replayed
+                      ? highlightData.userHighlight.replayed
                       : false
                   }
                 />
