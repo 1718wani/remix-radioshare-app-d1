@@ -3,23 +3,39 @@ import { json } from "@remix-run/node";
 import invariant from "tiny-invariant";
 import type { ActionFunctionArgs, LoaderFunctionArgs } from "@remix-run/node";
 import { useLoaderData } from "@remix-run/react";
+import { authenticator } from "~/features/Auth/services/authenticator";
+import { getRadioshowById } from "~/features/Radioshow/apis/getRadioshowById";
+import { getHighlightsForRadioshow } from "~/features/Highlight/apis/getHighlightsForRadioshow";
+import { EmptyHighlight } from "~/features/Highlight/components/EmptyHighlight";
+import { ShareButton } from "~/features/Highlight/components/ShareButton";
+import { HighLightCard } from "~/features/Highlight/components/HighLightCard";
+import { RadioShowHeader } from "~/features/Highlight/components/RadioShowHeader";
+import { updateHighlight } from "~/features/Highlight/apis/updateHighlight";
 
-export const loader = async ({ params, request }: LoaderFunctionArgs) => {
+export const loader = async ({
+  params,
+  request,
+  context,
+}: LoaderFunctionArgs) => {
   const userId = await authenticator.isAuthenticated(request, {});
   invariant(params.radioshowId, "Missing contactId param");
-  const radioshowId = parseInt(params.radioshowId, 10);
-  invariant(!isNaN(radioshowId), "radioshowId must be a number");
-  const radioshow = await getRadioshowById(radioshowId);
+  const radioshowId = params.radioshowId;
+  const radioshow = await getRadioshowById(radioshowId, context);
   invariant(radioshow, "Radioshow not found");
 
-  const highlights = await getHighlightsForRadioshow(radioshowId);
+  const highlights = await getHighlightsForRadioshow(
+    radioshowId,
+    context,
+    request,
+    0
+  );
   if (!highlights) {
     throw new Response("Not Found", { status: 404 });
   }
   return json({ radioshow, highlights, userId });
 };
 
-export const action = async ({ request }: ActionFunctionArgs) => {
+export const action = async ({ request, context }: ActionFunctionArgs) => {
   const formData = await request.formData();
   const played = formData.has("played")
     ? formData.get("played") === "true"
@@ -31,12 +47,14 @@ export const action = async ({ request }: ActionFunctionArgs) => {
     ? formData.get("liked") === "true"
     : undefined;
 
-  const highlightId = Number(formData.get("id"));
+  const highlightId = formData.get("id") as string;
+  invariant(highlightId, "highlightId not found");
 
   try {
     const updateResult = await updateHighlight(
       // highlightId,
       highlightId,
+      context,
       request,
       played,
       saved,
@@ -59,28 +77,31 @@ export default function Highlights() {
       />
       <>
         {highlights.length > 0 ? (
-          <Grid mt={10} mx={"sm"} >
+          <Grid mt={10} mx={"sm"}>
             {highlights.map((highlight) => (
-              <Grid.Col key={highlight.id} span={{ base: 12, md: 6, lg: 3 }}>
+              <Grid.Col
+                key={highlight.highlights.id}
+                span={{ base: 12, md: 6, lg: 3 }}
+              >
                 <HighLightCard
-                  id={highlight.id}
-                  title={highlight.title}
-                  description={highlight.description}
-                  playUrl={highlight.replayUrl}
-                  createdAt={highlight.createdAt}
+                  id={highlight.highlights.id}
+                  title={highlight.highlights.title}
+                  description={highlight.highlights.description ?? ""}
+                  playUrl={highlight.highlights.replayUrl}
+                  createdAt={highlight.highlights.createdAt ?? ""}
                   liked={
-                    highlight.userHighlights[0]
-                      ? highlight.userHighlights[0].liked
+                    highlight.userHighlights?.liked
+                      ? highlight.userHighlights?.liked
                       : false
                   }
                   saved={
-                    highlight.userHighlights[0]
-                      ? highlight.userHighlights[0].saved
+                    highlight.userHighlights?.saved
+                      ? highlight.userHighlights.saved
                       : false
                   }
                   played={
-                    highlight.userHighlights[0]
-                      ? highlight.userHighlights[0].played
+                    highlight.userHighlights?.replayed
+                      ? highlight.userHighlights.replayed
                       : false
                   }
                 />

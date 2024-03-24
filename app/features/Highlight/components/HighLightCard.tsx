@@ -14,7 +14,7 @@ import { IconBookmark, IconHeart } from "@tabler/icons-react";
 import { parseISO, isWithinInterval, add } from "date-fns";
 
 type props = {
-  id: number;
+  id: string;
   title: string;
   description: string;
   playUrl: string;

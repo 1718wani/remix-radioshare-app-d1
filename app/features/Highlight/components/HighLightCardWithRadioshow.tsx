@@ -16,8 +16,7 @@ import { IconBookmark, IconHeadphones, IconHeart } from "@tabler/icons-react";
 import { parseISO, isWithinInterval, add } from "date-fns";
 
 type props = {
-  id: number;
-  radioshowTitle: string;
+  id: string;
   title: string;
   description: string;
   replayUrl: string;
@@ -26,7 +25,7 @@ type props = {
   saved: boolean;
   played: boolean;
   imageUrl: string;
-  radioshowId: number;
+  radioshowId: string;
   totalReplayTimes: number;
   isEnabledUserAction: boolean;
   open: () => void;
@@ -51,6 +50,7 @@ export const HighLightCardWithRadioshow = (props: props) => {
     open,
   } = props;
   const theme = useMantineTheme();
+  console.log(radioshowId,"radioshowIdです")
 
   // formDataから値を取得する前に、キーが存在するか確認
   const likedState =

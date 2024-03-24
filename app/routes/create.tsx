@@ -15,13 +15,13 @@ export async function loader({ request }: LoaderFunctionArgs) {
   });
 }
 
-export const action = async ({ request }: ActionFunctionArgs) => {
+export const action = async ({ request, context }: ActionFunctionArgs) => {
   const formData = await request.formData();
   const title = formData.get("title") as string;
   const imageUrl = formData.get("imageUrl") as string;
   const session = await getSession(request.headers.get("cookie"));
   console.log("sessionの値", session.data.user);
-  await createRadioshow({ title, imageUrl });
+  await createRadioshow({ title, imageUrl }, context, request);
   return redirect("/");
 };
 

@@ -1,11 +1,12 @@
 import { Grid } from "@mantine/core";
-import { getAllRadioshows } from "~/features/Radioshow/apis/getAllRadioshows";
+import { LoaderFunctionArgs } from "@remix-run/cloudflare";
 import { json, useLoaderData } from "@remix-run/react";
+import { getRadioshows } from "~/features/Radioshow/apis/getRadioshows";
 import { NewRadioshowButton } from "~/features/Radioshow/components/NewRadioshowButton";
 import { RadioShowsCard } from "~/features/Radioshow/components/RadioShowsCard";
 
-export const loader = async () => {
-  const radioShows = await getAllRadioshows();
+export const loader = async ({ context }: LoaderFunctionArgs) => {
+  const radioShows = await getRadioshows(context, 0);
   if (!radioShows) {
     throw new Response("Not Found", { status: 404 });
   }

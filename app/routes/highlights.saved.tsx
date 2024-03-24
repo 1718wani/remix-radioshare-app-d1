@@ -6,9 +6,10 @@ import { updateHighlight } from "~/features/Highlight/apis/updateHighlight";
 import { useDisclosure } from "@mantine/hooks";
 import { LoginNavigateModal } from "~/features/Auth/components/LoginNavigateModal";
 import { authenticator } from "~/features/Auth/services/authenticator";
+import { EmptyHighlight } from "~/features/Highlight/components/EmptyHighlight";
 import { getSavedHighlights } from "~/features/Highlight/apis/getSavedHighlights";
 
-export const action = async ({ request }: ActionFunctionArgs) => {
+export const action = async ({ request, context }: ActionFunctionArgs) => {
   const formData = await request.formData();
   const played = formData.has("played")
     ? formData.get("played") === "true"
@@ -20,12 +21,13 @@ export const action = async ({ request }: ActionFunctionArgs) => {
     ? formData.get("liked") === "true"
     : undefined;
 
-  const highlightId = Number(formData.get("id"));
+  const highlightId = formData.get("id") as string;
 
   try {
     const updateResult = await updateHighlight(
       // highlightId,
       highlightId,
+      context,
       request,
       played,
       saved,
@@ -38,13 +40,13 @@ export const action = async ({ request }: ActionFunctionArgs) => {
   }
 };
 
-export const loader = async ({ request }: LoaderFunctionArgs) => {
+export const loader = async ({ request, context }: LoaderFunctionArgs) => {
   const userId = await authenticator.isAuthenticated(request, {});
-  const highlightsWithRadioshow = await getSavedHighlights(request, 0);
-  if (!highlightsWithRadioshow) {
+  const highlightsData = await getSavedHighlights(context, request, 0);
+  if (!highlightsData) {
     throw new Response("Not Found", { status: 404 });
   }
-  return json({ highlightsWithRadioshow, userId });
+  return json({ highlightsData, userId });
 };
 
 export default function HightlightsSaved() {
@@ -55,46 +57,45 @@ export default function HightlightsSaved() {
 
   return (
     <>
-      <Grid mt={10} mx={"sm"}>
-        {data.highlightsWithRadioshow.map((highlight) => (
-          <Grid.Col key={highlight.id} span={{ base: 12, md: 6, lg: 3 }}>
-            <HighLightCardWithRadioshow
-              key={highlight.id}
-              id={highlight.id}
-              imageUrl={
-                highlight.radioshow.imageUrl ?? "https://picsum.photos/200/300"
-              }
-              title={highlight.title}
-              radioshowTitle={highlight.radioshow.title}
-              description={highlight.description}
-              replayUrl={highlight.replayUrl}
-              createdAt={highlight.createdAt}
-              liked={
-                highlight.userHighlights[0]
-                  ? highlight.userHighlights[0].liked
-                  : false
-              }
-              saved={
-                highlight.userHighlights[0]
-                  ? highlight.userHighlights[0].saved
-                  : false
-              }
-              played={
-                highlight.userHighlights[0]
-                  ? highlight.userHighlights[0].played
-                  : false
-              }
-              radioshowId={highlight.radioshow.id}
-              totalReplayTimes={highlight.totalReplayTimes}
-              isEnabledUserAction={isEnabledUserAction}
-              open={open}
-            />
-          </Grid.Col>
-        ))}
-      </Grid>
-      <Center mt={"md"}>
-        <Button>もっと見る</Button>
-      </Center>
+      {data.highlightsData.length > 0 ? (
+        <>
+          <Grid mt={10} mx={"sm"}>
+            {data.highlightsData.map((highlightData) => (
+              <Grid.Col
+                key={highlightData.highlight.id}
+                span={{ base: 12, md: 6, lg: 3 }}
+              >
+                <HighLightCardWithRadioshow
+                  key={highlightData.highlight.id}
+                  id={highlightData.highlight.id}
+                  imageUrl={
+                    highlightData.radioshow?.imageUrl ??
+                    "https://picsum.photos/200/300"
+                  }
+                  title={highlightData.highlight.title}
+                  description={highlightData.highlight.description ?? ""}
+                  replayUrl={highlightData.highlight.replayUrl}
+                  createdAt={highlightData.highlight.createdAt ?? ""}
+                  liked={highlightData.userHighlight?.liked ?? false}
+                  saved={highlightData.userHighlight?.saved ?? false}
+                  played={highlightData.userHighlight?.played ?? false}
+                  totalReplayTimes={
+                    highlightData.highlight.totalReplayTimes ?? 0
+                  }
+                  radioshowId={highlightData.highlight.radioshowId ?? ""}
+                  isEnabledUserAction={isEnabledUserAction}
+                  open={open}
+                />
+              </Grid.Col>
+            ))}
+          </Grid>
+          <Center mt={"md"}>
+            <Button>もっと見る</Button>
+          </Center>
+        </>
+      ) : (
+        <EmptyHighlight />
+      )}
 
       <LoginNavigateModal opened={opened} close={close} />
     </>

@@ -14,7 +14,8 @@
     "drizzle:update": "drizzle-kit generate:sqlite --out ./app/drizzle/migrations --schema ./app/drizzle/schema.server.ts",
     "db:migrate:local": "npm run drizzle:update && npx wrangler d1 migrations apply db --local",
     "db:migrate:remote": "npm run drizzle:update && npx wrangler d1 migrations apply db --remote",
-    "db:migrate": "npm run drizzle:update && npx wrangler d1 migrations apply db"
+    "db:migrate": "npm run drizzle:update && npx wrangler d1 migrations apply db",
+    "test": "vitest"
   },
   "dependencies": {
     "@conform-to/react": "^1.0.2",
@@ -31,7 +32,7 @@
     "@types/uuid": "^9.0.8",
     "bcryptjs": "^2.4.3",
     "date-fns": "^3.3.1",
-    "drizzle-orm": "^0.30.3",
+    "drizzle-orm": "^0.30.4",
     "isbot": "^4.1.0",
     "miniflare": "^3.20231030.4",
     "react": "^18.2.0",
@@ -44,11 +45,15 @@
   },
   "devDependencies": {
     "@cloudflare/workers-types": "^4.20230518.0",
+    "@faker-js/faker": "^8.4.1",
     "@remix-run/dev": "^2.8.1",
+    "@testing-library/react": "^14.2.2",
+    "@testing-library/user-event": "^14.5.2",
     "@types/react": "^18.2.20",
     "@types/react-dom": "^18.2.7",
     "@typescript-eslint/eslint-plugin": "^6.7.4",
     "@typescript-eslint/parser": "^6.7.4",
+    "@vitest/coverage-v8": "^1.4.0",
     "better-sqlite3": "^9.4.3",
     "drizzle-kit": "^0.20.14",
     "eslint": "^8.38.0",
@@ -57,13 +62,16 @@
     "eslint-plugin-jsx-a11y": "^6.7.1",
     "eslint-plugin-react": "^7.33.2",
     "eslint-plugin-react-hooks": "^4.6.0",
+    "happy-dom": "^14.2.0",
+    "msw": "^2.2.9",
     "node-fetch": "^3.3.2",
     "postcss": "^8.4.37",
     "postcss-preset-mantine": "^1.13.0",
     "postcss-simple-vars": "^7.0.1",
     "typescript": "^5.1.6",
-    "vite": "^5.1.0",
-    "vite-tsconfig-paths": "^4.2.1",
+    "vite": "^5.2.2",
+    "vite-tsconfig-paths": "^4.3.2",
+    "vitest": "^1.4.0",
     "wrangler": "^3.24.0"
   },
   "engines": {

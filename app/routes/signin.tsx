@@ -30,7 +30,7 @@ export const loader: LoaderFunction = async ({ request }) => {
   return { user };
 };
 
-export async function action({ request }: ActionFunctionArgs) {
+export async function action({ request, context }: ActionFunctionArgs) {
   const clonedData = request.clone();
   const formData = await clonedData.formData();
   const submission = parseWithZod(formData, { schema });
@@ -43,7 +43,10 @@ export async function action({ request }: ActionFunctionArgs) {
     });
   }
 
-  const isEmailExisting = await checkUserExists(submission.value.email);
+  const isEmailExisting = await checkUserExists(
+    submission.value.email,
+    context
+  );
 
   if (!isEmailExisting) {
     return json({
@@ -56,6 +59,7 @@ export async function action({ request }: ActionFunctionArgs) {
   try {
     const userId = await authenticator.authenticate("user-signin", request, {
       failureRedirect: "/signin",
+      context: context
     });
 
     const session = await getSession(request.headers.get("cookie"));
@@ -139,7 +143,10 @@ export default function Signin() {
             error={password.errors}
           />
 
-          <Link to="/signup" style={{ textDecoration: "none", width:"fit-content" }}>
+          <Link
+            to="/signup"
+            style={{ textDecoration: "none", width: "fit-content" }}
+          >
             <Text
               size="sm"
               variant="gradient"

@@ -1,3 +1,5 @@
+/// <reference types="vitest" />
+
 import {
   vitePlugin as remix,
   cloudflareDevProxyVitePlugin as remixCloudflareDevProxy,
@@ -7,4 +9,8 @@ import tsconfigPaths from "vite-tsconfig-paths";
 
 export default defineConfig({
   plugins: [remixCloudflareDevProxy(), remix(), tsconfigPaths()],
+  test: {
+    globals: true,
+    environment: "happy-dom",
+  },
 });

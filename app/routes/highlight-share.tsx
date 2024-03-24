@@ -1,6 +1,13 @@
 import { getFormProps, getInputProps, useForm } from "@conform-to/react";
 import { parseWithZod } from "@conform-to/zod";
-import { Autocomplete, Button, Stack, Text, TextInput, Title } from "@mantine/core";
+import {
+  Autocomplete,
+  Button,
+  Stack,
+  Text,
+  TextInput,
+  Title,
+} from "@mantine/core";
 import { notifications } from "@mantine/notifications";
 import {
   ActionFunctionArgs,
@@ -15,51 +22,26 @@ import { z } from "zod";
 import { authenticator } from "~/features/Auth/services/authenticator";
 import { createHighlight } from "~/features/Highlight/apis/createHighlight";
 import { validateHighlightData } from "~/features/Highlight/functions/validateHighlightData";
+import { schemaForHighlightShare } from "~/features/Highlight/types/schemaForHighlightShare";
 import { getAllRadioshows } from "~/features/Radioshow/apis/getAllRadioshows";
+import { getRadioshows } from "~/features/Radioshow/apis/getRadioshows";
 
-export const loader = async ({ request }: LoaderFunctionArgs) => {
-  const radioshows = await getAllRadioshows();
+export const loader = async ({ request, context }: LoaderFunctionArgs) => {
+  const radioshows = await getRadioshows(context, 0);
   const user = await authenticator.isAuthenticated(request, {
     failureRedirect: "/signin",
   });
   return json({ user, radioshows });
 };
 
-export const schemaForHighlightShare = (
-  radioshowsData: { label: string; value: string }[]
-) => {
-  return z.object({
-    title: z.string({ required_error: "タイトルは必要です" }),
-    description: z.string().default("").optional(),
-    replayUrl: z
-      .string({ required_error: "再生用URLが必要です" })
-      .url({ message: "再生用URLは有効なURL形式である必要があります" }),
-    radioshowData: z
-      .string({ required_error: "番組名は必要です" })
-      .min(1, "番組名は少なくとも1文字以上である必要があります")
-      .refine((value) => radioshowsData.some((show) => show.label === value), {
-        message: "選択された番組名は一覧に含まれていません",
-      })
-      // ステップ2: バリデーション成功後に値を変換
-      .transform((value) => {
-        // `radioshowsData`から対応する`value`（ID）を見つける
-        const matchingShow = radioshowsData.find(
-          (show) => show.label === value
-        );
-        // 見つかった場合はその`value`（ID）を返す
-        return matchingShow ? Number(matchingShow.value) : undefined;
-      }),
-  });
-};
-
-export async function action({ request }: ActionFunctionArgs) {
+export async function action({ request, context }: ActionFunctionArgs) {
   const formData = await request.formData();
-  const radioshows = await getAllRadioshows();
+  const radioshows = await getAllRadioshows(context);
   const radioshowsData = radioshows.map((show) => ({
     value: show.id.toString(),
     label: show.title,
   }));
-  const schema : z.ZodTypeAny = schemaForHighlightShare(radioshowsData)
+  const schema: z.ZodTypeAny = schemaForHighlightShare(radioshowsData);
 
   const submission = parseWithZod(formData, { schema });
 
@@ -71,8 +53,8 @@ export async function action({ request }: ActionFunctionArgs) {
     });
   }
 
-  const highlightData = submission.value
-  console.log(highlightData,"送信されたFormData");
+  const highlightData = submission.value;
+  console.log(highlightData, "送信されたFormData");
 
   // highlightDataがcreateHighlightType型に合致するか検証
   try {
@@ -81,9 +63,9 @@ export async function action({ request }: ActionFunctionArgs) {
     return json({ success: false, message: (error as Error).message });
   }
 
-  await createHighlight(highlightData, request);
+  await createHighlight(highlightData, request, context);
 
-  return redirect("/");
+  return redirect("/highlights/new");
 }
 
 export default function HightlightShare() {
@@ -97,7 +79,7 @@ export default function HightlightShare() {
 
   const data = useActionData<typeof action>();
 
-  const schema : z.ZodTypeAny = schemaForHighlightShare(radioshowsData);
+  const schema: z.ZodTypeAny = schemaForHighlightShare(radioshowsData);
 
   const [form, { title, description, replayUrl, radioshowData }] = useForm({
     onValidate({ formData }) {
@@ -146,11 +128,7 @@ export default function HightlightShare() {
             error={radioshowData.errors}
           />
           {/* 隠しフィールドを追加して、選択された番組IDを送信 */}
-          <input
-            type="hidden"
-            name="radioshowData"
-            value={selectedRadioshow}
-          />
+          <input type="hidden" name="radioshowData" value={selectedRadioshow} />
 
           <TextInput
             {...getInputProps(title, { type: "text" })}
@@ -177,7 +155,10 @@ export default function HightlightShare() {
             error={replayUrl.errors}
             required
           />
-          <Link to="/create" style={{ textDecoration: "none", width:"fit-content" }}>
+          <Link
+            to="/create"
+            style={{ textDecoration: "none", width: "fit-content" }}
+          >
             <Text
               size="sm"
               variant="gradient"

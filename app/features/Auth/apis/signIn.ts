@@ -10,7 +10,9 @@ export async function signIn(
   password: string,
   context: AppLoadContext
 ) {
+  
   const db = drizzle(context.cloudflare.env.DB);
+  console.log("db",db)
   const user = await db
     .select()
     .from(users)
@@ -27,6 +29,8 @@ export async function signIn(
     password,
     user.password as string
   );
+
+  console.log(passwordsMatch,"passwordmatch")
 
   if (!passwordsMatch) {
     throw new AuthorizationError();
