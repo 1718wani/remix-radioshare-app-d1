@@ -8,6 +8,7 @@ import { useDisclosure } from "@mantine/hooks";
 import { LoginNavigateModal } from "~/features/Auth/components/LoginNavigateModal";
 import { authenticator } from "~/features/Auth/services/authenticator";
 import { EmptyHighlight } from "~/features/Highlight/components/EmptyHighlight";
+import { incrementTotalReplayTimes } from "~/features/Highlight/apis/incrementTotalReplayTimes";
 
 export const action = async ({ request, context }: ActionFunctionArgs) => {
   const formData = await request.formData();
@@ -22,6 +23,10 @@ export const action = async ({ request, context }: ActionFunctionArgs) => {
     : undefined;
 
   const highlightId = formData.get("id") as string;
+
+  if (replayed) {
+    await incrementTotalReplayTimes(highlightId, context);
+  }
 
   try {
     const updateResult = await updateHighlight(
