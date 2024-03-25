@@ -1,4 +1,4 @@
-import { createCookieSessionStorage } from "@remix-run/node";
+import { createCookieSessionStorage } from "@remix-run/cloudflare";
 
 const sessionSecret: string | undefined = process.env.SESSION_SECRET;
 if (sessionSecret === undefined)

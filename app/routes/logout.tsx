@@ -2,8 +2,8 @@ import type {
   ActionFunction,
   ActionFunctionArgs,
   LoaderFunction,
-} from "@remix-run/node";
-import { redirect } from "@remix-run/node";
+} from "@remix-run/cloudflare";
+import { redirect } from "@remix-run/cloudflare";
 import { authenticator } from "~/features/Auth/services/authenticator";
 import { destroySession, getSession } from "~/features/Auth/sessionStrage";
 

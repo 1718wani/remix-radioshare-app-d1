@@ -3,7 +3,7 @@ import {
   LoaderFunction,
   json,
   redirect,
-} from "@remix-run/node";
+} from "@remix-run/cloudflare";
 import { Link, Form, useActionData } from "@remix-run/react";
 import { authenticator } from "~/features/Auth/services/authenticator";
 import {

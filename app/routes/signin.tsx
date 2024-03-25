@@ -14,7 +14,7 @@ import {
   LoaderFunction,
   json,
   redirect,
-} from "@remix-run/node";
+} from "@remix-run/cloudflare";
 import { Form, Link, useActionData } from "@remix-run/react";
 import { IconX } from "@tabler/icons-react";
 import { useEffect } from "react";
