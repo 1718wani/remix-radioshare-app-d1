@@ -15,11 +15,11 @@ export const createRadioshow = async (
       throw new Error("User not authenticated");
     }
     const { title, imageUrl } = formData;
-    const db = drizzle(context.cloudflare.env.DB);
-    await db
-      .insert(radioshows)
-      .values({ title, imageUrl, createdBy: userId })
-      .execute();
+    // const db = drizzle(context.cloudflare.env.DB);
+    // await db
+    //   .insert(radioshows)
+    //   .values({ title, imageUrl, createdBy: userId })
+    //   .execute();
     return json({ message: "Radioshow added" }, { status: 201 });
   } catch (error) {
     console.error(error);

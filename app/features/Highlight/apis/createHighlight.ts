@@ -17,15 +17,15 @@ export const createHighlight = async (
     }
 
     const db = drizzle(context.cloudflare.env.DB);
-    await db
-      .insert(highlights)
-      .values({
-        title,
-        description,
-        replayUrl,
-        createdBy: userId,
-        radioshowId: radioshowData,
-      })
+    // await db
+    //   .insert(highlights)
+    //   .values({
+    //     title,
+    //     description,
+    //     replayUrl,
+    //     createdBy: userId,
+    //     radioshowId: radioshowData,
+    //   })
       .execute();
 
     return json({ message: "Highlight created successfully" }, { status: 201 });

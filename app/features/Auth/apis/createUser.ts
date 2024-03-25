@@ -13,10 +13,10 @@ export const createUser = async (
     const db = drizzle(context.cloudflare.env.DB);
     // const passwordHash = await crypto.hash(password, 12);
     const passwordHash = password
-    await db
-      .insert(users)
-      .values({ email, password: passwordHash, name })
-      .execute();
+    // await db
+    //   .insert(users)
+    //   .values({ email, password: passwordHash, name })
+    //   .execute();
     return json({ message: "Resource added" }, { status: 201 });
   } catch (error) {
     console.error(error);
