@@ -5,12 +5,12 @@ import {
   integer,
   primaryKey,
 } from "drizzle-orm/sqlite-core";
-import { v4 as uuidv4 } from "uuid";
+// import { v4 as uuidv4 } from "uuid";
 
 export const users = sqliteTable("users", {
   id: text("id")
-    .primaryKey()
-    .$defaultFn(() => uuidv4()),
+    .primaryKey(),
+    // .$defaultFn(() => uuidv4()),
   email: text("email").unique().notNull(),
   password: text("password").notNull(),
   name: text("name").notNull(),
@@ -20,8 +20,8 @@ export const users = sqliteTable("users", {
 
 export const radioshows = sqliteTable("radioshows", {
   id: text("id")
-    .primaryKey()
-    .$defaultFn(() => uuidv4()),
+    .primaryKey(),
+    // .$defaultFn(() => uuidv4()),
   title: text("title").notNull(),
   imageUrl: text("image_url"),
   createdBy: text("user_id")
@@ -32,8 +32,8 @@ export const radioshows = sqliteTable("radioshows", {
 
 export const highlights = sqliteTable("highlights", {
   id: text("id")
-    .primaryKey()
-    .$defaultFn(() => uuidv4()),
+    .primaryKey(),
+    // .$defaultFn(() => uuidv4()),
   title: text("title").notNull(),
   description: text("description").default(""),
   replayUrl: text("replay_url").notNull(),
