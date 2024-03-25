@@ -26,7 +26,7 @@ export const createHighlight = async (
     //     createdBy: userId,
     //     radioshowId: radioshowData,
     //   })
-      .execute();
+      // .execute();
 
     return json({ message: "Highlight created successfully" }, { status: 201 });
   } catch (error) {

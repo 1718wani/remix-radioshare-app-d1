@@ -191,7 +191,7 @@ export const HighLightCardWithRadioshow = (props: props) => {
             <input type="hidden" name="replayed" value="true" />
             <Button
               type="submit"
-              onClick={() => window.open(replayUrl, "_blank")}
+              // onClick={() => window.open(replayUrl, "_blank")}
               radius="xl"
               variant="gradient"
               gradient={{
