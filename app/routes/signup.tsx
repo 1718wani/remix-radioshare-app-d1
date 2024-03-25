@@ -1,9 +1,5 @@
-import {
-  ActionFunctionArgs,
-  LoaderFunction,
-  json,
-  redirect,
-} from "@remix-run/cloudflare";
+import { ActionFunctionArgs } from "@remix-run/node";
+import { LoaderFunctionArgs, json, redirect } from "@remix-run/cloudflare";
 import { Link, Form, useActionData } from "@remix-run/react";
 import { authenticator } from "~/features/Auth/services/authenticator";
 import {
@@ -23,7 +19,7 @@ import { IconX } from "@tabler/icons-react";
 import { notifications } from "@mantine/notifications";
 import { checkUserExists } from "~/features/Auth/apis/checkUserExists";
 
-export const loader: LoaderFunction = async ({ request }) => {
+export const loader = async ({ request }: LoaderFunctionArgs) => {
   const user = await authenticator.isAuthenticated(request, {
     successRedirect: "/",
   });
@@ -78,7 +74,7 @@ export default function Signup() {
   });
 
   useEffect(() => {
-    console.log(data,"dataの値")
+    console.log(data, "dataの値");
     if (!data) return;
     if (!data.success) {
       notifications.show({
