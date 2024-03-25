@@ -11,7 +11,7 @@ export const sessionStorage = createCookieSessionStorage({
     path: "/",
     httpOnly: true,
     secrets: [sessionSecret],
-    secure: process.env.NODE_ENV === "production",
+    secure: import.meta.env.VITE_NODE_ENV === "production",
     maxAge: 60 * 60 * 24,
   },
 });
