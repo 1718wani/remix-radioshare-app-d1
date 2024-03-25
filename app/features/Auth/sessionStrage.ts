@@ -1,6 +1,6 @@
 import { createCookieSessionStorage } from "@remix-run/cloudflare";
 
-const sessionSecret: string | undefined = process.env.SESSION_SECRET;
+const sessionSecret: string | undefined = import.meta.env.VITE_SESSION_SECRET;
 if (sessionSecret === undefined)
   throw new Error("SESSION_SECRETを設定してください。");
 
