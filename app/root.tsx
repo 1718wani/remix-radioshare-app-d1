@@ -19,7 +19,7 @@ import { HeaderComponent } from "./components/HeaderComponent";
 import { Notifications } from "@mantine/notifications";
 import { useEffect, useState } from "react";
 
-export default function App() {
+export function Layout({ children }: { children: React.ReactNode }) {
   const navigation = useNavigation();
   const [showLoadingOverlay, setShowLoadingOverlay] = useState(false);
 
@@ -59,8 +59,13 @@ export default function App() {
           <Outlet />
           <ScrollRestoration />
           <Scripts />
+          {children}
         </MantineProvider>
       </body>
     </html>
   );
+}
+
+export default function App() {
+  return <Outlet />;
 }
