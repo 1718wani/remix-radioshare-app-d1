@@ -20,9 +20,30 @@ import { Notifications } from "@mantine/notifications";
 import { useEffect, useState } from "react";
 
 export function Layout({ children }: { children: React.ReactNode }) {
+  return (
+    <html lang="en">
+      <head>
+        <meta charSet="utf-8" />
+        <meta name="viewport" content="width=device-width,initial-scale=1" />
+        <Meta />
+        <Links />
+        <ColorSchemeScript />
+      </head>
+      <body>
+        <MantineProvider>
+          {children}
+          <ScrollRestoration />
+          <Scripts />
+        </MantineProvider>
+      </body>
+    </html>
+  );
+}
+
+export default function App() {
   const navigation = useNavigation();
   const [showLoadingOverlay, setShowLoadingOverlay] = useState(false);
-
+  
   // ちらつき防止
   useEffect(() => {
     let timeoutId: number;
@@ -38,34 +59,17 @@ export function Layout({ children }: { children: React.ReactNode }) {
     return () => clearTimeout(timeoutId);
   }, [navigation.state]);
   return (
-    <html lang="en">
-      <head>
-        <meta charSet="utf-8" />
-        <meta name="viewport" content="width=device-width,initial-scale=1" />
-        <Meta />
-        <Links />
-        <ColorSchemeScript />
-      </head>
-      <body>
-        <MantineProvider>
-          <LoadingOverlay
-            visible={showLoadingOverlay}
-            zIndex={1500}
-            overlayProps={{ radius: "sm", blur: 2 }}
-            loaderProps={{ color: "blue", type: "bars" }}
-          />
-          <Notifications />
-          <HeaderComponent />
-          <Outlet />
-          <ScrollRestoration />
-          <Scripts />
-          {children}
-        </MantineProvider>
-      </body>
-    </html>
-  );
-}
+    <>
+      <LoadingOverlay
+        visible={showLoadingOverlay}
+        zIndex={1500}
+        overlayProps={{ radius: "sm", blur: 2 }}
+        loaderProps={{ color: "blue", type: "bars" }}
+      />
+      <Notifications />
+      <HeaderComponent />
 
-export default function App() {
-  return <Outlet />;
+      <Outlet />
+    </>
+  );
 }
