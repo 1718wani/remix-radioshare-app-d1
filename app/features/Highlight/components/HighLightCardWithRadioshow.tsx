@@ -13,7 +13,7 @@ import {
 } from "@mantine/core";
 import { Link, useFetcher } from "@remix-run/react";
 import { IconBookmark, IconHeadphones, IconHeart } from "@tabler/icons-react";
-// import { parseISO, isWithinInterval, add } from "date-fns";
+import { parseISO, isWithinInterval, add } from "date-fns";
 
 type props = {
   id: string;
@@ -63,12 +63,12 @@ export const HighLightCardWithRadioshow = (props: props) => {
       ? fetcher.formData.get("saved") === "true"
       : saved;
 
-  // const isWithinAWeek = (dateString: string) => {
-  //   const date = parseISO(dateString);
-  //   const now = new Date();
-  //   const oneWeekAgo = add(now, { weeks: -1 }); // 1週間前の日付を計算
-  //   return isWithinInterval(date, { start: oneWeekAgo, end: now });
-  // };
+  const isWithinAWeek = (dateString: string) => {
+    const date = parseISO(dateString);
+    const now = new Date();
+    const oneWeekAgo = add(now, { weeks: -1 }); // 1週間前の日付を計算
+    return isWithinInterval(date, { start: oneWeekAgo, end: now });
+  };
 
   return (
     <>
@@ -90,11 +90,11 @@ export const HighLightCardWithRadioshow = (props: props) => {
               </Badge>
             )}
 
-            {/* {isWithinAWeek(createdAt) && !replayed && (
+            {isWithinAWeek(createdAt) && !replayed && (
               <Badge w="fit-content" variant="light">
                 NEW !
               </Badge>
-            )} */}
+            )}
           </Group>
         </Flex>
 
