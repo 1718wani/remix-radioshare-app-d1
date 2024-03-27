@@ -9,12 +9,8 @@ import {
   Title,
 } from "@mantine/core";
 import { notifications } from "@mantine/notifications";
-import {
-  ActionFunctionArgs,
-  LoaderFunction,
-  json,
-  redirect,
-} from "@remix-run/node";
+import { LoaderFunctionArgs, ActionFunctionArgs } from "@remix-run/node";
+import { json, redirect } from "@remix-run/cloudflare";
 import { Form, Link, useActionData } from "@remix-run/react";
 import { IconX } from "@tabler/icons-react";
 import { useEffect } from "react";
@@ -23,7 +19,7 @@ import { checkUserExists } from "~/features/Auth/apis/checkUserExists";
 import { authenticator } from "~/features/Auth/services/authenticator";
 import { commitSession, getSession } from "~/features/Auth/sessionStrage";
 
-export const loader: LoaderFunction = async ({ request }) => {
+export const loader = async ({ request }: LoaderFunctionArgs) => {
   const user = await authenticator.isAuthenticated(request, {
     successRedirect: "/",
   });
@@ -59,7 +55,7 @@ export async function action({ request, context }: ActionFunctionArgs) {
   try {
     const userId = await authenticator.authenticate("user-signin", request, {
       failureRedirect: "/signin",
-      context: context
+      context: context,
     });
 
     const session = await getSession(request.headers.get("cookie"));

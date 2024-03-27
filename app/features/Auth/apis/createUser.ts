@@ -1,4 +1,4 @@
-import bcrypt from "bcryptjs";
+// import bcrypt from "bcryptjs";
 import type { RegisterFormType } from "../types/registerFormType";
 import { drizzle } from "drizzle-orm/d1";
 import { AppLoadContext, json } from "@remix-run/cloudflare";
@@ -11,12 +11,12 @@ export const createUser = async (
   try {
     const { email, password, name } = user;
     const db = drizzle(context.cloudflare.env.DB);
-    // const passwordHash = await bcrypt.hash(password, 12);
-     const passwordHash = await bcrypt.hash(password, 12);
-    await db
-      .insert(users)
-      .values({ email, password: passwordHash, name })
-      .execute();
+    // const passwordHash = await crypto.hash(password, 12);
+    const passwordHash = password
+    // await db
+    //   .insert(users)
+    //   .values({ email, password: passwordHash, name })
+    //   .execute();
     return json({ message: "Resource added" }, { status: 201 });
   } catch (error) {
     console.error(error);

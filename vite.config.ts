@@ -13,7 +13,4 @@ export default defineConfig({
     globals: true,
     environment: "happy-dom",
   },
-  esbuild: {
-    drop: ["console", "debugger"],
-  },
 });
