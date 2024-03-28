@@ -1,0 +1,1 @@
+ALTER TABLE `highlights` DROP COLUMN `dammy_data`;
