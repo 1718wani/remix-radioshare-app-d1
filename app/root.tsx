@@ -49,7 +49,7 @@ export default function App() {
     let timeoutId: number;
     if (navigation.state === "loading") {
       // navigation.stateが"loading"になったら、0.3秒後にLoadingOverlayを表示する
-      // timeoutId = window.setTimeout(() => setShowLoadingOverlay(true), 200);
+      timeoutId = window.setTimeout(() => setShowLoadingOverlay(true), 200);
     } else {
       // navigation.stateが"loading"ではない場合、LoadingOverlayを即座に非表示にする
       setShowLoadingOverlay(false);
