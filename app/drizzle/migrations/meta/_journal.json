@@ -155,6 +155,34 @@
       "when": 1711247591725,
       "tag": "0021_superb_tyrannus",
       "breakpoints": true
+    },
+    {
+      "idx": 22,
+      "version": "5",
+      "when": 1711668544282,
+      "tag": "0022_odd_quentin_quire",
+      "breakpoints": true
+    },
+    {
+      "idx": 23,
+      "version": "5",
+      "when": 1711668559698,
+      "tag": "0023_unusual_medusa",
+      "breakpoints": true
+    },
+    {
+      "idx": 24,
+      "version": "5",
+      "when": 1711669196985,
+      "tag": "0024_kind_marvex",
+      "breakpoints": true
+    },
+    {
+      "idx": 25,
+      "version": "5",
+      "when": 1711669210722,
+      "tag": "0025_lethal_adam_warlock",
+      "breakpoints": true
     }
   ]
 }

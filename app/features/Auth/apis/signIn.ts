@@ -1,5 +1,5 @@
 import { AuthorizationError } from "remix-auth";
-// import bcrypt from "bcryptjs";
+import bcrypt from "bcryptjs";
 import { AppLoadContext } from "@remix-run/cloudflare";
 import { users } from "~/drizzle/schema.server";
 import { drizzle } from "drizzle-orm/d1";
@@ -11,9 +11,8 @@ export async function signIn(
   password: string,
   context: AppLoadContext
 ) {
-  
   const db = drizzle(context.cloudflare.env.DB);
-  console.log("db",db)
+  console.log("db", db);
   const user = await db
     .select()
     .from(users)
@@ -26,13 +25,12 @@ export async function signIn(
     throw new AuthorizationError();
   }
 
-  // const passwordsMatch = await bcrypt.compare(
-  //   password,
-  //   user.password as string
-  // );
-  const passwordsMatch = true
+  const passwordsMatch = await bcrypt.compare(
+    password,
+    user.password as string
+  );
 
-  console.log(passwordsMatch,"passwordmatch")
+  console.log(passwordsMatch, "passwordmatch");
 
   if (!passwordsMatch) {
     throw new AuthorizationError();
