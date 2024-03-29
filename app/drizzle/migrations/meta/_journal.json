@@ -183,6 +183,20 @@
       "when": 1711669210722,
       "tag": "0025_lethal_adam_warlock",
       "breakpoints": true
+    },
+    {
+      "idx": 26,
+      "version": "5",
+      "when": 1711671092790,
+      "tag": "0026_last_starbolt",
+      "breakpoints": true
+    },
+    {
+      "idx": 27,
+      "version": "5",
+      "when": 1711671136025,
+      "tag": "0027_nifty_tomorrow_man",
+      "breakpoints": true
     }
   ]
 }
