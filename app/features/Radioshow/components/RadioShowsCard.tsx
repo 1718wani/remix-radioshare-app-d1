@@ -11,7 +11,6 @@ type props = {
 export const RadioShowsCard = (props: props) => {
   const { imageUrl, title, id } = props;
   const correctImageUrl = `${customeDomain}${imageUrl}`;
-  console.log(correctImageUrl);
 
   return (
     <NavLink to={`/${id}`} style={{ textDecoration: "none" }}>

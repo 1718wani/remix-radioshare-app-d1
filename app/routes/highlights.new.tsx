@@ -76,7 +76,7 @@ export default function NewHighlights() {
                   id={highlightData.highlight.id}
                   imageUrl={
                     highlightData.radioshow?.imageUrl ??
-                    "https://picsum.photos/200/300"
+                    ""
                   }
                   title={highlightData.highlight.title}
                   description={highlightData.highlight.description ?? ""}

@@ -14,6 +14,7 @@ import {
 import { Link, useFetcher } from "@remix-run/react";
 import { IconBookmark, IconHeadphones, IconHeart } from "@tabler/icons-react";
 import { parseISO, isWithinInterval, add } from "date-fns";
+import { customeDomain } from "~/consts/customeDomain";
 
 type props = {
   id: string;
@@ -49,6 +50,7 @@ export const HighLightCardWithRadioshow = (props: props) => {
     isEnabledUserAction,
     open,
   } = props;
+  const correctImageUrl = `${customeDomain}${imageUrl}`;
   const theme = useMantineTheme();
   console.log(radioshowId, "radioshowIdです");
 
@@ -76,8 +78,8 @@ export const HighLightCardWithRadioshow = (props: props) => {
         <Card.Section mb={"sm"}>
           <Link to={`/${radioshowId}`}>
             <Image
-              src={imageUrl}
-              fallbackSrc="https://placehold.co/600x400?text=Placeholder"
+              src={correctImageUrl}
+              fallbackSrc="/radiowaiting.png"
               h={160}
             />
           </Link>
