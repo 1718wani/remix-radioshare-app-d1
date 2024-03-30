@@ -18,7 +18,7 @@ export const RadioShowHeader = ({
         style={{ position: "relative" }}
       >
         <Image
-          src={"https://8f628e10f40aa399782c57adea278e47.r2.cloudflarestorage.com/radioshow-header-image-/スクリーンショット 2024-03-27 22.09.52.png"}
+          src="https://aikunapp.org/%E3%82%B9%E3%82%AF%E3%83%AA%E3%83%BC%E3%83%B3%E3%82%B7%E3%83%A7%E3%83%83%E3%83%88%202024-03-27%2022.09.52.png"
           w={"full"}
           h={160}
           fallbackSrc="https://placehold.co/600x400?text=Placeholder"

@@ -7,6 +7,7 @@ import { RadioShowsCard } from "~/features/Radioshow/components/RadioShowsCard";
 
 export const loader = async ({ context }: LoaderFunctionArgs) => {
   const radioShows = await getRadioshows(context, 0);
+
   if (!radioShows) {
     throw new Response("Not Found", { status: 404 });
   }
