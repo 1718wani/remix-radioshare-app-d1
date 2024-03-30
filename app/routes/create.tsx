@@ -12,11 +12,12 @@ import { IconPhoto } from "@tabler/icons-react";
 import { Form } from "@remix-run/react";
 import { parseWithZod } from "@conform-to/zod";
 import { getFormProps, getInputProps, useForm } from "@conform-to/react";
+import { createRadioshow } from "~/features/Radioshow/apis/createRadioshow";
 
 const schema = z.object({
   title: z.string({ required_error: "タイトルは必要です" }),
   headerImage: z
-  
+
     .instanceof(File, { message: "画像ファイルを選択してください" })
     .transform((file) => file)
     .refine((file) => file.size < 500 * 1000, {
@@ -27,7 +28,7 @@ const schema = z.object({
       {
         message: ".jpeg .jpgもしくは.pngのみ可能です",
       }
-    )
+    ),
 });
 
 export async function loader({ request }: LoaderFunctionArgs) {
@@ -57,18 +58,22 @@ export const action = async ({ request, context }: ActionFunctionArgs) => {
 
   const form = await unstable_parseMultipartFormData(request, uploadHandler);
   const file = form.get("headerImage");
-  console.log(file,"file");
+  console.log(file, "file");
   const response = await env.BUCKET.put(
     `${radioshowData.title}${new Date().toISOString()}.png`,
     file
   );
-  console.log(response?.checksums.md5);
 
   // const session = await getSession(request.headers.get("cookie"));
   // console.log("sessionの値", session.data.user);
-  // await createRadioshow({ title, imageUrl }, context, request);
+  await createRadioshow(
+    { title: radioshowData.title, imageUrl: response?.key ?? "" },
+    context,
+    request
+  );
   return redirect("/");
 };
+
 
 export default function RadioshowCreate() {
   const [form, { title, headerImage }] = useForm({
