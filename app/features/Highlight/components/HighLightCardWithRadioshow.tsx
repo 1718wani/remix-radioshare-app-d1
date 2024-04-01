@@ -69,6 +69,22 @@ export const HighLightCardWithRadioshow = (props: props) => {
     return isWithinInterval(date, { start: oneWeekAgo, end: now });
   };
 
+  const handleActionClick =
+    (actionType: "liked" | "saved", currentState: boolean) =>
+    (e: React.MouseEvent) => {
+      if (!isEnabledUserAction) {
+        e.preventDefault();
+        open();
+      } else {
+        onAction(id, actionType, !currentState);
+        if (actionType === "liked") {
+          setLikedState(!currentState);
+        } else if (actionType === "saved") {
+          setSavedState(!currentState);
+        }
+      }
+    };
+
   return (
     <>
       <Card withBorder padding="md" radius="md" mx={"sm"}>
@@ -105,14 +121,7 @@ export const HighLightCardWithRadioshow = (props: props) => {
             <ActionIcon
               variant="subtle"
               color="gray"
-              onClick={(e) => {
-                onAction(id, "liked", !likedState);
-                setLikedState((prevSavedState) => !prevSavedState);
-                if (!isEnabledUserAction) {
-                  e.preventDefault();
-                  open();
-                }
-              }}
+              onClick={handleActionClick("liked", likedState)}
             >
               {likedState ? (
                 <IconHeart
@@ -127,14 +136,7 @@ export const HighLightCardWithRadioshow = (props: props) => {
             <ActionIcon
               variant="subtle"
               color="gray"
-              onClick={(e) => {
-                onAction(id, "saved", !savedState);
-                setSavedState((prevSavedState) => !prevSavedState);
-                if (!isEnabledUserAction) {
-                  e.preventDefault();
-                  open();
-                }
-              }}
+              onClick={handleActionClick("saved", savedState)}
             >
               {savedState ? (
                 <IconBookmark

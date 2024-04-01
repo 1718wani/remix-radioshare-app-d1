@@ -51,7 +51,7 @@ export const loader = async ({ request, context }: LoaderFunctionArgs) => {
   const userId = await authenticator.isAuthenticated(request, {});
   const url = new URL(request.url);
   const offset = Number(url.searchParams.get("offset")) ?? 0;
-  const limit = 10;
+  const limit = 13;
   const highlightsData = await getNewHighlights(
     context,
     request,
