@@ -11,9 +11,10 @@ import {
   Image,
   rem,
 } from "@mantine/core";
-import { Link, useFetcher } from "@remix-run/react";
+import { Link } from "@remix-run/react";
 import { IconBookmark, IconHeadphones, IconHeart } from "@tabler/icons-react";
 import { parseISO, isWithinInterval, add } from "date-fns";
+import { useState } from "react";
 import { customeDomain } from "~/consts/customeDomain";
 
 type props = {
@@ -30,11 +31,14 @@ type props = {
   totalReplayTimes: number;
   isEnabledUserAction: boolean;
   open: () => void;
+  onAction: (
+    id: string,
+    actionType: "replayed" | "saved" | "liked",
+    value: boolean
+  ) => void;
 };
 
 export const HighLightCardWithRadioshow = (props: props) => {
-  const fetcher = useFetcher();
-
   const {
     id,
     title,
@@ -49,21 +53,14 @@ export const HighLightCardWithRadioshow = (props: props) => {
     totalReplayTimes,
     isEnabledUserAction,
     open,
+    onAction,
   } = props;
   const correctImageUrl = `${customeDomain}${imageUrl}`;
   const theme = useMantineTheme();
-  console.log(radioshowId, "radioshowIdです");
 
-  // formDataから値を取得する前に、キーが存在するか確認
-  const likedState =
-    fetcher.formData && fetcher.formData.has("liked")
-      ? fetcher.formData.get("liked") === "true"
-      : liked;
+  const [likedState, setLikedState] = useState(liked);
 
-  const savedState =
-    fetcher.formData && fetcher.formData.has("saved")
-      ? fetcher.formData.get("saved") === "true"
-      : saved;
+  const [savedState, setSavedState] = useState(saved);
 
   const isWithinAWeek = (dateString: string) => {
     const date = parseISO(dateString);
@@ -105,63 +102,49 @@ export const HighLightCardWithRadioshow = (props: props) => {
             {title}
           </Text>
           <Group align={"center"} gap={6}>
-            <fetcher.Form
-              method="post"
+            <ActionIcon
+              variant="subtle"
+              color="gray"
               onClick={(e) => {
+                onAction(id, "liked", !likedState);
+                setLikedState((prevSavedState) => !prevSavedState);
                 if (!isEnabledUserAction) {
                   e.preventDefault();
                   open();
                 }
               }}
             >
-              <input type="hidden" name="id" value={id} />
-              <button
-                name="liked"
-                value={likedState ? "false" : "true"}
-                type="submit"
-                style={{ background: "none", border: "none", padding: 0 }}
-              >
-                <ActionIcon variant="subtle" color="gray">
-                  {likedState ? (
-                    <IconHeart
-                      color={theme.colors.red[6]}
-                      fill={theme.colors.red[6]}
-                    />
-                  ) : (
-                    <IconHeart color={theme.colors.red[6]} />
-                  )}
-                </ActionIcon>
-              </button>
-            </fetcher.Form>
+              {likedState ? (
+                <IconHeart
+                  color={theme.colors.red[6]}
+                  fill={theme.colors.red[6]}
+                />
+              ) : (
+                <IconHeart color={theme.colors.red[6]} />
+              )}
+            </ActionIcon>
 
-            <fetcher.Form
-              method="post"
+            <ActionIcon
+              variant="subtle"
+              color="gray"
               onClick={(e) => {
+                onAction(id, "saved", !savedState);
+                setSavedState((prevSavedState) => !prevSavedState);
                 if (!isEnabledUserAction) {
-                  e.preventDefault(); // フォームの送信を防ぐ
-                  open(); // ログインモーダルを開く
+                  e.preventDefault();
+                  open();
                 }
               }}
             >
-              <input type="hidden" name="id" value={id} />
-              <button
-                type="submit"
-                name="saved"
-                value={savedState ? "false" : "true"}
-                style={{ background: "none", border: "none", padding: 0 }}
-              >
-                <ActionIcon variant="subtle" color="gray">
-                  {savedState ? (
-                    <IconBookmark
-                      fill={theme.colors.yellow[6]}
-                      color={theme.colors.yellow[6]}
-                    />
-                  ) : (
-                    <IconBookmark color={theme.colors.yellow[6]} />
-                  )}
-                </ActionIcon>
-              </button>
-            </fetcher.Form>
+              {savedState ? (
+                <IconBookmark
+                  fill={theme.colors.yellow[6]}
+                  color={theme.colors.yellow[6]}
+                />
+              ) : (
+                <IconBookmark color={theme.colors.yellow[6]} />
+              )}
+            </ActionIcon>
           </Group>
         </Flex>
 
@@ -188,23 +171,22 @@ export const HighLightCardWithRadioshow = (props: props) => {
               {totalReplayTimes}
             </Text>
           </Flex>
-          <fetcher.Form method="post">
-            <input type="hidden" name="id" value={id} />
-            <input type="hidden" name="replayed" value="true" />
-            <Button
-              type="submit"
-              onClick={() => window.open(replayUrl, "_blank")}
-              radius="xl"
-              variant="gradient"
-              gradient={{
-                from: "rgba(4, 201, 47, 1)",
-                to: "rgba(87, 70, 70, 1)",
-                deg: 158,
-              }}
-            >
-              Spotifyで再生する
-            </Button>
-          </fetcher.Form>
+
+          <Button
+            onClick={() => {
+              onAction(id, "replayed", true);
+              window.open(replayUrl, "_blank");
+            }}
+            radius="xl"
+            variant="gradient"
+            gradient={{
+              from: "rgba(4, 201, 47, 1)",
+              to: "rgba(87, 70, 70, 1)",
+              deg: 158,
+            }}
+          >
+            Spotifyで再生する
+          </Button>
         </Flex>
       </Card>
     </>

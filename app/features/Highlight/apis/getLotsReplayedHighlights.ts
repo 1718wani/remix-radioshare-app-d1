@@ -11,12 +11,12 @@ import { authenticator } from "~/features/Auth/services/authenticator";
 export const getLotsReplayedHighlights = async (
   context: AppLoadContext,
   request: Request,
-  offset: number
+  offset: number,
+  limit: number
 ) => {
   try {
     const db = drizzle(context.cloudflare.env.DB);
     const userId = await authenticator.isAuthenticated(request);
-    console.log( "userId:",userId);
     const result = await db
       .select({
         highlight: {
@@ -43,15 +43,20 @@ export const getLotsReplayedHighlights = async (
         userHighlights,
         and(
           eq(highlights.id, userHighlights.highlightId),
-          eq(userHighlights.userId, userId ?? "") 
+          eq(userHighlights.userId, userId ?? "")
         )
       )
       .orderBy(desc(highlights.totalReplayTimes))
-      .limit(30)
+      .limit(limit)
       .offset(offset)
       .execute();
-    console.log( "result:",result,);
-    return result;
+
+    // // もし取得した値が、限界値と同じ値であれば、ちょうど終わり、もしくはもっとある。
+    // const hasNextPage = result.length === limit;
+    // // もし次ページもあるのであれば、末尾１つだけ削除して返す。 そうすれば、もし仮にちょうどなら、次はもうhasNextPageとならない。もし普通にそれ以上あるならそのまま返す。
+    // // もし次ページがないのなら、そのまま返す。limitとoffsetは同じである必要がある？いや、
+    // if (hasNextPage && result.length >= 1  ) result.slice(0, -1);
+    return  result ;
   } catch (error) {
     console.error(error);
     throw new Response("ハイライト取得に伴ってエラーが発生しました", {
