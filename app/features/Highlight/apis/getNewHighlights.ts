@@ -7,12 +7,12 @@ import { authenticator } from "~/features/Auth/services/authenticator";
 export const getNewHighlights = async (
   context: AppLoadContext,
   request: Request,
-  offset: number
+  offset: number,
+  limit:number
 ) => {
   try {
     const db = drizzle(context.cloudflare.env.DB);
     const userId = await authenticator.isAuthenticated(request);
-    console.log( "userId:",userId);
     const result = await db
       .select({
         highlight: {
@@ -43,10 +43,9 @@ export const getNewHighlights = async (
         )
       )
       .orderBy(desc(highlights.createdAt))
-      .limit(30)
+      .limit(limit)
       .offset(offset)
       .execute();
-    console.log( "result:",result,);
     return result;
   } catch (error) {
     console.error(error);
