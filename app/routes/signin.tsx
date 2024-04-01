@@ -20,8 +20,9 @@ import { authenticator } from "~/features/Auth/services/authenticator";
 import { commitSession, getSession } from "~/features/Auth/sessionStrage";
 
 export const loader = async ({ request }: LoaderFunctionArgs) => {
+  
   const user = await authenticator.isAuthenticated(request, {
-    successRedirect: "/",
+    successRedirect: "/highlights/popular",
   });
   return { user };
 };
