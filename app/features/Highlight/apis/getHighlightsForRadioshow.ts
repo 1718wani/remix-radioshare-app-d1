@@ -8,7 +8,8 @@ export const getHighlightsForRadioshow = async (
   radioshowId: string,
   context: AppLoadContext,
   request: Request,
-  offset: number
+  offset: number,
+  limit: number
 ) => {
   try {
     const db = drizzle(context.cloudflare.env.DB);
@@ -39,7 +40,7 @@ export const getHighlightsForRadioshow = async (
         )
       )
       .where(eq(highlights.radioshowId, radioshowId))
-      .limit(30)
+      .limit(limit)
       .offset(offset)
       .execute();
     return highlightsWithUserHighlights;
