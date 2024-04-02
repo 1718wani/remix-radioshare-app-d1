@@ -18,6 +18,7 @@ import { createUser } from "~/features/Auth/apis/createUser";
 import { IconX } from "@tabler/icons-react";
 import { notifications } from "@mantine/notifications";
 import { checkUserExists } from "~/features/Auth/apis/checkUserExists";
+import { commitSession, getSession } from "~/features/Auth/sessionStrage";
 
 export const loader = async ({ request }: LoaderFunctionArgs) => {
   const user = await authenticator.isAuthenticated(request, {
@@ -30,6 +31,11 @@ export async function action({ request, context }: ActionFunctionArgs) {
   const formData = await request.formData();
   console.log(formData, "requestSignup");
   const submission = parseWithZod(formData, { schema });
+
+  const session = await getSession(
+    request.headers.get("Cookie"),
+  )
+  session.flash("message", `Task created!`)
 
   if (submission.status !== "success") {
     return json({
@@ -48,7 +54,11 @@ export async function action({ request, context }: ActionFunctionArgs) {
     });
   }
   await createUser(submission.value, context);
-  return redirect("/signin");
+  return redirect("/signin",{
+    headers: {
+      "Set-Cookie": await commitSession(session),
+    },
+  });
 }
 
 const schema = z.object({
