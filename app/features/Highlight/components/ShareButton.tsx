@@ -3,7 +3,6 @@ import { useNavigate } from "@remix-run/react";
 import { useDisclosure } from "@mantine/hooks";
 import { LoginNavigateModal } from "~/features/Auth/components/LoginNavigateModal";
 import classes from "../../../styles/pulseNewButton.module.css"
-console.log(classes);
 
 interface shareButtonType  {
    userId: string|null
@@ -30,6 +29,7 @@ export const ShareButton = (props : shareButtonType) => {
         variant="filled"
         radius={"lg"}
         style={{ position: "fixed", right: 30, bottom: 50, zIndex: 1000 }}
+        key={classes.pulse}
       >
         Share
       </Button>
