@@ -1,8 +1,9 @@
 import { Button } from "@mantine/core";
 import { useNavigate } from "@remix-run/react";
-import "./ShareButton.module.css";
 import { useDisclosure } from "@mantine/hooks";
 import { LoginNavigateModal } from "~/features/Auth/components/LoginNavigateModal";
+import classes from "../../../styles/pulseNewButton.module.css"
+console.log(classes);
 
 interface shareButtonType  {
    userId: string|null
@@ -24,7 +25,7 @@ export const ShareButton = (props : shareButtonType) => {
             navigate("/highlight-share");
           }
         }}
-        className="pulse-button"
+        className={"pulse-new-button"}
         size="lg"
         variant="filled"
         radius={"lg"}

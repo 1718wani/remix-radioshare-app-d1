@@ -3,6 +3,7 @@ import * as dotenv from "dotenv";
 dotenv.config();
 
 const cfConfig = {
+  
   schema: "./app/drizzle/schema.server.ts",
   out: "./app/drizzle/migrations",
   driver: "d1",

@@ -1,13 +1,13 @@
 import { Button } from "@mantine/core";
 import { NavLink } from "@remix-run/react";
-import classes from "./NewRadioshowButton.module.css";
+import classes from "../../../styles/pulseNewButton.module.css";
 console.log(classes);
 
 export const NewRadioshowButton = () => {
   return (
     <NavLink to={"/create"}>
       <Button
-        className={"pulse-new-radioshow-button"}
+        className={"pulse-new-button"}
         size="lg"
         variant="filled"
         radius={"lg"}
