@@ -1,6 +1,6 @@
 import { Flex, Select, Title, rem } from "@mantine/core";
 import { LoaderFunctionArgs, json } from "@remix-run/cloudflare";
-import { Outlet, useLoaderData, useNavigate } from "@remix-run/react";
+import { Outlet, useLoaderData, useMatches, useNavigate } from "@remix-run/react";
 import { authenticator } from "~/features/Auth/services/authenticator";
 import { ShareButton } from "~/features/Highlight/components/ShareButton";
 
@@ -13,17 +13,17 @@ export const loader = async ({ request }: LoaderFunctionArgs) => {
 export default function Highlights() {
   const data = useLoaderData<typeof loader>();
   const navigate = useNavigate();
-  const handleChange = (value: string|null) => {
+  const matches = useMatches();
+  const currentPath = matches[matches.length - 1]?.pathname ?? "";
+
+  const handleChange = (value: string | null) => {
     if (value === null) return;
     switch (value) {
       case "人気順":
-        navigate("/highlights/popular");
+        navigate("/");
         break;
       case "新しい順":
         navigate("/highlights/new");
-        break;
-      case "保存済み":
-        navigate("/highlights/saved");
         break;
       default:
         break;
@@ -37,14 +37,14 @@ export default function Highlights() {
         <Select
           withCheckIcon={false}
           w={rem(120)}
-          defaultValue={"人気順"}
-          data={["人気順", "新しい順", "保存済み"]}
+          defaultValue={currentPath === "/highlights/new" ? "新しい順" : "人気順"}
+          data={["人気順", "新しい順"]}
           clearable={false}
           allowDeselect={false}
           onChange={handleChange}
         />
       </Flex>
-      <Outlet/>
+      <Outlet />
       <ShareButton userId={data.userId} />
     </div>
   );

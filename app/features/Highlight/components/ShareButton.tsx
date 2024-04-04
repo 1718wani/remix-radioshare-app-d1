@@ -28,7 +28,7 @@ export const ShareButton = (props : shareButtonType) => {
         size="lg"
         variant="filled"
         radius={"lg"}
-        style={{ position: "fixed", right: 30, bottom: 50, zIndex: 1000 }}
+        style={{ position: "fixed", right: 30, bottom: 50, zIndex: 3 }}
         key={classes.pulse}
       >
         Share
