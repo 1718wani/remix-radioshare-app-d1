@@ -150,7 +150,7 @@ export default function Highlights() {
                 {highlightsData.map((highlightData) => (
                   <Grid.Col
                     key={highlightData.highlight.id}
-                    span={{ base: 12, md: 6, lg: 3 }}
+                    span={{ base: 12, md: 6, lg: 4 }}
                   >
                     <HighLightCard
                       id={highlightData.highlight.id}

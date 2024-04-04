@@ -132,7 +132,7 @@ export default function HightlightsPopular() {
               {highlightsData.map((highlightData) => (
                 <Grid.Col
                   key={highlightData.highlight.id}
-                  span={{ base: 12, md: 6, lg: 3 }}
+                  span={{ base: 12, md: 6, lg: 4 }}
                 >
                   <HighLightCardWithRadioshow
                     key={highlightData.highlight.id}
