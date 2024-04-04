@@ -14,10 +14,17 @@ import {
   ColorSchemeScript,
   LoadingOverlay,
   MantineProvider,
+  AppShell,
+  NavLink,
+  ScrollArea,
+  Divider,
+  SegmentedControl,
 } from "@mantine/core";
 import { HeaderComponent } from "./components/HeaderComponent";
 import { Notifications } from "@mantine/notifications";
 import { useEffect, useState } from "react";
+import { useDisclosure } from "@mantine/hooks";
+import { IconLogout } from "@tabler/icons-react";
 
 export function Layout({ children }: { children: React.ReactNode }) {
   return (
@@ -43,7 +50,8 @@ export function Layout({ children }: { children: React.ReactNode }) {
 export default function App() {
   const navigation = useNavigation();
   const [showLoadingOverlay, setShowLoadingOverlay] = useState(false);
-  
+  const [opened, { toggle }] = useDisclosure();
+
   // ちらつき防止
   useEffect(() => {
     let timeoutId: number;
@@ -67,9 +75,63 @@ export default function App() {
         loaderProps={{ color: "blue", type: "bars" }}
       />
       <Notifications />
-      <HeaderComponent />
 
-      <Outlet />
+      <AppShell
+        header={{ height: 60 }}
+        navbar={{
+          width: 250,
+          breakpoint: "sm",
+          collapsed: { mobile: !opened },
+        }}
+      >
+        <AppShell.Header>
+          <div>
+            <HeaderComponent opened={opened} toggle={toggle} />
+          </div>
+        </AppShell.Header>
+
+        <AppShell.Navbar p="xs">
+          <SegmentedControl data={["一覧", "保存済み"]} />
+
+          <Divider my="sm" />
+          <ScrollArea style={{ height: "85%" }}>
+            <NavLink href="#required-for-focus" label="Active light" />
+            <NavLink href="#required-for-focus" label="Active light" active />
+            <NavLink href="#required-for-focus" label="Active light" />
+            <NavLink href="#required-for-focus" label="Active light" />
+            <NavLink href="#required-for-focus" label="Active light" />
+            <NavLink href="#required-for-focus" label="Active light" active />
+            <NavLink href="#required-for-focus" label="Active light" />
+            <NavLink href="#required-for-focus" label="Active light" />
+            <NavLink href="#required-for-focus" label="Active light" />
+            <NavLink href="#required-for-focus" label="Active light" active />
+            <NavLink href="#required-for-focus" label="Active light" />
+            <NavLink href="#required-for-focus" label="Active light" />
+            <NavLink href="#required-for-focus" label="Active light" />
+            <NavLink href="#required-for-focus" label="Active light" active />
+            <NavLink href="#required-for-focus" label="Active light" />
+            <NavLink href="#required-for-focus" label="Active light" />
+            <NavLink href="#required-for-focus" label="Active light" />
+            <NavLink href="#required-for-focus" label="Active light" active />
+            <NavLink href="#required-for-focus" label="Active light" />
+            <NavLink href="#required-for-focus" label="Active light" />
+            <NavLink href="#required-for-focus" label="Active light" />
+            <NavLink href="#required-for-focus" label="Active light" active />
+            <NavLink href="#required-for-focus" label="Active light" />
+            <NavLink href="#required-for-focus" label="Active light" />
+          </ScrollArea>
+          <Divider my="sm" />
+          <NavLink
+            href="#required-for-focus"
+            label="ログアウト"
+            leftSection={<IconLogout />}
+          />
+        </AppShell.Navbar>
+
+        <AppShell.Main>
+          <Outlet />
+        </AppShell.Main>
+      </AppShell>
     </>
   );
 }
