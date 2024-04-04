@@ -124,7 +124,6 @@ export default function App() {
           p="xs"
           style={{
             ...(isMobile ? { zIndex: 201 } : {}),
-            
           }}
         >
           <NavLink
@@ -161,8 +160,10 @@ export default function App() {
             </Form>
           ) : (
             <Form
-              onClick={() => navigate("/signin")}
-              method="post"
+              onClick={() => {
+                navigate("/signin");
+                toggle();
+              }}
               style={{ margin: 0 }}
             >
               <Button w="100%" bg={"gray.4"}>
