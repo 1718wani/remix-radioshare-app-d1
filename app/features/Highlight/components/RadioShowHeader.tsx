@@ -35,7 +35,7 @@ export const RadioShowHeader = ({
           <Title
             order={3}
             c={"gray.0"}
-            style={{ position: "absolute", left: 0, bottom: 0, zIndex: 200 }}
+            style={{ position: "absolute", left: 0, bottom: 0, zIndex: 202 }}
             p={8}
           >
             {radioshowTitle}

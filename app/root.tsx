@@ -33,11 +33,13 @@ import {
   IconBookmark,
   IconLogin2,
   IconLogout,
+  IconMusicPlus,
   IconRadio,
 } from "@tabler/icons-react";
 import { getRadioshows } from "./features/Radioshow/apis/getRadioshows";
 import { LoaderFunctionArgs } from "@remix-run/cloudflare";
 import { authenticator } from "./features/Auth/services/authenticator";
+import { LoginNavigateModal } from "./features/Auth/components/LoginNavigateModal";
 
 export const loader = async ({ context, request }: LoaderFunctionArgs) => {
   const radioShows = await getRadioshows(context, 0);
@@ -74,7 +76,9 @@ export default function App() {
   const { radioShows, user } = useLoaderData<typeof loader>();
   const navigation = useNavigation();
   const [showLoadingOverlay, setShowLoadingOverlay] = useState(false);
-  const [opened, { toggle }] = useDisclosure();
+  const [menuOpened, { toggle: toggleMenu }] = useDisclosure();
+  const [modalOpened, { open: openModal, close: closeModal }] =
+    useDisclosure(false);
   const navigate = useNavigate();
   const isMobile = useMediaQuery("(max-width: 48em)");
 
@@ -100,7 +104,7 @@ export default function App() {
     <>
       <LoadingOverlay
         visible={showLoadingOverlay}
-        zIndex={1500}
+        zIndex={2000}
         overlayProps={{ radius: "sm", blur: 2 }}
         loaderProps={{ color: "blue", type: "bars" }}
       />
@@ -111,19 +115,19 @@ export default function App() {
         navbar={{
           width: 250,
           breakpoint: "sm",
-          collapsed: { mobile: !opened },
+          collapsed: { mobile: !menuOpened },
         }}
       >
         <AppShell.Header>
           <div>
-            <HeaderComponent opened={opened} toggle={toggle} />
+            <HeaderComponent opened={menuOpened} toggle={toggleMenu} />
           </div>
         </AppShell.Header>
 
         <AppShell.Navbar
           p="xs"
           style={{
-            ...(isMobile ? { zIndex: 201 } : {}),
+            ...(isMobile ? { zIndex: 203 } : {}),
           }}
         >
           <NavLink
@@ -140,7 +144,7 @@ export default function App() {
           />
 
           <Divider my="sm" />
-          <ScrollArea style={{ height: "80%" }}>
+          <ScrollArea style={{ height: "75%" }}>
             {radioShows.map((show) => (
               <NavLink
                 key={show.id}
@@ -151,9 +155,27 @@ export default function App() {
             ))}
           </ScrollArea>
           <Divider my="sm" />
+          <Button
+            onClick={(e) => {
+              if (!user) {
+                e.preventDefault();
+                toggleMenu();
+                console.log("開いている");
+                openModal();
+              } else {
+                navigate("/create");
+              }
+            }}
+            w="100%"
+            bg={"blue.4"}
+            mb={"sm"}
+          >
+            <IconMusicPlus stroke={2} />
+            <span style={{ marginLeft: 4 }}>番組登録</span>
+          </Button>
           {user ? (
             <Form action="/logout" method="post" style={{ margin: 0 }}>
-              <Button type="submit" w="100%" bg={"gray.4"}>
+              <Button type="submit" w="100%" bg={"gray.5"}>
                 <IconLogout stroke={2} />
                 <span style={{ marginLeft: 4 }}>ログアウト</span>
               </Button>
@@ -162,11 +184,11 @@ export default function App() {
             <Form
               onClick={() => {
                 navigate("/signin");
-                toggle();
+                toggleMenu();
               }}
               style={{ margin: 0 }}
             >
-              <Button w="100%" bg={"gray.4"}>
+              <Button w="100%" bg={"gray.5"}>
                 <IconLogin2 stroke={2} />
                 <span style={{ marginLeft: 4 }}>ログイン</span>
               </Button>
@@ -178,6 +200,16 @@ export default function App() {
           <Outlet />
         </AppShell.Main>
       </AppShell>
+      {/* <div>
+        <iframe
+          title="spotify"
+          src="https://open.spotify.com/embed/track/0kdqcbwei4MDWFEX5f33yG?si=93526051bac04d12"
+          width="900"
+          height="150"
+          allow="encrypted-media"
+        ></iframe>
+      </div> */}
+      <LoginNavigateModal opened={modalOpened} close={closeModal} />
     </>
   );
 }

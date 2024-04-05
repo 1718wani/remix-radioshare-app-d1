@@ -116,8 +116,8 @@ export default function Signin() {
       notifications.show({
         withCloseButton: true,
         autoClose: 5000,
-        title: "サインアップが完了しました",
-        message: toastMessage,
+        title: "新規ユーザー登録が完了しました",
+        message: "再度ログインしてください",
         color: "green",
         icon: <IconCheck />,
       });
