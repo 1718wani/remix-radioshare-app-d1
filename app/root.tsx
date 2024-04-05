@@ -27,7 +27,7 @@ import {
 } from "@mantine/core";
 import { HeaderComponent } from "./components/HeaderComponent";
 import { Notifications } from "@mantine/notifications";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useDisclosure, useMediaQuery } from "@mantine/hooks";
 import {
   IconBookmark,
@@ -40,6 +40,9 @@ import { getRadioshows } from "./features/Radioshow/apis/getRadioshows";
 import { LoaderFunctionArgs } from "@remix-run/cloudflare";
 import { authenticator } from "./features/Auth/services/authenticator";
 import { LoginNavigateModal } from "./features/Auth/components/LoginNavigateModal";
+import { SpotifyEmbed } from "./features/Player/components/spotifyEmbed";
+import { useAtom } from "jotai";
+import { spotifyEmbedRefAtom } from "./features/Player/atoms/spotifyEmbedRefAtom";
 
 export const loader = async ({ context, request }: LoaderFunctionArgs) => {
   const radioShows = await getRadioshows(context, 0);
@@ -84,7 +87,13 @@ export default function App() {
 
   const matches = useMatches();
   const currentPath = matches[matches.length - 1]?.pathname ?? "";
-  console.log(currentPath, "currentpath");
+
+  const [spotifyEmbedRef, setSpotifyEmbedRef] = useAtom(spotifyEmbedRefAtom);
+  const SpotifyEmbedRef = useRef(null);
+
+  useEffect(() => {
+    setSpotifyEmbedRef(SpotifyEmbedRef);
+  }, [SpotifyEmbedRef, setSpotifyEmbedRef]);
 
   // ちらつき防止
   useEffect(() => {
@@ -113,7 +122,7 @@ export default function App() {
       <AppShell
         header={{ height: 60 }}
         navbar={{
-          width: 250,
+          width: 350,
           breakpoint: "sm",
           collapsed: { mobile: !menuOpened },
         }}
@@ -144,7 +153,7 @@ export default function App() {
           />
 
           <Divider my="sm" />
-          <ScrollArea style={{ height: "75%" }}>
+          <ScrollArea style={{ height: "60%" }}>
             {radioShows.map((show) => (
               <NavLink
                 key={show.id}
@@ -155,6 +164,13 @@ export default function App() {
             ))}
           </ScrollArea>
           <Divider my="sm" />
+          <SpotifyEmbed
+            ref={SpotifyEmbedRef}
+            uri={"spotify:episode:7makk4oTQel546B0PZlDM5"}
+            width={"full"}
+            height={200}
+          />
+
           <Button
             onClick={(e) => {
               if (!user) {
@@ -200,15 +216,6 @@ export default function App() {
           <Outlet />
         </AppShell.Main>
       </AppShell>
-      {/* <div>
-        <iframe
-          title="spotify"
-          src="https://open.spotify.com/embed/track/0kdqcbwei4MDWFEX5f33yG?si=93526051bac04d12"
-          width="900"
-          height="150"
-          allow="encrypted-media"
-        ></iframe>
-      </div> */}
       <LoginNavigateModal opened={modalOpened} close={closeModal} />
     </>
   );

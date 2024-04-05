@@ -14,8 +14,10 @@ import {
 import { Link } from "@remix-run/react";
 import { IconBookmark, IconHeadphones, IconHeart } from "@tabler/icons-react";
 import { parseISO, isWithinInterval, add } from "date-fns";
+import { useAtom } from "jotai";
 import { useState } from "react";
 import { customeDomain } from "~/consts/customeDomain";
+import { spotifyEmbedRefAtom } from "~/features/Player/atoms/spotifyEmbedRefAtom";
 
 type props = {
   id: string;
@@ -61,6 +63,12 @@ export const HighLightCardWithRadioshow = (props: props) => {
   const [likedState, setLikedState] = useState(liked);
 
   const [savedState, setSavedState] = useState(saved);
+
+  const [spotifyEmbedRef] = useAtom(spotifyEmbedRefAtom);
+
+  const handlePlayAtSpecificTime = () => {
+    spotifyEmbedRef?.current?.playAtSpecificTime(500,"spotify:episode/73gRmm46xZAXuXQb8Frgbw",);
+  };
 
   const isWithinAWeek = (dateString: string) => {
     const date = parseISO(dateString);
@@ -176,8 +184,9 @@ export const HighLightCardWithRadioshow = (props: props) => {
 
           <Button
             onClick={() => {
+              handlePlayAtSpecificTime();
               onAction(id, "replayed", true);
-              window.open(replayUrl, "_blank");
+              // window.open(replayUrl, "_blank");
             }}
             radius="xl"
             variant="gradient"

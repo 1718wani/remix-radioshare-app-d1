@@ -34,6 +34,7 @@
     "date-fns": "^3.3.1",
     "drizzle-orm": "^0.30.4",
     "isbot": "^4.1.0",
+    "jotai": "^2.7.2",
     "miniflare": "^3.20231030.4",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
