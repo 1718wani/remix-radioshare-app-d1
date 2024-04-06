@@ -88,7 +88,7 @@ export default function App() {
   const matches = useMatches();
   const currentPath = matches[matches.length - 1]?.pathname ?? "";
 
-  const [spotifyEmbedRef, setSpotifyEmbedRef] = useAtom(spotifyEmbedRefAtom);
+  const [, setSpotifyEmbedRef] = useAtom(spotifyEmbedRefAtom);
   const SpotifyEmbedRef = useRef(null);
 
   useEffect(() => {
@@ -153,7 +153,7 @@ export default function App() {
           />
 
           <Divider my="sm" />
-          <ScrollArea style={{ height: "60%" }}>
+          <ScrollArea style={{ height: "65%" }}>
             {radioShows.map((show) => (
               <NavLink
                 key={show.id}
@@ -166,6 +166,7 @@ export default function App() {
           <Divider my="sm" />
           <SpotifyEmbed
             ref={SpotifyEmbedRef}
+            // Hightlightの1番めをのせておきたい
             uri={"spotify:episode:7makk4oTQel546B0PZlDM5"}
             width={"full"}
             height={200}

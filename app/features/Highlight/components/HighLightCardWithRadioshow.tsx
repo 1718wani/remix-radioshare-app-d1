@@ -67,7 +67,13 @@ export const HighLightCardWithRadioshow = (props: props) => {
   const [spotifyEmbedRef] = useAtom(spotifyEmbedRefAtom);
 
   const handlePlayAtSpecificTime = () => {
-    spotifyEmbedRef?.current?.playAtSpecificTime(500,"spotify:episode/73gRmm46xZAXuXQb8Frgbw",);
+    spotifyEmbedRef?.current?.playAtSpecificTime(
+      500,
+      "spotify:episode:7makk4oTQel546B0PZlDM5",
+      10000,
+      500,
+      "spotify:episode:5TuEOgFzx09JkladdclaTu"
+    );
   };
 
   const isWithinAWeek = (dateString: string) => {
@@ -186,7 +192,6 @@ export const HighLightCardWithRadioshow = (props: props) => {
             onClick={() => {
               handlePlayAtSpecificTime();
               onAction(id, "replayed", true);
-              // window.open(replayUrl, "_blank");
             }}
             radius="xl"
             variant="gradient"

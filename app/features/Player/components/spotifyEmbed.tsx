@@ -15,15 +15,27 @@ export const SpotifyEmbed = forwardRef(
         setEmbedController(EmbedController);
         // ref.current に EmbedController のメソッドを設定する
         ref.current = {
-          playAtSpecificTime: (time, newUri) => {
-            // 新しいURIが指定されている場合は、loadUriを呼び出してからplayを実行
-            console.log(newUri,"newuri")
-            EmbedController.loadUri(newUri)
+          playAtSpecificTime: (time, newUri, stopAfter, nextTime, nextUri) => {
+            console.log(newUri, "newuri");
+            EmbedController.loadUri(newUri);
             EmbedController.play();
             setTimeout(() => {
               EmbedController.seek(time);
-            }, 100);
-            
+              // 指定した時間後に停止し、次のエピソードを再生する
+              if (stopAfter && nextUri) {
+                setTimeout(() => {
+                  EmbedController.pause();
+                  // 次のエピソードを再生
+                  EmbedController.loadUri(nextUri);
+                  EmbedController.play();
+                  if (nextTime) {
+                    setTimeout(() => {
+                      EmbedController.seek(nextTime);
+                    }, 700); // 次のエピソードが再生を開始してからシークするまでの待機時間
+                  }
+                }, stopAfter);
+              }
+            }, 700);
           },
           togglePlay: () => {
             EmbedController.togglePlay();
