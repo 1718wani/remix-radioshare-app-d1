@@ -67,13 +67,14 @@ export const HighLightCardWithRadioshow = (props: props) => {
   const [spotifyEmbedRef] = useAtom(spotifyEmbedRefAtom);
 
   const handlePlayAtSpecificTime = () => {
-    spotifyEmbedRef?.current?.playAtSpecificTime(
-      500,
-      "spotify:episode:7makk4oTQel546B0PZlDM5",
-      10000,
-      500,
-      "spotify:episode:5TuEOgFzx09JkladdclaTu"
-    );
+    const episodes = [
+      { uri: "spotify:episode:7makk4oTQel546B0PZlDM5", startTime: 500, stopAfter: 10000 },
+      { uri: "spotify:episode:5TuEOgFzx09JkladdclaTu", startTime: 500, stopAfter: 10000 },
+      { uri: "spotify:episode:63k3neU40blqXuetfOd6qJ", startTime: 2000, stopAfter: 10000 },
+      // 他のエピソード情報を追加
+    ];
+    
+    spotifyEmbedRef?.current?.playEpisodes(episodes);
   };
 
   const isWithinAWeek = (dateString: string) => {

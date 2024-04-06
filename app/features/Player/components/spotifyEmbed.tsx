@@ -1,6 +1,12 @@
 import { forwardRef, useState } from "react";
 import { useSpotifyIframeApi } from "../hooks/useSpotifyIframeApi";
 
+type Episode = {
+  uri: string;
+  startTime: number;
+  stopAfter: number;
+};
+
 export const SpotifyEmbed = forwardRef(
   ({ uri, width = "full", height = "10%" }, ref) => {
     SpotifyEmbed.displayName = "SpotifyEmbed";
@@ -15,27 +21,22 @@ export const SpotifyEmbed = forwardRef(
         setEmbedController(EmbedController);
         // ref.current に EmbedController のメソッドを設定する
         ref.current = {
-          playAtSpecificTime: (time, newUri, stopAfter, nextTime, nextUri) => {
-            console.log(newUri, "newuri");
-            EmbedController.loadUri(newUri);
+          playEpisodes: (episodes: Episode[], currentIndex: number = 0) => {
+            if (currentIndex >= episodes.length) return; // 全てのエピソードが再生されたら終了
+        
+            const { uri, startTime, stopAfter } = episodes[currentIndex];
+            EmbedController.loadUri(uri);
             EmbedController.play();
             setTimeout(() => {
-              EmbedController.seek(time);
-              // 指定した時間後に停止し、次のエピソードを再生する
-              if (stopAfter && nextUri) {
-                setTimeout(() => {
-                  EmbedController.pause();
-                  // 次のエピソードを再生
-                  EmbedController.loadUri(nextUri);
-                  EmbedController.play();
-                  if (nextTime) {
-                    setTimeout(() => {
-                      EmbedController.seek(nextTime);
-                    }, 700); // 次のエピソードが再生を開始してからシークするまでの待機時間
-                  }
-                }, stopAfter);
-              }
-            }, 700);
+              EmbedController.seek(startTime);
+              setTimeout(() => {
+                EmbedController.pause();
+                // 次のエピソードがあれば再生
+                if (currentIndex + 1 < episodes.length) {
+                  ref?.current.playEpisodes(episodes, currentIndex + 1);
+                }
+              }, stopAfter);
+            }, 700); // エピソードが再生を開始してからシークするまでの待機時間
           },
           togglePlay: () => {
             EmbedController.togglePlay();
