@@ -13,7 +13,7 @@ import {
 import { useSpotifyIframeApi } from "../hooks/useSpotifyIframeApi";
 
 export const SpotifyPlayer = forwardRef(
-  ({ uri, width, height = "75%" }: SpotifyIFrameAPIOptions, ref) => {
+  ({ uri, width = 0, height = 0 }: SpotifyIFrameAPIOptions, ref) => {
     SpotifyPlayer.displayName = "SpotifyPlayer";
 
     const containerRef = useRef<HTMLDivElement>(null);

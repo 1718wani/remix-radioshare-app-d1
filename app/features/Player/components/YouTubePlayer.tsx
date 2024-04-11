@@ -14,8 +14,8 @@ export const YoutubePlayer = forwardRef(
     {
       initialVideoId,
       initialStartSeconds = 0,
-      width = "full",
-      height = "20%",
+      width = 0,
+      height = 0,
     }: YoutubeIFrameAPIOptions,
     ref
   ) => {

@@ -23,5 +23,5 @@ const localConfig = {
   },
 } satisfies Config;
 
-export default import.meta.env.VITE_NODE_ENV === "production" ? cfConfig : localConfig;
-// export default process.env.NODE_ENV === "production" ? cfConfig : localConfig;
+// export default import.meta.env.VITE_NODE_ENV === "production" ? cfConfig : localConfig;
+export default process.env.NODE_ENV === "production" ? cfConfig : localConfig;
