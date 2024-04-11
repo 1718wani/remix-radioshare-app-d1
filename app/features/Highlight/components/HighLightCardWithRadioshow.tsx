@@ -14,10 +14,12 @@ import {
 import { Link } from "@remix-run/react";
 import { IconBookmark, IconHeadphones, IconHeart } from "@tabler/icons-react";
 import { parseISO, isWithinInterval, add } from "date-fns";
-import { useAtom } from "jotai";
+import { useAtom, useAtomValue } from "jotai";
 import { useState } from "react";
 import { customeDomain } from "~/consts/customeDomain";
+import { platformAtom } from "~/features/Player/atoms/playingStatusAtom";
 import { spotifyEmbedRefAtom } from "~/features/Player/atoms/spotifyEmbedRefAtom";
+import { youtubeEmbedRefAtom } from "~/features/Player/atoms/youtubeEmbedRefAtom";
 
 type props = {
   id: string;
@@ -61,20 +63,23 @@ export const HighLightCardWithRadioshow = (props: props) => {
   const theme = useMantineTheme();
 
   const [likedState, setLikedState] = useState(liked);
-
   const [savedState, setSavedState] = useState(saved);
-
   const [spotifyEmbedRef] = useAtom(spotifyEmbedRefAtom);
+  const [youtubeEmbedRef] = useAtom(youtubeEmbedRefAtom);
+  const [, setPlatform] = useAtom(platformAtom);
 
-  const handlePlayAtSpecificTime = () => {
-    const episodes = [
-      { uri: "spotify:episode:7makk4oTQel546B0PZlDM5", startTime: 500, stopAfter: 10000 },
-      { uri: "spotify:episode:5TuEOgFzx09JkladdclaTu", startTime: 500, stopAfter: 10000 },
-      { uri: "spotify:episode:63k3neU40blqXuetfOd6qJ", startTime: 2000, stopAfter: 10000 },
-      // 他のエピソード情報を追加
-    ];
-    
-    spotifyEmbedRef?.current?.playEpisodes(episodes);
+  const handlePlayHighlight = (highlight: props) => {
+    if (highlight.replayUrl.includes("spotify")) {
+      setPlatform("spotify");
+      spotifyEmbedRef?.current?.playAtSpecificTime(
+        500,
+        "spotify:episode/73gRmm46xZAXuXQb8Frgbw",
+        5000
+      );
+    } else {
+      setPlatform("youtube");
+      youtubeEmbedRef?.current.playVideo("DtjJyon7Ba8", 100, 300);
+    }
   };
 
   const isWithinAWeek = (dateString: string) => {
@@ -191,8 +196,8 @@ export const HighLightCardWithRadioshow = (props: props) => {
 
           <Button
             onClick={() => {
-              handlePlayAtSpecificTime();
               onAction(id, "replayed", true);
+              handlePlayHighlight(props);
             }}
             radius="xl"
             variant="gradient"

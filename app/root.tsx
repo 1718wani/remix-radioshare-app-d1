@@ -24,6 +24,8 @@ import {
   Divider,
   NavLink,
   Button,
+  Paper,
+  Box,
 } from "@mantine/core";
 import { HeaderComponent } from "./components/HeaderComponent";
 import { Notifications } from "@mantine/notifications";
@@ -34,15 +36,16 @@ import {
   IconLogin2,
   IconLogout,
   IconMusicPlus,
+  IconPlayerPlayFilled,
   IconRadio,
 } from "@tabler/icons-react";
 import { getRadioshows } from "./features/Radioshow/apis/getRadioshows";
 import { LoaderFunctionArgs } from "@remix-run/cloudflare";
 import { authenticator } from "./features/Auth/services/authenticator";
 import { LoginNavigateModal } from "./features/Auth/components/LoginNavigateModal";
-import { SpotifyEmbed } from "./features/Player/components/spotifyEmbed";
-import { useAtom } from "jotai";
-import { spotifyEmbedRefAtom } from "./features/Player/atoms/spotifyEmbedRefAtom";
+import { SpotifyPlayer } from "./features/Player/components/SpotifyPlayer";
+import { SpotifyPlayerRef } from "./features/Player/types/SpotifyIframeApiTypes";
+import { YoutubePlayer } from "./features/Player/components/YouTubePlayer";
 
 export const loader = async ({ context, request }: LoaderFunctionArgs) => {
   const radioShows = await getRadioshows(context, 0);
@@ -87,19 +90,47 @@ export default function App() {
 
   const matches = useMatches();
   const currentPath = matches[matches.length - 1]?.pathname ?? "";
+  const [platform, setPlatform] = useState<"Spotify" | "Youtube" | null>(null);
 
-  const [, setSpotifyEmbedRef] = useAtom(spotifyEmbedRefAtom);
-  const SpotifyEmbedRef = useRef(null);
+  // SpotifyPlayer コンポーネントへの ref を作成
+  const spotifyPlayerRef = useRef<SpotifyPlayerRef>(null);
 
-  useEffect(() => {
-    setSpotifyEmbedRef(SpotifyEmbedRef);
-  }, [SpotifyEmbedRef, setSpotifyEmbedRef]);
+  const handleSpotifyPlay = () => {
+    setPlatform("Spotify");
+    spotifyPlayerRef.current?.play();
+  };
 
-  // ちらつき防止
+  const handleSpotifySeek = (seconds: number) => {
+    setPlatform("Spotify");
+    youtubePlayerRef.current?.stop();
+    spotifyPlayerRef.current?.seek(seconds);
+  };
+
+  const handleSpotifyStop = () => {
+    spotifyPlayerRef.current?.stop();
+  };
+
+  // YoutubePlayer コンポーネントへの ref を作成
+  const youtubePlayerRef = useRef<{
+    play: () => void;
+    stop: () => void;
+    changeVideo: (videoId: string, startSeconds: number) => void;
+  }>(null);
+
+  const handleYoutubePlay = () => {
+    setPlatform("Youtube");
+    spotifyPlayerRef.current?.stop();
+    youtubePlayerRef.current?.changeVideo("vsH15_DJRMY", 120);
+  };
+
+  const handleYoutubeStop = () => {
+    youtubePlayerRef.current?.stop();
+  };
+
+  // ちらつき防止に遅延させて
   useEffect(() => {
     let timeoutId: number;
     if (navigation.state === "loading") {
-      // navigation.stateが"loading"になったら、0.3秒後にLoadingOverlayを表示する
       timeoutId = window.setTimeout(() => setShowLoadingOverlay(true), 200);
     } else {
       // navigation.stateが"loading"ではない場合、LoadingOverlayを即座に非表示にする
@@ -151,9 +182,8 @@ export default function App() {
             leftSection={<IconBookmark stroke={2} />}
             active={currentPath === "/highlights/saved"}
           />
-
           <Divider my="sm" />
-          <ScrollArea style={{ height: "65%" }}>
+          <ScrollArea style={{ height: "20%" }}>
             {radioShows.map((show) => (
               <NavLink
                 key={show.id}
@@ -164,13 +194,41 @@ export default function App() {
             ))}
           </ScrollArea>
           <Divider my="sm" />
-          <SpotifyEmbed
-            ref={SpotifyEmbedRef}
-            // Hightlightの1番めをのせておきたい
-            uri={"spotify:episode:7makk4oTQel546B0PZlDM5"}
-            width={"full"}
-            height={200}
+
+          <SpotifyPlayer
+            ref={spotifyPlayerRef}
+            uri="spotify:episode:7makk4oTQel546B0PZlDM5"
           />
+
+          <YoutubePlayer
+            ref={youtubePlayerRef}
+            initialVideoId=""
+            initialStartSeconds={0}
+          />
+
+          <Paper
+            w={"full"}
+            h={"10%"}
+            shadow="xl"
+            bg={"gray.3"}
+            p="xl"
+            radius={"md"}
+            style={{
+              display: platform === null ? "flex" : "none",
+              justifyContent: "center",
+              alignItems: "center",
+            }}
+          >
+            <IconPlayerPlayFilled stroke={2} />
+          </Paper>
+
+          <Button onClick={handleYoutubePlay}>再生</Button>
+          <Button onClick={handleYoutubeStop}>ストップ</Button>
+          <Button onClick={handleSpotifyPlay}>Spotify再生</Button>
+          <Button onClick={() => handleSpotifySeek(200)}>
+            Spotify指定再生
+          </Button>
+          <Button onClick={handleSpotifyStop}>Spotifyストップ</Button>
 
           <Button
             onClick={(e) => {
