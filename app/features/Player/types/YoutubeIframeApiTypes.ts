@@ -4,3 +4,9 @@ export interface YoutubeIFrameAPIOptions {
   width?: number | string;
   height?: number | string;
 }
+
+declare global {
+  interface Window {
+    onYouTubeIframeAPIReady: () => void;
+  }
+}

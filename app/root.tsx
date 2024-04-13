@@ -24,8 +24,6 @@ import {
   Divider,
   NavLink,
   Button,
-  Paper,
-  Box,
 } from "@mantine/core";
 import { HeaderComponent } from "./components/HeaderComponent";
 import { Notifications } from "@mantine/notifications";
@@ -36,7 +34,6 @@ import {
   IconLogin2,
   IconLogout,
   IconMusicPlus,
-  IconPlayerPlayFilled,
   IconRadio,
 } from "@tabler/icons-react";
 import { getRadioshows } from "./features/Radioshow/apis/getRadioshows";
@@ -49,6 +46,7 @@ import { YoutubePlayer } from "./features/Player/components/YouTubePlayer";
 import { useAtom } from "jotai";
 import { spotifyEmbedRefAtom } from "./features/Player/atoms/spotifyEmbedRefAtom";
 import { youtubeEmbedRefAtom } from "./features/Player/atoms/youtubeEmbedRefAtom";
+import { playingHighlightIdAtom } from "./features/Player/atoms/playingStatusAtom";
 
 export const loader = async ({ context, request }: LoaderFunctionArgs) => {
   const radioShows = await getRadioshows(context, 0);
@@ -91,6 +89,8 @@ export default function App() {
   const navigate = useNavigate();
   const isMobile = useMediaQuery("(max-width: 48em)");
 
+  const [, setPlayingHighlightId] = useAtom(playingHighlightIdAtom);
+
   const matches = useMatches();
   const currentPath = matches[matches.length - 1]?.pathname ?? "";
 
@@ -98,7 +98,7 @@ export default function App() {
   const spotifyPlayerRef = useRef<SpotifyPlayerRef>(null);
 
   const [, setYoutubeEmbedRef] = useAtom(youtubeEmbedRefAtom);
-  const youtubePlayerRef = useRef(null);
+  const youtubePlayerRef = useRef<YT.Player | null>(null);
 
   useEffect(() => {
     setSpotifyEmbedRef(spotifyPlayerRef);
@@ -106,6 +106,7 @@ export default function App() {
 
   useEffect(() => {
     setYoutubeEmbedRef(youtubePlayerRef);
+    console.log("youtubePlayerRef", youtubePlayerRef);
   }, [youtubePlayerRef, setYoutubeEmbedRef]);
 
   // ちらつき防止に遅延させて
@@ -164,7 +165,7 @@ export default function App() {
             active={currentPath === "/highlights/saved"}
           />
           <Divider my="sm" />
-          <ScrollArea style={{ height: "70%" }}>
+          <ScrollArea style={{ height: "40%" }}>
             {radioShows.map((show) => (
               <NavLink
                 key={show.id}
@@ -178,7 +179,8 @@ export default function App() {
 
           <SpotifyPlayer
             ref={spotifyPlayerRef}
-            uri="spotify:episode:7makk4oTQel546B0PZlDM5"
+            uri="spotify:episode:67hjIN8AH2KiIhWiA8XyuO"
+            onStop={() => setPlayingHighlightId(null)}
           />
 
           <YoutubePlayer
@@ -187,23 +189,8 @@ export default function App() {
             initialStartSeconds={0}
           />
 
-          <Paper
-            w={"full"}
-            h={"10%"}
-            shadow="xl"
-            bg={"gray.3"}
-            p="xl"
-            radius={"md"}
-            style={{
-              display:  "flex" ,
-              justifyContent: "center",
-              alignItems: "center",
-            }}
-          >
-            <IconPlayerPlayFilled stroke={2} />
-          </Paper>
-
           <Button
+            mt={"sm"}
             onClick={(e) => {
               if (!user) {
                 e.preventDefault();
@@ -215,7 +202,7 @@ export default function App() {
               }
             }}
             w="100%"
-            bg={"blue.4"}
+            bg={"blue.5"}
             mb={"sm"}
           >
             <IconMusicPlus stroke={2} />

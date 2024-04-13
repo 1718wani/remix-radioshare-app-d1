@@ -11,6 +11,10 @@ export const useSpotifyIframeApi = (
       return;
     }
 
+    // 既にスクリプトが追加されているかチェックする
+    const spotifyScript = document.getElementById('spotify-iframeapi-script');
+    if(spotifyScript) return;
+
     // グローバル関数を定義
     window.onSpotifyIframeApiReady = (iframeAPI: SpotifyIFrameAPI) => {
       onReady(iframeAPI);
@@ -26,6 +30,8 @@ export const useSpotifyIframeApi = (
       if (script.parentNode) {
         script.parentNode.removeChild(script);
       }
+
+    
     };
   }, [onReady]);
 };

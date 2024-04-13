@@ -2,6 +2,7 @@ export interface SpotifyIFrameAPIOptions {
   uri?: string | string;
   width?: number | string;
   height?: number | string;
+  onStop: () => void;
 }
 
 export interface PlaybackState {
@@ -35,10 +36,8 @@ export interface SpotifyEmbedController {
 
 // SpotifyPlayerからのメソッドを含む型を定義
 export interface SpotifyPlayerRef {
-  play: () => void;
-  seek: (seconds: number) => void;
   stop: () => void;
-  playEpisode: (uri: string, seekSeconds: number) => void;
+  playEpisode: (uri: string, seekSeconds: number,endSeconds:number) => void;
 }
 
 declare global {

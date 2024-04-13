@@ -1,38 +1,41 @@
+/// <reference types="youtube" />
+
 // components/YoutubePlayer.tsx
 import {
   useRef,
   useEffect,
   forwardRef,
-  useImperativeHandle,
-  useState,
 } from "react";
 import { useYoutubeIframeApi } from "../hooks/useYouTubeIframeApi";
 import { YoutubeIFrameAPIOptions } from "../types/YoutubeIframeApiTypes";
+import { useAtom } from "jotai";
+import { youtubeEmbedRefAtom } from "../atoms/youtubeEmbedRefAtom";
 
-export const YoutubePlayer = forwardRef(
+
+export const YoutubePlayer = forwardRef<YT.Player, YoutubeIFrameAPIOptions>(
   (
     {
       initialVideoId,
-      initialStartSeconds = 0,
-      width = 0,
-      height = 0,
+      width = "full",
+      height = "20%",
     }: YoutubeIFrameAPIOptions,
-    ref
   ) => {
     YoutubePlayer.displayName = "YoutubePlayer";
     const playerRef = useRef<HTMLDivElement>(null);
-    const player = useRef<YouTubePlayer | null>(null);
+    const player = useRef<YT.Player | null>(null);
+    const [, setYoutubeEmbedRef] = useAtom(youtubeEmbedRefAtom);
 
     useYoutubeIframeApi(() => {
-      if (playerRef.current && !player.current) {
+      if (playerRef.current) {
         player.current = new YT.Player(playerRef.current, {
           width: typeof width === "number" ? `${width}px` : width, // 数値の場合はpxを付ける
           height: typeof height === "number" ? `${height}px` : height, // 数値の場合はpxを付ける
-          initialVideoId,
+          videoId: initialVideoId, // Correct property name
           events: {
             onReady: () => {
               if (player.current) {
-                player.current.seekTo(initialStartSeconds, true);
+                console.log("onReadyですよ");
+                setYoutubeEmbedRef(player)
               }
             },
             // その他のイベントハンドラー
@@ -41,31 +44,6 @@ export const YoutubePlayer = forwardRef(
       }
     });
 
-    useImperativeHandle(ref, () => ({
-      play: () => {
-        player.current?.playVideo();
-      },
-      stop: () => {
-        player.current?.stopVideo();
-      },
-      changeVideo: (newVideoId: string, newStartSeconds: number) => {
-        if (player.current) {
-          player.current.loadVideoById({
-            videoId: newVideoId,
-            startSeconds: newStartSeconds,
-          });
-        }
-        
-      },
-    }));
-
-    // useEffect(() => {
-    //   if (player.current) {
-    //     console.log("effect")
-    //     player.current.loadVideoById(videoId);
-    //     player.current.seekTo(startSeconds, true);
-    //   }
-    // }, [videoId, startSeconds]);
 
     useEffect(() => {
       return () => {
@@ -78,7 +56,7 @@ export const YoutubePlayer = forwardRef(
     return (
       <div
         ref={playerRef}
-        style={{ borderRadius: "10px", overflow: "hidden" ,display:"none"}}
+        style={{ borderRadius: "10px", overflow: "hidden" }}
       />
     );
   }

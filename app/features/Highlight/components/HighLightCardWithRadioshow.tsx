@@ -17,17 +17,16 @@ import {
   IconBookmark,
   IconHeadphones,
   IconHeart,
+  IconPlayerPlayFilled,
+  IconPlayerStopFilled,
   IconX,
 } from "@tabler/icons-react";
 import { parseISO, isWithinInterval, add } from "date-fns";
-import { useAtom, useAtomValue } from "jotai";
+import { useAtom } from "jotai";
 import { useState } from "react";
 import { customeDomain } from "~/consts/customeDomain";
-import { highlights } from "~/drizzle/schema.server";
 import {
-  platformAtom,
-  playingHighlightIdAtom,
-  playingHightlightId,
+  playingHighlightIdAtom
 } from "~/features/Player/atoms/playingStatusAtom";
 import { spotifyEmbedRefAtom } from "~/features/Player/atoms/spotifyEmbedRefAtom";
 import { youtubeEmbedRefAtom } from "~/features/Player/atoms/youtubeEmbedRefAtom";
@@ -62,7 +61,6 @@ export const HighLightCardWithRadioshow = (props: props) => {
     id,
     title,
     description,
-    replayUrl,
     createdAt,
     liked,
     saved,
@@ -89,7 +87,9 @@ export const HighLightCardWithRadioshow = (props: props) => {
 
   const handlePlayHighlight = (highlight: props) => {
     const { platform, idOrUri } = convertUrlToId(highlight.replayUrl);
-    console.log(idOrUri, "idOrUri");
+    const convertedStartSeconds = convertHHMMSSToSeconds(highlight.startHHmmss);
+    const convertedEndSeconds = convertHHMMSSToSeconds(highlight.endHHmmss);
+    console.log(idOrUri, convertedStartSeconds, "idOrUri");
     if (!idOrUri) {
       notifications.show({
         withCloseButton: true,
@@ -102,24 +102,28 @@ export const HighLightCardWithRadioshow = (props: props) => {
       return;
     }
     setPlayingHighlightId(highlight.id);
-    if (platform === "spotify") {
-      youtubeEmbedRef?.current?.stop();
-      spotifyEmbedRef?.current?.playEpisode(
-        idOrUri,
-        convertHHMMSSToSeconds(highlight.startHHmmss)
-      );
-    } else if (platform === "youtube") {
+    if (platform === "spotify" ) {
+      youtubeEmbedRef?.current?.stopVideo();
+      spotifyEmbedRef?.current?.playEpisode(idOrUri, convertedStartSeconds ?? 0,convertedEndSeconds ?? 0);
+    } else if (platform === "youtube" && youtubeEmbedRef?.current) {
       spotifyEmbedRef?.current?.stop();
-      youtubeEmbedRef?.current?.changeVideo(
-        idOrUri,
-        convertHHMMSSToSeconds(highlight.startHHmmss)
-      );
+      youtubeEmbedRef?.current?.loadVideoById(
+        {
+          videoId: idOrUri,
+          startSeconds: convertedStartSeconds,
+          endSeconds: convertedEndSeconds,
+          suggestedQuality: "small",
+        }
+
+      )
+    }else{
+      console.log("特に何もしない")
     }
   };
 
   const handleStopHighlight = () => {
     setPlayingHighlightId(null);
-    youtubeEmbedRef?.current?.stop();
+    youtubeEmbedRef?.current?.stopVideo();
     spotifyEmbedRef?.current?.stop();
   };
 
@@ -175,7 +179,7 @@ export const HighLightCardWithRadioshow = (props: props) => {
         </Flex>
 
         <Flex justify={"space-between"} align={"baseline"} mx={"sm"}>
-          <Text truncate fz="xl" fw={700} mt="sm">
+          <Text truncate fz="md" fw={700} mt="sm">
             {title}
           </Text>
           <Group align={"center"} gap={6}>
@@ -213,7 +217,9 @@ export const HighLightCardWithRadioshow = (props: props) => {
 
         <Accordion>
           <Accordion.Item value="test">
-            <Accordion.Control>説明</Accordion.Control>
+            <Accordion.Control>
+              {startHHmmss}-{endHHmmss}
+            </Accordion.Control>
             <Accordion.Panel>
               <Text fz="sm" c="dimmed" mt={5}>
                 {description || "説明はありません"}
@@ -236,30 +242,26 @@ export const HighLightCardWithRadioshow = (props: props) => {
           </Flex>
           {playingHighlightId === id ? (
             <Button
+              leftSection={
+                <IconPlayerStopFilled stroke={0.5} width={20} height={20} />
+              }
               onClick={handleStopHighlight}
               radius="xl"
-              variant="gradient"
-              gradient={{
-                from: theme.colors.gray[6],
-                to: theme.colors.gray[4],
-                deg: 158,
-              }}
+              bg={"gray.5"}
             >
               停止する
             </Button>
           ) : (
             <Button
+              leftSection={
+                <IconPlayerPlayFilled stroke={0.5} width={20} height={20} />
+              }
               onClick={() => {
                 onAction(id, "replayed", true);
                 handlePlayHighlight(props);
               }}
               radius="xl"
-              variant="gradient"
-              gradient={{
-                from: theme.colors.blue[6],
-                to: theme.colors.blue[4],
-                deg: 158,
-              }}
+              bg={"blue.5"}
             >
               再生する
             </Button>
@@ -269,5 +271,3 @@ export const HighLightCardWithRadioshow = (props: props) => {
     </>
   );
 };
-
-// gradient={{ from: 'red', to: 'rgba(87, 70, 70, 1)', deg: 158 }}

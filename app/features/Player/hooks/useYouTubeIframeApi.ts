@@ -10,7 +10,7 @@ export const useYoutubeIframeApi = (onApiLoad: () => void) => {
     window.onYouTubeIframeAPIReady = onApiLoad;
 
     return () => {
-      window.onYouTubeIframeAPIReady = undefined;
+      window.onYouTubeIframeAPIReady = () => {};
     };
   }, [onApiLoad]);
 };

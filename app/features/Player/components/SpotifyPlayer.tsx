@@ -13,13 +13,14 @@ import {
 import { useSpotifyIframeApi } from "../hooks/useSpotifyIframeApi";
 
 export const SpotifyPlayer = forwardRef(
-  ({ uri, width = 0, height = 0 }: SpotifyIFrameAPIOptions, ref) => {
+  ({ uri, width = "full", height = "20%",onStop }: SpotifyIFrameAPIOptions, ref) => {
     SpotifyPlayer.displayName = "SpotifyPlayer";
 
     const containerRef = useRef<HTMLDivElement>(null);
     const mapRef = useRef<SpotifyEmbedController | null>(null);
-    const [isBuffering, setIsBuffering] = useState(false);
     const [isPaused, setIsPaused] = useState(true);
+    const [endSeconds, setEndSeconds] = useState(0);
+    const [nowSeconds, setNowSeconds] = useState(0);
 
     useSpotifyIframeApi((spotifyIframeApi: SpotifyIFrameAPI) => {
       if (containerRef.current) {
@@ -29,18 +30,23 @@ export const SpotifyPlayer = forwardRef(
             uri, // プロパティから受け取ったURIを使用
             width: typeof width === "number" ? `${width}px` : width, // 数値の場合はpxを付ける
             height: typeof height === "number" ? `${height}px` : height, // 数値の場合はpxを付ける
+            onStop
           },
           (embedController: SpotifyEmbedController) => {
             mapRef.current = embedController;
 
+            embedController.addListener("ready", () => {
+              console.log("ready");
+            });
+
             // playback_updateイベントにリスナーを登録
             embedController.addListener("playback_update", (e) => {
               if (e) {
-                console.log(e.data.position, "position");
-                console.log(e.data.isBuffering, "buffer");
-                console.log(e.data.isPaused, "isPaused");
-                console.log(e.data.duration, "duration");
-                setIsBuffering(e.data.isBuffering);
+                // console.log(e.data.position, "position");
+                // console.log(e.data.isBuffering, "buffer");
+                // console.log(e.data.isPaused, "isPaused");
+                // console.log(e.data.duration, "duration");
+                setNowSeconds(e.data.position / 1000);
                 setIsPaused(e.data.isPaused);
               }
             });
@@ -50,42 +56,30 @@ export const SpotifyPlayer = forwardRef(
     });
 
     useImperativeHandle(ref, () => ({
-      play: () => {
-        mapRef.current?.play();
-      },
-      seek: (seconds: number) => {
-        mapRef.current?.play();
-        setTimeout(() => {
-          mapRef.current?.seek(seconds);
-        }, 150); // 0.5秒後にseekを実行
-      },
       stop: () => {
         if (!isPaused) {
           mapRef.current?.togglePlay();
         }
       },
-      playEpisode: async (uri: string, seekSeconds: number) => {
-        if (!mapRef.current) return;
-    
-        // URIをロードする
-        await mapRef.current.loadUri(uri);
-    
-        // 少し待ってからシークと再生を行う
+      playEpisode: async (uri: string, startSeconds: number,endSeconds :number) => {
+        mapRef.current?.loadUri(uri);
+        // 
+        mapRef.current?.play();
         setTimeout(() => {
-          mapRef.current?.seek(seekSeconds);
-          mapRef.current?.play();
-        }, 150); // ロード後、0.5秒後にseekと再生を実行
+          mapRef.current?.seek(startSeconds);
+        }, 700); // 0.7秒後にseekを実行しないと特定時間から再生されない
+        setEndSeconds(endSeconds)
       },
     }));
 
-    // バッファリング状態に基づいて何かアクションを実行する例
     useEffect(() => {
-      if (isBuffering) {
-        console.log("バッファリング中...");
-      } else {
-        console.log("バッファリング完了");
+      if (nowSeconds >= endSeconds && !isPaused) {
+        mapRef.current?.togglePlay();
+        if (onStop) {
+          onStop(); // コールバックを呼び出す
+        }
       }
-    }, [isBuffering]);
+    }, [nowSeconds, isPaused, endSeconds,onStop]);
 
     return <div ref={containerRef} />;
   }
