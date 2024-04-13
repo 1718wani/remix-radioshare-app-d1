@@ -20,7 +20,7 @@ const schema = z.object({
 
     .instanceof(File, { message: "画像ファイルを選択してください" })
     .transform((file) => file)
-    .refine((file) => file.size < 500 * 1000, {
+    .refine((file) => file.size > 500 * 1000, {
       message: "ファイルサイズは最大5MBです",
     })
     .refine(
