@@ -64,6 +64,18 @@ export const SpotifyPlayer = forwardRef(
           mapRef.current?.togglePlay();
         }
       },
+      playEpisode: async (uri: string, seekSeconds: number) => {
+        if (!mapRef.current) return;
+    
+        // URIをロードする
+        await mapRef.current.loadUri(uri);
+    
+        // 少し待ってからシークと再生を行う
+        setTimeout(() => {
+          mapRef.current?.seek(seekSeconds);
+          mapRef.current?.play();
+        }, 150); // ロード後、0.5秒後にseekと再生を実行
+      },
     }));
 
     // バッファリング状態に基づいて何かアクションを実行する例

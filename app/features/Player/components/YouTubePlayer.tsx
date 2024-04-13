@@ -22,15 +22,13 @@ export const YoutubePlayer = forwardRef(
     YoutubePlayer.displayName = "YoutubePlayer";
     const playerRef = useRef<HTMLDivElement>(null);
     const player = useRef<YouTubePlayer | null>(null);
-    const [videoId, setVideoId] = useState(initialVideoId);
-    const [startSeconds, setStartSeconds] = useState(0);
 
     useYoutubeIframeApi(() => {
       if (playerRef.current && !player.current) {
         player.current = new YT.Player(playerRef.current, {
           width: typeof width === "number" ? `${width}px` : width, // 数値の場合はpxを付ける
           height: typeof height === "number" ? `${height}px` : height, // 数値の場合はpxを付ける
-          videoId,
+          initialVideoId,
           events: {
             onReady: () => {
               if (player.current) {
@@ -61,13 +59,13 @@ export const YoutubePlayer = forwardRef(
       },
     }));
 
-    useEffect(() => {
-      if (player.current) {
-        console.log("effect")
-        player.current.loadVideoById(videoId);
-        player.current.seekTo(startSeconds, true);
-      }
-    }, [videoId, startSeconds]);
+    // useEffect(() => {
+    //   if (player.current) {
+    //     console.log("effect")
+    //     player.current.loadVideoById(videoId);
+    //     player.current.seekTo(startSeconds, true);
+    //   }
+    // }, [videoId, startSeconds]);
 
     useEffect(() => {
       return () => {

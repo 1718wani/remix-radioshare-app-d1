@@ -38,6 +38,7 @@ export interface SpotifyPlayerRef {
   play: () => void;
   seek: (seconds: number) => void;
   stop: () => void;
+  playEpisode: (uri: string, seekSeconds: number) => void;
 }
 
 declare global {

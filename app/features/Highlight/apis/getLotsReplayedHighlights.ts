@@ -27,6 +27,8 @@ export const getLotsReplayedHighlights = async (
           description: highlights.description,
           radioshowId: highlights.radioshowId,
           createdAt: highlights.createdAt,
+          startHHmmss:highlights.replayStartTime,
+          endHHmmss:highlights.replayEndTime
         },
         radioshow: {
           imageUrl: radioshows.imageUrl,

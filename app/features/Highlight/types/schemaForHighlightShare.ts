@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { convertHHMMSSToSeconds } from "~/features/Player/functions/convertHHmmssToSeconds";
 
 export const schemaForHighlightShare = (
   radioshowsData: { label: string; value: string }[]
@@ -14,7 +15,9 @@ export const schemaForHighlightShare = (
         .refine(
           (url) =>
             /^https:\/\/open\.spotify\.com\//.test(url) ||
-            /^https:\/\/(www\.youtube\.com\/watch\?v=|youtu\.be\/)/.test(url),
+            /^https:\/\/(www\.youtube\.com\/watch\?v=|youtu\.be\/|www\.youtube\.com\/live\/)/.test(
+              url
+            ),
           {
             message: "URLはSpotifyまたはYouTubeのものである必要があります",
           }
@@ -52,9 +55,4 @@ export const schemaForHighlightShare = (
         path: ["endSeconds"],
       }
     );
-};
-
-const convertHHMMSSToSeconds = (timeString: string) => {
-  const [hours, minutes, seconds] = timeString.split(":").map(Number);
-  return hours * 3600 + minutes * 60 + seconds;
 };

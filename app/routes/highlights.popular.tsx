@@ -154,6 +154,9 @@ export default function HightlightsPopular() {
                     isEnabledUserAction={isEnabledUserAction}
                     open={open}
                     onAction={handleAction}
+                    startHHmmss={highlightData.highlight.startHHmmss}
+                    endHHmmss={highlightData.highlight.endHHmmss}
+
                   />
                 </Grid.Col>
               ))}

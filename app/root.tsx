@@ -46,6 +46,9 @@ import { LoginNavigateModal } from "./features/Auth/components/LoginNavigateModa
 import { SpotifyPlayer } from "./features/Player/components/SpotifyPlayer";
 import { SpotifyPlayerRef } from "./features/Player/types/SpotifyIframeApiTypes";
 import { YoutubePlayer } from "./features/Player/components/YouTubePlayer";
+import { useAtom } from "jotai";
+import { spotifyEmbedRefAtom } from "./features/Player/atoms/spotifyEmbedRefAtom";
+import { youtubeEmbedRefAtom } from "./features/Player/atoms/youtubeEmbedRefAtom";
 
 export const loader = async ({ context, request }: LoaderFunctionArgs) => {
   const radioShows = await getRadioshows(context, 0);
@@ -90,42 +93,20 @@ export default function App() {
 
   const matches = useMatches();
   const currentPath = matches[matches.length - 1]?.pathname ?? "";
-  const [platform, setPlatform] = useState<"Spotify" | "Youtube" | null>(null);
 
-  // SpotifyPlayer コンポーネントへの ref を作成
+  const [, setSpotifyEmbedRef] = useAtom(spotifyEmbedRefAtom);
   const spotifyPlayerRef = useRef<SpotifyPlayerRef>(null);
 
-  const handleSpotifyPlay = () => {
-    setPlatform("Spotify");
-    spotifyPlayerRef.current?.play();
-  };
+  const [, setYoutubeEmbedRef] = useAtom(youtubeEmbedRefAtom);
+  const youtubePlayerRef = useRef(null);
 
-  const handleSpotifySeek = (seconds: number) => {
-    setPlatform("Spotify");
-    youtubePlayerRef.current?.stop();
-    spotifyPlayerRef.current?.seek(seconds);
-  };
+  useEffect(() => {
+    setSpotifyEmbedRef(spotifyPlayerRef);
+  }, [spotifyPlayerRef, setSpotifyEmbedRef]);
 
-  const handleSpotifyStop = () => {
-    spotifyPlayerRef.current?.stop();
-  };
-
-  // YoutubePlayer コンポーネントへの ref を作成
-  const youtubePlayerRef = useRef<{
-    play: () => void;
-    stop: () => void;
-    changeVideo: (videoId: string, startSeconds: number) => void;
-  }>(null);
-
-  const handleYoutubePlay = () => {
-    setPlatform("Youtube");
-    spotifyPlayerRef.current?.stop();
-    youtubePlayerRef.current?.changeVideo("vsH15_DJRMY", 120);
-  };
-
-  const handleYoutubeStop = () => {
-    youtubePlayerRef.current?.stop();
-  };
+  useEffect(() => {
+    setYoutubeEmbedRef(youtubePlayerRef);
+  }, [youtubePlayerRef, setYoutubeEmbedRef]);
 
   // ちらつき防止に遅延させて
   useEffect(() => {
@@ -183,7 +164,7 @@ export default function App() {
             active={currentPath === "/highlights/saved"}
           />
           <Divider my="sm" />
-          <ScrollArea style={{ height: "20%" }}>
+          <ScrollArea style={{ height: "70%" }}>
             {radioShows.map((show) => (
               <NavLink
                 key={show.id}
@@ -214,21 +195,13 @@ export default function App() {
             p="xl"
             radius={"md"}
             style={{
-              display: platform === null ? "flex" : "none",
+              display:  "flex" ,
               justifyContent: "center",
               alignItems: "center",
             }}
           >
             <IconPlayerPlayFilled stroke={2} />
           </Paper>
-
-          <Button onClick={handleYoutubePlay}>再生</Button>
-          <Button onClick={handleYoutubeStop}>ストップ</Button>
-          <Button onClick={handleSpotifyPlay}>Spotify再生</Button>
-          <Button onClick={() => handleSpotifySeek(200)}>
-            Spotify指定再生
-          </Button>
-          <Button onClick={handleSpotifyStop}>Spotifyストップ</Button>
 
           <Button
             onClick={(e) => {

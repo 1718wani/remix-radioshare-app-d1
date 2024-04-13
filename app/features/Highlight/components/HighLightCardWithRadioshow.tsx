@@ -11,15 +11,28 @@ import {
   Image,
   rem,
 } from "@mantine/core";
+import { notifications } from "@mantine/notifications";
 import { Link } from "@remix-run/react";
-import { IconBookmark, IconHeadphones, IconHeart } from "@tabler/icons-react";
+import {
+  IconBookmark,
+  IconHeadphones,
+  IconHeart,
+  IconX,
+} from "@tabler/icons-react";
 import { parseISO, isWithinInterval, add } from "date-fns";
 import { useAtom, useAtomValue } from "jotai";
 import { useState } from "react";
 import { customeDomain } from "~/consts/customeDomain";
-import { platformAtom } from "~/features/Player/atoms/playingStatusAtom";
+import { highlights } from "~/drizzle/schema.server";
+import {
+  platformAtom,
+  playingHighlightIdAtom,
+  playingHightlightId,
+} from "~/features/Player/atoms/playingStatusAtom";
 import { spotifyEmbedRefAtom } from "~/features/Player/atoms/spotifyEmbedRefAtom";
 import { youtubeEmbedRefAtom } from "~/features/Player/atoms/youtubeEmbedRefAtom";
+import { convertHHMMSSToSeconds } from "~/features/Player/functions/convertHHmmssToSeconds";
+import { convertUrlToId } from "~/features/Player/functions/convertUrlToId";
 
 type props = {
   id: string;
@@ -34,6 +47,8 @@ type props = {
   radioshowId: string;
   totalReplayTimes: number;
   isEnabledUserAction: boolean;
+  startHHmmss: string;
+  endHHmmss: string;
   open: () => void;
   onAction: (
     id: string,
@@ -56,6 +71,8 @@ export const HighLightCardWithRadioshow = (props: props) => {
     radioshowId,
     totalReplayTimes,
     isEnabledUserAction,
+    startHHmmss,
+    endHHmmss,
     open,
     onAction,
   } = props;
@@ -66,20 +83,44 @@ export const HighLightCardWithRadioshow = (props: props) => {
   const [savedState, setSavedState] = useState(saved);
   const [spotifyEmbedRef] = useAtom(spotifyEmbedRefAtom);
   const [youtubeEmbedRef] = useAtom(youtubeEmbedRefAtom);
-  const [, setPlatform] = useAtom(platformAtom);
+  const [playingHighlightId, setPlayingHighlightId] = useAtom(
+    playingHighlightIdAtom
+  );
 
   const handlePlayHighlight = (highlight: props) => {
-    if (highlight.replayUrl.includes("spotify")) {
-      setPlatform("spotify");
-      spotifyEmbedRef?.current?.playAtSpecificTime(
-        500,
-        "spotify:episode/73gRmm46xZAXuXQb8Frgbw",
-        5000
-      );
-    } else {
-      setPlatform("youtube");
-      youtubeEmbedRef?.current.playVideo("DtjJyon7Ba8", 100, 300);
+    const { platform, idOrUri } = convertUrlToId(highlight.replayUrl);
+    console.log(idOrUri, "idOrUri");
+    if (!idOrUri) {
+      notifications.show({
+        withCloseButton: true,
+        autoClose: 5000,
+        title: "再生エラーです",
+        message: "登録されたURIの不備です",
+        color: "red",
+        icon: <IconX />,
+      });
+      return;
     }
+    setPlayingHighlightId(highlight.id);
+    if (platform === "spotify") {
+      youtubeEmbedRef?.current?.stop();
+      spotifyEmbedRef?.current?.playEpisode(
+        idOrUri,
+        convertHHMMSSToSeconds(highlight.startHHmmss)
+      );
+    } else if (platform === "youtube") {
+      spotifyEmbedRef?.current?.stop();
+      youtubeEmbedRef?.current?.changeVideo(
+        idOrUri,
+        convertHHMMSSToSeconds(highlight.startHHmmss)
+      );
+    }
+  };
+
+  const handleStopHighlight = () => {
+    setPlayingHighlightId(null);
+    youtubeEmbedRef?.current?.stop();
+    spotifyEmbedRef?.current?.stop();
   };
 
   const isWithinAWeek = (dateString: string) => {
@@ -193,22 +234,36 @@ export const HighLightCardWithRadioshow = (props: props) => {
               {totalReplayTimes}
             </Text>
           </Flex>
-
-          <Button
-            onClick={() => {
-              onAction(id, "replayed", true);
-              handlePlayHighlight(props);
-            }}
-            radius="xl"
-            variant="gradient"
-            gradient={{
-              from: "rgba(4, 201, 47, 1)",
-              to: "rgba(87, 70, 70, 1)",
-              deg: 158,
-            }}
-          >
-            Spotifyで再生する
-          </Button>
+          {playingHighlightId === id ? (
+            <Button
+              onClick={handleStopHighlight}
+              radius="xl"
+              variant="gradient"
+              gradient={{
+                from: theme.colors.gray[6],
+                to: theme.colors.gray[4],
+                deg: 158,
+              }}
+            >
+              停止する
+            </Button>
+          ) : (
+            <Button
+              onClick={() => {
+                onAction(id, "replayed", true);
+                handlePlayHighlight(props);
+              }}
+              radius="xl"
+              variant="gradient"
+              gradient={{
+                from: theme.colors.blue[6],
+                to: theme.colors.blue[4],
+                deg: 158,
+              }}
+            >
+              再生する
+            </Button>
+          )}
         </Flex>
       </Card>
     </>
