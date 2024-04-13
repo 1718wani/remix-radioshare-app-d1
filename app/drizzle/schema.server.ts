@@ -37,8 +37,8 @@ export const highlights = sqliteTable("highlights", {
   title: text("title").notNull(),
   description: text("description").default(""),
   replayUrl: text("replay_url").notNull(),
-  replayStartTime: text("replay_start_time"),
-  replayEndTime: text("replay_end_time"),
+  replayStartTime: text("replay_start_time").notNull(),
+  replayEndTime: text("replay_end_time").notNull(),
   totalReplayTimes: integer("total_replay_times").default(0),
   createdBy: text("user_id")
     .references(() => users.id)

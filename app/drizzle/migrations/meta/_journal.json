@@ -197,6 +197,34 @@
       "when": 1711671136025,
       "tag": "0027_nifty_tomorrow_man",
       "breakpoints": true
+    },
+    {
+      "idx": 28,
+      "version": "5",
+      "when": 1712826907716,
+      "tag": "0028_fine_abomination",
+      "breakpoints": true
+    },
+    {
+      "idx": 29,
+      "version": "5",
+      "when": 1712827003769,
+      "tag": "0029_thin_rage",
+      "breakpoints": true
+    },
+    {
+      "idx": 30,
+      "version": "5",
+      "when": 1712827034796,
+      "tag": "0030_petite_morlocks",
+      "breakpoints": true
+    },
+    {
+      "idx": 31,
+      "version": "5",
+      "when": 1712827943363,
+      "tag": "0031_military_crusher_hogan",
+      "breakpoints": true
     }
   ]
 }

@@ -1,6 +1,6 @@
 import { ActionFunctionArgs, LoaderFunctionArgs } from "@remix-run/node";
 import { json } from "@remix-run/cloudflare";
-import { Grid } from "@mantine/core";
+import {  Grid } from "@mantine/core";
 import { useFetcher, useLoaderData } from "@remix-run/react";
 import { HighLightCardWithRadioshow } from "~/features/Highlight/components/HighLightCardWithRadioshow";
 import { getLotsReplayedHighlights } from "~/features/Highlight/apis/getLotsReplayedHighlights";
@@ -64,8 +64,10 @@ export const loader = async ({ request, context }: LoaderFunctionArgs) => {
 
   // 目一杯取れているということは次もあるということだ。
   const hasNextPage = highlightsData.length === limit;
- // もし次のページが有るなら1切り取るが、最後のページならそのまま返す
-  const resultHighlightData = hasNextPage ?  highlightsData.slice(0, -1): highlightsData
+  // もし次のページが有るなら1切り取るが、最後のページならそのまま返す
+  const resultHighlightData = hasNextPage
+    ? highlightsData.slice(0, -1)
+    : highlightsData;
 
   return json({ resultHighlightData, userId, offset, hasNextPage, limit });
 };
@@ -110,12 +112,9 @@ export default function HightlightsPopular() {
       setOffset(fetchedData.offset);
       setHasNextPage(fetchedData.hasNextPage);
     }
-    console.log(fetchedData,"fetchedData")
+    console.log(fetchedData, "fetchedData");
   }, [fetcher.data, limit]);
 
-  //  fetcher.submit({ offset: offset + limit -1 ?? "" });
-  // これにすることで、offsetがlimit-1増える、limitだと4になるので5番目から取得されてしまう
-  
   return (
     <>
       {highlightsData.length > 0 ? (
@@ -155,6 +154,9 @@ export default function HightlightsPopular() {
                     isEnabledUserAction={isEnabledUserAction}
                     open={open}
                     onAction={handleAction}
+                    startHHmmss={highlightData.highlight.startHHmmss}
+                    endHHmmss={highlightData.highlight.endHHmmss}
+
                   />
                 </Grid.Col>
               ))}

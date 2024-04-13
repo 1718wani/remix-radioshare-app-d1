@@ -1,6 +1,9 @@
 import { useEffect } from "react";
+import { SpotifyIFrameAPI } from "../types/SpotifyIframeApiTypes";
 
-export const useSpotifyIframeApi = (onReady) => {
+export const useSpotifyIframeApi = (
+  onReady: (iframeAPI: SpotifyIFrameAPI) => void
+) => {
   useEffect(() => {
     // APIが既にロードされているかチェック
     if (window.Spotify && window.Spotify.Player) {
@@ -8,9 +11,13 @@ export const useSpotifyIframeApi = (onReady) => {
       return;
     }
 
+    // 既にスクリプトが追加されているかチェックする
+    const spotifyScript = document.getElementById('spotify-iframeapi-script');
+    if(spotifyScript) return;
+
     // グローバル関数を定義
-    window.onSpotifyIframeApiReady = (IFrameAPI) => {
-      onReady(IFrameAPI);
+    window.onSpotifyIframeApiReady = (iframeAPI: SpotifyIFrameAPI) => {
+      onReady(iframeAPI);
     };
 
     // スクリプトタグを作成してAPIをロード
@@ -18,10 +25,13 @@ export const useSpotifyIframeApi = (onReady) => {
     script.src = "https://open.spotify.com/embed/iframe-api/v1";
     script.async = true;
     document.body.appendChild(script);
-  
 
     return () => {
-      document.body.removeChild(script);
+      if (script.parentNode) {
+        script.parentNode.removeChild(script);
+      }
+
+    
     };
   }, [onReady]);
 };

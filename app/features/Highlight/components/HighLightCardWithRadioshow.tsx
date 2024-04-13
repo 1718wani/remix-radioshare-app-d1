@@ -11,13 +11,27 @@ import {
   Image,
   rem,
 } from "@mantine/core";
+import { notifications } from "@mantine/notifications";
 import { Link } from "@remix-run/react";
-import { IconBookmark, IconHeadphones, IconHeart } from "@tabler/icons-react";
+import {
+  IconBookmark,
+  IconHeadphones,
+  IconHeart,
+  IconPlayerPlayFilled,
+  IconPlayerStopFilled,
+  IconX,
+} from "@tabler/icons-react";
 import { parseISO, isWithinInterval, add } from "date-fns";
 import { useAtom } from "jotai";
 import { useState } from "react";
 import { customeDomain } from "~/consts/customeDomain";
+import {
+  playingHighlightIdAtom
+} from "~/features/Player/atoms/playingStatusAtom";
 import { spotifyEmbedRefAtom } from "~/features/Player/atoms/spotifyEmbedRefAtom";
+import { youtubeEmbedRefAtom } from "~/features/Player/atoms/youtubeEmbedRefAtom";
+import { convertHHMMSSToSeconds } from "~/features/Player/functions/convertHHmmssToSeconds";
+import { convertUrlToId } from "~/features/Player/functions/convertUrlToId";
 
 type props = {
   id: string;
@@ -32,6 +46,8 @@ type props = {
   radioshowId: string;
   totalReplayTimes: number;
   isEnabledUserAction: boolean;
+  startHHmmss: string;
+  endHHmmss: string;
   open: () => void;
   onAction: (
     id: string,
@@ -45,7 +61,6 @@ export const HighLightCardWithRadioshow = (props: props) => {
     id,
     title,
     description,
-    replayUrl,
     createdAt,
     liked,
     saved,
@@ -54,6 +69,8 @@ export const HighLightCardWithRadioshow = (props: props) => {
     radioshowId,
     totalReplayTimes,
     isEnabledUserAction,
+    startHHmmss,
+    endHHmmss,
     open,
     onAction,
   } = props;
@@ -61,20 +78,53 @@ export const HighLightCardWithRadioshow = (props: props) => {
   const theme = useMantineTheme();
 
   const [likedState, setLikedState] = useState(liked);
-
   const [savedState, setSavedState] = useState(saved);
-
   const [spotifyEmbedRef] = useAtom(spotifyEmbedRefAtom);
+  const [youtubeEmbedRef] = useAtom(youtubeEmbedRefAtom);
+  const [playingHighlightId, setPlayingHighlightId] = useAtom(
+    playingHighlightIdAtom
+  );
 
-  const handlePlayAtSpecificTime = () => {
-    const episodes = [
-      { uri: "spotify:episode:7makk4oTQel546B0PZlDM5", startTime: 500, stopAfter: 10000 },
-      { uri: "spotify:episode:5TuEOgFzx09JkladdclaTu", startTime: 500, stopAfter: 10000 },
-      { uri: "spotify:episode:63k3neU40blqXuetfOd6qJ", startTime: 2000, stopAfter: 10000 },
-      // 他のエピソード情報を追加
-    ];
-    
-    spotifyEmbedRef?.current?.playEpisodes(episodes);
+  const handlePlayHighlight = (highlight: props) => {
+    const { platform, idOrUri } = convertUrlToId(highlight.replayUrl);
+    const convertedStartSeconds = convertHHMMSSToSeconds(highlight.startHHmmss);
+    const convertedEndSeconds = convertHHMMSSToSeconds(highlight.endHHmmss);
+    console.log(idOrUri, convertedStartSeconds, "idOrUri");
+    if (!idOrUri) {
+      notifications.show({
+        withCloseButton: true,
+        autoClose: 5000,
+        title: "再生エラーです",
+        message: "登録されたURIの不備です",
+        color: "red",
+        icon: <IconX />,
+      });
+      return;
+    }
+    setPlayingHighlightId(highlight.id);
+    if (platform === "spotify" ) {
+      youtubeEmbedRef?.current?.stopVideo();
+      spotifyEmbedRef?.current?.playEpisode(idOrUri, convertedStartSeconds ?? 0,convertedEndSeconds ?? 0);
+    } else if (platform === "youtube" && youtubeEmbedRef?.current) {
+      spotifyEmbedRef?.current?.stop();
+      youtubeEmbedRef?.current?.loadVideoById(
+        {
+          videoId: idOrUri,
+          startSeconds: convertedStartSeconds,
+          endSeconds: convertedEndSeconds,
+          suggestedQuality: "small",
+        }
+
+      )
+    }else{
+      console.log("特に何もしない")
+    }
+  };
+
+  const handleStopHighlight = () => {
+    setPlayingHighlightId(null);
+    youtubeEmbedRef?.current?.stopVideo();
+    spotifyEmbedRef?.current?.stop();
   };
 
   const isWithinAWeek = (dateString: string) => {
@@ -129,7 +179,7 @@ export const HighLightCardWithRadioshow = (props: props) => {
         </Flex>
 
         <Flex justify={"space-between"} align={"baseline"} mx={"sm"}>
-          <Text truncate fz="xl" fw={700} mt="sm">
+          <Text truncate fz="md" fw={700} mt="sm">
             {title}
           </Text>
           <Group align={"center"} gap={6}>
@@ -167,7 +217,9 @@ export const HighLightCardWithRadioshow = (props: props) => {
 
         <Accordion>
           <Accordion.Item value="test">
-            <Accordion.Control>説明</Accordion.Control>
+            <Accordion.Control>
+              {startHHmmss}-{endHHmmss}
+            </Accordion.Control>
             <Accordion.Panel>
               <Text fz="sm" c="dimmed" mt={5}>
                 {description || "説明はありません"}
@@ -188,26 +240,34 @@ export const HighLightCardWithRadioshow = (props: props) => {
               {totalReplayTimes}
             </Text>
           </Flex>
-
-          <Button
-            onClick={() => {
-              handlePlayAtSpecificTime();
-              onAction(id, "replayed", true);
-            }}
-            radius="xl"
-            variant="gradient"
-            gradient={{
-              from: "rgba(4, 201, 47, 1)",
-              to: "rgba(87, 70, 70, 1)",
-              deg: 158,
-            }}
-          >
-            Spotifyで再生する
-          </Button>
+          {playingHighlightId === id ? (
+            <Button
+              leftSection={
+                <IconPlayerStopFilled stroke={0.5} width={20} height={20} />
+              }
+              onClick={handleStopHighlight}
+              radius="xl"
+              bg={"gray.5"}
+            >
+              停止する
+            </Button>
+          ) : (
+            <Button
+              leftSection={
+                <IconPlayerPlayFilled stroke={0.5} width={20} height={20} />
+              }
+              onClick={() => {
+                onAction(id, "replayed", true);
+                handlePlayHighlight(props);
+              }}
+              radius="xl"
+              bg={"blue.5"}
+            >
+              再生する
+            </Button>
+          )}
         </Flex>
       </Card>
     </>
   );
 };
-
-// gradient={{ from: 'red', to: 'rgba(87, 70, 70, 1)', deg: 158 }}

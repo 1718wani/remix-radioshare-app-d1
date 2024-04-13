@@ -85,6 +85,8 @@ export default function NewHighlights() {
   const [hasNextPage, setHasNextPage] = useState(initialHasNextPage);
   const fetcher = useFetcher<typeof loader>();
 
+ 
+
   const [opened, { open, close }] = useDisclosure(false);
   const isEnabledUserAction = userId ? true : false;
 
@@ -125,6 +127,7 @@ export default function NewHighlights() {
             }}
             hasNextPage={hasNextPage}
           >
+           
             <Grid mt={10} mx={"sm"}>
               {highlightsData.map((highlightData) => (
                 <Grid.Col

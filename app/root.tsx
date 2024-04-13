@@ -40,9 +40,13 @@ import { getRadioshows } from "./features/Radioshow/apis/getRadioshows";
 import { LoaderFunctionArgs } from "@remix-run/cloudflare";
 import { authenticator } from "./features/Auth/services/authenticator";
 import { LoginNavigateModal } from "./features/Auth/components/LoginNavigateModal";
-import { SpotifyEmbed } from "./features/Player/components/spotifyEmbed";
+import { SpotifyPlayer } from "./features/Player/components/SpotifyPlayer";
+import { SpotifyPlayerRef } from "./features/Player/types/SpotifyIframeApiTypes";
+import { YoutubePlayer } from "./features/Player/components/YouTubePlayer";
 import { useAtom } from "jotai";
 import { spotifyEmbedRefAtom } from "./features/Player/atoms/spotifyEmbedRefAtom";
+import { youtubeEmbedRefAtom } from "./features/Player/atoms/youtubeEmbedRefAtom";
+import { playingHighlightIdAtom } from "./features/Player/atoms/playingStatusAtom";
 
 export const loader = async ({ context, request }: LoaderFunctionArgs) => {
   const radioShows = await getRadioshows(context, 0);
@@ -85,21 +89,30 @@ export default function App() {
   const navigate = useNavigate();
   const isMobile = useMediaQuery("(max-width: 48em)");
 
+  const [, setPlayingHighlightId] = useAtom(playingHighlightIdAtom);
+
   const matches = useMatches();
   const currentPath = matches[matches.length - 1]?.pathname ?? "";
 
   const [, setSpotifyEmbedRef] = useAtom(spotifyEmbedRefAtom);
-  const SpotifyEmbedRef = useRef(null);
+  const spotifyPlayerRef = useRef<SpotifyPlayerRef>(null);
+
+  const [, setYoutubeEmbedRef] = useAtom(youtubeEmbedRefAtom);
+  const youtubePlayerRef = useRef<YT.Player | null>(null);
 
   useEffect(() => {
-    setSpotifyEmbedRef(SpotifyEmbedRef);
-  }, [SpotifyEmbedRef, setSpotifyEmbedRef]);
+    setSpotifyEmbedRef(spotifyPlayerRef);
+  }, [spotifyPlayerRef, setSpotifyEmbedRef]);
 
-  // ちらつき防止
+  useEffect(() => {
+    setYoutubeEmbedRef(youtubePlayerRef);
+    console.log("youtubePlayerRef", youtubePlayerRef);
+  }, [youtubePlayerRef, setYoutubeEmbedRef]);
+
+  // ちらつき防止に遅延させて
   useEffect(() => {
     let timeoutId: number;
     if (navigation.state === "loading") {
-      // navigation.stateが"loading"になったら、0.3秒後にLoadingOverlayを表示する
       timeoutId = window.setTimeout(() => setShowLoadingOverlay(true), 200);
     } else {
       // navigation.stateが"loading"ではない場合、LoadingOverlayを即座に非表示にする
@@ -151,9 +164,8 @@ export default function App() {
             leftSection={<IconBookmark stroke={2} />}
             active={currentPath === "/highlights/saved"}
           />
-
           <Divider my="sm" />
-          <ScrollArea style={{ height: "65%" }}>
+          <ScrollArea style={{ height: "40%" }}>
             {radioShows.map((show) => (
               <NavLink
                 key={show.id}
@@ -164,15 +176,21 @@ export default function App() {
             ))}
           </ScrollArea>
           <Divider my="sm" />
-          <SpotifyEmbed
-            ref={SpotifyEmbedRef}
-            // Hightlightの1番めをのせておきたい
-            uri={"spotify:episode:7makk4oTQel546B0PZlDM5"}
-            width={"full"}
-            height={200}
+
+          <SpotifyPlayer
+            ref={spotifyPlayerRef}
+            uri="spotify:episode:67hjIN8AH2KiIhWiA8XyuO"
+            onStop={() => setPlayingHighlightId(null)}
+          />
+
+          <YoutubePlayer
+            ref={youtubePlayerRef}
+            initialVideoId=""
+            initialStartSeconds={0}
           />
 
           <Button
+            mt={"sm"}
             onClick={(e) => {
               if (!user) {
                 e.preventDefault();
@@ -184,7 +202,7 @@ export default function App() {
               }
             }}
             w="100%"
-            bg={"blue.4"}
+            bg={"blue.5"}
             mb={"sm"}
           >
             <IconMusicPlus stroke={2} />
