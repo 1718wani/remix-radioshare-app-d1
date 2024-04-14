@@ -86,6 +86,7 @@ export const HighLightCardWithRadioshow = (props: props) => {
   );
 
   const handlePlayHighlight = (highlight: props) => {
+    console.log("spotifyEmbedRefのグローバルな状態",spotifyEmbedRef)
     const { platform, idOrUri } = convertUrlToId(highlight.replayUrl);
     const convertedStartSeconds = convertHHMMSSToSeconds(highlight.startHHmmss);
     const convertedEndSeconds = convertHHMMSSToSeconds(highlight.endHHmmss);
@@ -102,11 +103,16 @@ export const HighLightCardWithRadioshow = (props: props) => {
       return;
     }
     setPlayingHighlightId(highlight.id);
-    if (platform === "spotify" ) {
+    if (platform === "spotify" && spotifyEmbedRef?.current) {
       youtubeEmbedRef?.current?.stopVideo();
-      spotifyEmbedRef?.current?.playEpisode(idOrUri, convertedStartSeconds ?? 0,convertedEndSeconds ?? 0);
+      spotifyEmbedRef?.current?.loadUri(idOrUri);
+      spotifyEmbedRef.current?.play();
+        setTimeout(() => {
+          spotifyEmbedRef.current?.seek(convertedStartSeconds);
+        }, 700); 
+
     } else if (platform === "youtube" && youtubeEmbedRef?.current) {
-      spotifyEmbedRef?.current?.stop();
+      spotifyEmbedRef?.current?.pause();
       youtubeEmbedRef?.current?.loadVideoById(
         {
           videoId: idOrUri,
@@ -114,10 +120,9 @@ export const HighLightCardWithRadioshow = (props: props) => {
           endSeconds: convertedEndSeconds,
           suggestedQuality: "small",
         }
-
       )
     }else{
-      console.log("特に何もしない")
+      console.log("何も再生しない")
     }
   };
 

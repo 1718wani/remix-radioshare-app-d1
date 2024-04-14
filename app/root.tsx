@@ -100,14 +100,14 @@ export default function App() {
   const [, setYoutubeEmbedRef] = useAtom(youtubeEmbedRefAtom);
   const youtubePlayerRef = useRef<YT.Player | null>(null);
 
-  useEffect(() => {
-    setSpotifyEmbedRef(spotifyPlayerRef);
-  }, [spotifyPlayerRef, setSpotifyEmbedRef]);
+  // useEffect(() => {
+  //   setSpotifyEmbedRef(spotifyPlayerRef);
+  // }, [spotifyPlayerRef, setSpotifyEmbedRef]);
 
-  useEffect(() => {
-    setYoutubeEmbedRef(youtubePlayerRef);
-    console.log("youtubePlayerRef", youtubePlayerRef);
-  }, [youtubePlayerRef, setYoutubeEmbedRef]);
+  // useEffect(() => {
+  //   setYoutubeEmbedRef(youtubePlayerRef);
+  //   console.log("youtubePlayerRef", youtubePlayerRef);
+  // }, [youtubePlayerRef, setYoutubeEmbedRef]);
 
   // ちらつき防止に遅延させて
   useEffect(() => {

@@ -11,21 +11,26 @@ import {
   SpotifyIFrameAPIOptions,
 } from "../types/SpotifyIframeApiTypes";
 import { useSpotifyIframeApi } from "../hooks/useSpotifyIframeApi";
+import { useAtom } from "jotai";
+import { spotifyEmbedRefAtom } from "../atoms/spotifyEmbedRefAtom";
 
 export const SpotifyPlayer = forwardRef(
   ({ uri, width = "full", height = "20%",onStop }: SpotifyIFrameAPIOptions, ref) => {
     SpotifyPlayer.displayName = "SpotifyPlayer";
 
-    const containerRef = useRef<HTMLDivElement>(null);
-    const mapRef = useRef<SpotifyEmbedController | null>(null);
+    // Spotify プレイヤーが埋め込まれる <div> 要素への参照を保持
+    const playerRef = useRef<HTMLDivElement>(null);
+    // Spotify プレイヤーのインスタンス自体
+    const player = useRef<SpotifyEmbedController | null>(null);
     const [isPaused, setIsPaused] = useState(true);
     const [endSeconds, setEndSeconds] = useState(0);
     const [nowSeconds, setNowSeconds] = useState(0);
+    const [, setSpotifyEmbedRef] = useAtom(spotifyEmbedRefAtom);
 
     useSpotifyIframeApi((spotifyIframeApi: SpotifyIFrameAPI) => {
-      if (containerRef.current) {
+      if (playerRef.current) {
         spotifyIframeApi.createController(
-          containerRef.current,
+          playerRef.current,
           {
             uri, // プロパティから受け取ったURIを使用
             width: typeof width === "number" ? `${width}px` : width, // 数値の場合はpxを付ける
@@ -33,21 +38,26 @@ export const SpotifyPlayer = forwardRef(
             onStop
           },
           (embedController: SpotifyEmbedController) => {
-            mapRef.current = embedController;
+            player.current = embedController;
+            console.log(embedController,"embedController")
 
             embedController.addListener("ready", () => {
-              console.log("ready");
+              console.log("Spotify IframeAPI ready");
+              console.log("player.current",player.current)
+              setSpotifyEmbedRef(player)
             });
+
 
             // playback_updateイベントにリスナーを登録
             embedController.addListener("playback_update", (e) => {
               if (e) {
+                console.log("playback_update")
                 // console.log(e.data.position, "position");
                 // console.log(e.data.isBuffering, "buffer");
                 // console.log(e.data.isPaused, "isPaused");
                 // console.log(e.data.duration, "duration");
-                setNowSeconds(e.data.position / 1000);
-                setIsPaused(e.data.isPaused);
+                
+  
               }
             });
           }
@@ -57,16 +67,14 @@ export const SpotifyPlayer = forwardRef(
 
     useImperativeHandle(ref, () => ({
       stop: () => {
-        if (!isPaused) {
-          mapRef.current?.togglePlay();
-        }
+          player.current?.pause();
       },
       playEpisode: async (uri: string, startSeconds: number,endSeconds :number) => {
-        mapRef.current?.loadUri(uri);
+        player.current?.loadUri(uri);
         // 
-        mapRef.current?.play();
+        player.current?.play();
         setTimeout(() => {
-          mapRef.current?.seek(startSeconds);
+          player.current?.seek(startSeconds);
         }, 700); // 0.7秒後にseekを実行しないと特定時間から再生されない
         setEndSeconds(endSeconds)
       },
@@ -74,13 +82,13 @@ export const SpotifyPlayer = forwardRef(
 
     useEffect(() => {
       if (nowSeconds >= endSeconds && !isPaused) {
-        mapRef.current?.togglePlay();
+        player.current?.togglePlay();
         if (onStop) {
           onStop(); // コールバックを呼び出す
         }
       }
     }, [nowSeconds, isPaused, endSeconds,onStop]);
 
-    return <div ref={containerRef} />;
+    return <div ref={playerRef} />;
   }
 );

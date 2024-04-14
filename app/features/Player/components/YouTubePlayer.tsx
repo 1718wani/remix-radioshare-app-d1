@@ -1,6 +1,5 @@
 /// <reference types="youtube" />
 
-// components/YoutubePlayer.tsx
 import {
   useRef,
   useEffect,
@@ -21,7 +20,9 @@ export const YoutubePlayer = forwardRef<YT.Player, YoutubeIFrameAPIOptions>(
     }: YoutubeIFrameAPIOptions,
   ) => {
     YoutubePlayer.displayName = "YoutubePlayer";
+    // YouTube プレイヤーが埋め込まれる <div> 要素への参照を保持
     const playerRef = useRef<HTMLDivElement>(null);
+    // YouTube プレイヤーのインスタンス自体
     const player = useRef<YT.Player | null>(null);
     const [, setYoutubeEmbedRef] = useAtom(youtubeEmbedRefAtom);
 
@@ -34,16 +35,14 @@ export const YoutubePlayer = forwardRef<YT.Player, YoutubeIFrameAPIOptions>(
           events: {
             onReady: () => {
               if (player.current) {
-                console.log("onReadyですよ");
+                console.log("Youtube Iframe onReady",player);
                 setYoutubeEmbedRef(player)
               }
             },
-            // その他のイベントハンドラー
           },
         });
       }
     });
-
 
     useEffect(() => {
       return () => {
