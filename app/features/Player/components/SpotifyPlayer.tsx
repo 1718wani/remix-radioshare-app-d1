@@ -43,6 +43,7 @@ export const SpotifyPlayer = forwardRef(
               console.log("Spotify IframeAPI ready");
               console.log("player.current",player.current)
               setSpotifyEmbedRef(player)
+              player.current?.togglePlay()
             });
 
 
