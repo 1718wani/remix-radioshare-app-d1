@@ -22,9 +22,7 @@ export const SpotifyPlayer = forwardRef(
     const playerRef = useRef<HTMLDivElement>(null);
     // Spotify プレイヤーのインスタンス自体
     const player = useRef<SpotifyEmbedController | null>(null);
-    const [isPaused, setIsPaused] = useState(true);
-    const [endSeconds, setEndSeconds] = useState(0);
-    const [nowSeconds, setNowSeconds] = useState(0);
+    const [stopPosition, setStopPosition] = useState<number | undefined>(undefined);
     const [, setSpotifyEmbedRef] = useAtom(spotifyEmbedRefAtom);
 
     useSpotifyIframeApi((spotifyIframeApi: SpotifyIFrameAPI) => {
@@ -51,12 +49,19 @@ export const SpotifyPlayer = forwardRef(
             // playback_updateイベントにリスナーを登録
             embedController.addListener("playback_update", (e) => {
               if (e) {
-                console.log("playback_update")
+                console.log("playback_update",e)
+              
                 // console.log(e.data.position, "position");
                 // console.log(e.data.isBuffering, "buffer");
                 // console.log(e.data.isPaused, "isPaused");
                 // console.log(e.data.duration, "duration");
-                
+                if (e.data.position > 1000) {
+                  player.current?.pause();
+                }
+
+                if (e.data.isPaused && e.data.position > 0) {
+                  onStop();
+                }
   
               }
             });
@@ -64,30 +69,6 @@ export const SpotifyPlayer = forwardRef(
         );
       }
     });
-
-    useImperativeHandle(ref, () => ({
-      stop: () => {
-          player.current?.pause();
-      },
-      playEpisode: async (uri: string, startSeconds: number,endSeconds :number) => {
-        player.current?.loadUri(uri);
-        // 
-        player.current?.play();
-        setTimeout(() => {
-          player.current?.seek(startSeconds);
-        }, 700); // 0.7秒後にseekを実行しないと特定時間から再生されない
-        setEndSeconds(endSeconds)
-      },
-    }));
-
-    useEffect(() => {
-      if (nowSeconds >= endSeconds && !isPaused) {
-        player.current?.togglePlay();
-        if (onStop) {
-          onStop(); // コールバックを呼び出す
-        }
-      }
-    }, [nowSeconds, isPaused, endSeconds,onStop]);
 
     return <div ref={playerRef} />;
   }

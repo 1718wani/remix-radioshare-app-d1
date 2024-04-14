@@ -105,11 +105,10 @@ export const HighLightCardWithRadioshow = (props: props) => {
     setPlayingHighlightId(highlight.id);
     if (platform === "spotify" && spotifyEmbedRef?.current) {
       youtubeEmbedRef?.current?.stopVideo();
-      spotifyEmbedRef?.current?.loadUri(idOrUri);
+      spotifyEmbedRef?.current?.loadUri(idOrUri,false,convertedStartSeconds);
       spotifyEmbedRef.current?.play();
-        setTimeout(() => {
-          spotifyEmbedRef.current?.seek(convertedStartSeconds);
-        }, 700); 
+
+      spotifyEmbedRef.current.setStopPosition(convertedEndSeconds)
 
     } else if (platform === "youtube" && youtubeEmbedRef?.current) {
       spotifyEmbedRef?.current?.pause();
@@ -129,7 +128,7 @@ export const HighLightCardWithRadioshow = (props: props) => {
   const handleStopHighlight = () => {
     setPlayingHighlightId(null);
     youtubeEmbedRef?.current?.stopVideo();
-    spotifyEmbedRef?.current?.stop();
+    spotifyEmbedRef?.current?.pause();
   };
 
   const isWithinAWeek = (dateString: string) => {
