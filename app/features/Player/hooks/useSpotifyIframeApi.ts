@@ -11,6 +11,23 @@ export const useSpotifyIframeApi = (
       return;
     }
 
+     // MutationObserverを設定してiframeの挿入を監視
+     const observer = new MutationObserver((mutations) => {
+      mutations.forEach((mutation) => {
+        mutation.addedNodes.forEach((node) => {
+          if (node.nodeName === 'IFRAME') {
+            const iframe = node as HTMLIFrameElement;
+            // allow属性を設定
+            iframe.setAttribute('allow', 'encrypted-media');
+          }
+        });
+      });
+    });
+
+    // ドキュメント全体を監視対象とする
+    observer.observe(document.body, { childList: true, subtree: true });
+
+
     // 既にスクリプトが追加されているかチェックする
     const spotifyScript = document.getElementById('spotify-iframeapi-script');
     if(spotifyScript) return;

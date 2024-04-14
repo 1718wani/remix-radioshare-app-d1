@@ -56,7 +56,7 @@ export const SpotifyPlayer = forwardRef(
                 // console.log(e.data.isBuffering, "buffer");
                 // console.log(e.data.isPaused, "isPaused");
                 // console.log(e.data.duration, "duration");
-                if (e.data.position > 1000) {
+                if (e.data.position > 10000) {
                   player.current?.pause();
                 }
 
