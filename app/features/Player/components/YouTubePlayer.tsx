@@ -30,7 +30,7 @@ export const YoutubePlayer = forwardRef<YT.Player, YoutubeIFrameAPIOptions>(
         player.current = new YT.Player(playerRef.current, {
           width: typeof width === "number" ? `${width}px` : width, // 数値の場合はpxを付ける
           height: typeof height === "number" ? `${height}px` : height, // 数値の場合はpxを付ける
-          videoId: initialVideoId, // Correct property name
+          videoId: initialVideoId, 
           events: {
             onReady: () => {
               if (player.current) {

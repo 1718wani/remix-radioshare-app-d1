@@ -47,6 +47,7 @@ import { useAtom } from "jotai";
 import { spotifyEmbedRefAtom } from "./features/Player/atoms/spotifyEmbedRefAtom";
 import { youtubeEmbedRefAtom } from "./features/Player/atoms/youtubeEmbedRefAtom";
 import { playingHighlightIdAtom } from "./features/Player/atoms/playingStatusAtom";
+import { menuOpenedAtom } from "./features/Player/atoms/menuOpendAtom";
 
 export const loader = async ({ context, request }: LoaderFunctionArgs) => {
   const radioShows = await getRadioshows(context, 0);
@@ -83,7 +84,7 @@ export default function App() {
   const { radioShows, user } = useLoaderData<typeof loader>();
   const navigation = useNavigation();
   const [showLoadingOverlay, setShowLoadingOverlay] = useState(false);
-  const [menuOpened, { toggle: toggleMenu }] = useDisclosure();
+  const [menuOpened, setMenuOpened] = useAtom(menuOpenedAtom);
   const [modalOpened, { open: openModal, close: closeModal }] =
     useDisclosure(false);
   const navigate = useNavigate();
@@ -142,7 +143,7 @@ export default function App() {
       >
         <AppShell.Header>
           <div>
-            <HeaderComponent opened={menuOpened} toggle={toggleMenu} />
+            <HeaderComponent opened={menuOpened} />
           </div>
         </AppShell.Header>
 
@@ -156,7 +157,7 @@ export default function App() {
             href="/"
             label="一覧"
             leftSection={<IconRadio stroke={2} />}
-            active={currentPath === "/highlights/popular"}
+            active={currentPath === "/highlights/all"}
           />
           <NavLink
             href="/highlights/saved"
@@ -165,13 +166,13 @@ export default function App() {
             active={currentPath === "/highlights/saved"}
           />
           <Divider my="sm" />
-          <ScrollArea style={{ height: "40%" }}>
+          <ScrollArea style={{ height: "45%" }}>
             {radioShows.map((show) => (
               <NavLink
                 key={show.id}
-                href={`/${show.id}`}
+                href={`/highlights/${show.id}`}
                 label={show.title}
-                active={currentPath === `/${show.id}`}
+                active={currentPath === `/highlights/${show.id}`}
               />
             ))}
           </ScrollArea>
@@ -194,7 +195,6 @@ export default function App() {
             onClick={(e) => {
               if (!user) {
                 e.preventDefault();
-                toggleMenu();
                 console.log("開いている");
                 openModal();
               } else {
@@ -219,7 +219,7 @@ export default function App() {
             <Form
               onClick={() => {
                 navigate("/signin");
-                toggleMenu();
+                setMenuOpened(prev => !prev);
               }}
               style={{ margin: 0 }}
             >

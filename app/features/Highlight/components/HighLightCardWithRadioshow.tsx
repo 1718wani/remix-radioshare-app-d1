@@ -23,40 +23,24 @@ import {
 } from "@tabler/icons-react";
 import { parseISO, isWithinInterval, add } from "date-fns";
 import { useAtom } from "jotai";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { customeDomain } from "~/consts/customeDomain";
-import {
-  playingHighlightIdAtom
-} from "~/features/Player/atoms/playingStatusAtom";
+import { playingHighlightIdAtom } from "~/features/Player/atoms/playingStatusAtom";
 import { spotifyEmbedRefAtom } from "~/features/Player/atoms/spotifyEmbedRefAtom";
 import { youtubeEmbedRefAtom } from "~/features/Player/atoms/youtubeEmbedRefAtom";
 import { convertHHMMSSToSeconds } from "~/features/Player/functions/convertHHmmssToSeconds";
 import { convertUrlToId } from "~/features/Player/functions/convertUrlToId";
+import { isIOS, isChrome } from "react-device-detect";
+import { useDisclosure } from "@mantine/hooks";
+import { menuOpenedAtom } from "~/features/Player/atoms/menuOpendAtom";
+import { highlightCardWithRadioshowProps } from "../types/highlightCardWithRadioshowProps";
+import { isListPlayingAtom, playingIndexAtom } from "~/features/Player/atoms/listPlayingAtom";
+import { loader } from "~/routes/create";
+import { loadRouteModule } from "@remix-run/react/dist/routeModules";
 
-type props = {
-  id: string;
-  title: string;
-  description: string;
-  replayUrl: string;
-  createdAt: string;
-  liked: boolean;
-  saved: boolean;
-  replayed: boolean;
-  imageUrl: string;
-  radioshowId: string;
-  totalReplayTimes: number;
-  isEnabledUserAction: boolean;
-  startHHmmss: string;
-  endHHmmss: string;
-  open: () => void;
-  onAction: (
-    id: string,
-    actionType: "replayed" | "saved" | "liked",
-    value: boolean
-  ) => void;
-};
-
-export const HighLightCardWithRadioshow = (props: props) => {
+export const HighLightCardWithRadioshow = (
+  props: highlightCardWithRadioshowProps
+) => {
   const {
     id,
     title,
@@ -74,18 +58,22 @@ export const HighLightCardWithRadioshow = (props: props) => {
     open,
     onAction,
   } = props;
+
   const correctImageUrl = `${customeDomain}${imageUrl}`;
   const theme = useMantineTheme();
+  const [, setMenuOpened] = useAtom(menuOpenedAtom);
 
   const [likedState, setLikedState] = useState(liked);
   const [savedState, setSavedState] = useState(saved);
   const [spotifyEmbedRef] = useAtom(spotifyEmbedRefAtom);
   const [youtubeEmbedRef] = useAtom(youtubeEmbedRefAtom);
+  const [isListPlaying, setIsListPlaying] = useAtom(isListPlayingAtom);
+  const [playingIndex, setPlayingIndex] = useAtom(playingIndexAtom);
   const [playingHighlightId, setPlayingHighlightId] = useAtom(
     playingHighlightIdAtom
   );
 
-  const handlePlayHighlight = (highlight: props) => {
+  const handlePlayHighlight = (highlight: highlightCardWithRadioshowProps) => {
     const { platform, idOrUri } = convertUrlToId(highlight.replayUrl);
     const convertedStartSeconds = convertHHMMSSToSeconds(highlight.startHHmmss);
     const convertedEndSeconds = convertHHMMSSToSeconds(highlight.endHHmmss);
@@ -102,23 +90,28 @@ export const HighLightCardWithRadioshow = (props: props) => {
       return;
     }
     setPlayingHighlightId(highlight.id);
-    if (platform === "spotify" ) {
+    if (platform === "spotify") {
       youtubeEmbedRef?.current?.stopVideo();
-      spotifyEmbedRef?.current?.playEpisode(idOrUri, convertedStartSeconds ?? 0,convertedEndSeconds ?? 0);
+      spotifyEmbedRef?.current?.playEpisode(
+        idOrUri,
+        convertedStartSeconds ?? 0,
+        convertedEndSeconds ?? 0
+      );
     } else if (platform === "youtube" && youtubeEmbedRef?.current) {
       spotifyEmbedRef?.current?.stop();
-      youtubeEmbedRef?.current?.loadVideoById(
-        {
-          videoId: idOrUri,
-          startSeconds: convertedStartSeconds,
-          endSeconds: convertedEndSeconds,
-          suggestedQuality: "small",
-        }
-
-      )
-    }else{
-      console.log("特に何もしない")
+      youtubeEmbedRef?.current?.loadVideoById({
+        videoId: idOrUri,
+        startSeconds: convertedStartSeconds,
+        endSeconds: convertedEndSeconds,
+        suggestedQuality: "small",
+      });
+    } else {
+      console.log("特に何もしない");
     }
+  };
+
+  const handleOpenMenu = () => {
+    setMenuOpened(true);
   };
 
   const handleStopHighlight = () => {
@@ -150,11 +143,22 @@ export const HighLightCardWithRadioshow = (props: props) => {
       }
     };
 
+
+    // isListPlaying（）
+
+    useEffect(() => {
+     // もし連続再生中なら、handlePlayHighlight()を呼び出す。
+     if (isListPlaying){
+      handlePlayHighlight(props);
+     }
+     // 
+    }, [playingIndex, isListPlaying]);
+
   return (
     <>
       <Card withBorder padding="md" radius="md" mx={"sm"}>
         <Card.Section mb={"sm"}>
-          <Link to={`/${radioshowId}`}>
+          <Link to={`/highlights/${radioshowId}`}>
             <Image
               src={correctImageUrl}
               fallbackSrc="/radiowaiting.png"
@@ -257,6 +261,9 @@ export const HighLightCardWithRadioshow = (props: props) => {
                 <IconPlayerPlayFilled stroke={0.5} width={20} height={20} />
               }
               onClick={() => {
+                if (isIOS) {
+                  handleOpenMenu();
+                }
                 onAction(id, "replayed", true);
                 handlePlayHighlight(props);
               }}

@@ -1,5 +1,5 @@
 import { AppLoadContext } from "@remix-run/cloudflare";
-import { and, desc, eq } from "drizzle-orm";
+import { and, asc, desc, eq } from "drizzle-orm";
 import { drizzle } from "drizzle-orm/d1";
 import {
   highlights,
@@ -8,16 +8,24 @@ import {
 } from "~/drizzle/schema.server";
 import { authenticator } from "~/features/Auth/services/authenticator";
 
-export const getLotsReplayedHighlights = async (
+export const getHighlights = async (
   context: AppLoadContext,
   request: Request,
   offset: number,
-  limit: number
+  limit: number,
+  ascOrDesc: "asc" | "desc",
+  orderBy: "totalReplayTimes" | "totalLikedTimes" | "totalSavedTimes",
+  pick?: "all" | "saved" | "liked" | "notReplayed",
+  radioshowId?: string
 ) => {
   try {
     const db = drizzle(context.cloudflare.env.DB);
     const userId = await authenticator.isAuthenticated(request);
-    const result = await db
+    const orderByQuery =
+      orderBy === "totalReplayTimes"
+        ? highlights.totalReplayTimes
+        : highlights.createdAt;
+    const query = db
       .select({
         highlight: {
           id: highlights.id,
@@ -27,8 +35,8 @@ export const getLotsReplayedHighlights = async (
           description: highlights.description,
           radioshowId: highlights.radioshowId,
           createdAt: highlights.createdAt,
-          startHHmmss:highlights.replayStartTime,
-          endHHmmss:highlights.replayEndTime
+          startHHmmss: highlights.replayStartTime,
+          endHHmmss: highlights.replayEndTime,
         },
         radioshow: {
           imageUrl: radioshows.imageUrl,
@@ -47,18 +55,43 @@ export const getLotsReplayedHighlights = async (
           eq(highlights.id, userHighlights.highlightId),
           eq(userHighlights.userId, userId ?? "")
         )
-      )
-      .orderBy(desc(highlights.totalReplayTimes))
-      .limit(limit)
-      .offset(offset)
-      .execute();
+      );
 
-    // // もし取得した値が、限界値と同じ値であれば、ちょうど終わり、もしくはもっとある。
-    // const hasNextPage = result.length === limit;
-    // // もし次ページもあるのであれば、末尾１つだけ削除して返す。 そうすれば、もし仮にちょうどなら、次はもうhasNextPageとならない。もし普通にそれ以上あるならそのまま返す。
-    // // もし次ページがないのなら、そのまま返す。limitとoffsetは同じである必要がある？いや、
-    // if (hasNextPage && result.length >= 1  ) result.slice(0, -1);
-    return  result ;
+    console.log(query, "query");
+
+    // pickの値に応じてフィルタリングする条件を追加
+    if (pick) {
+      switch (pick) {
+        case "saved":
+          query.where(eq(userHighlights.saved, true));
+          break;
+        case "liked":
+          query.where(eq(userHighlights.liked, true));
+          break;
+        case "notReplayed":
+          query.where(eq(userHighlights.replayed, false));
+          break;
+        case "all":
+          break;
+        default:
+          break;
+      }
+    }
+
+    // radioshowIdが指定されている場合、そのIDに合致するハイライトのみを取得
+    if (radioshowId) {
+      query.where(eq(highlights.radioshowId, radioshowId));
+    }
+
+    // ソートとページネーションの設定
+    query
+      .orderBy(ascOrDesc === "asc" ? asc(orderByQuery) : desc(orderByQuery))
+      .limit(limit)
+      .offset(offset);
+
+    const result = await query.execute();
+
+    return result;
   } catch (error) {
     console.error(error);
     throw new Response("ハイライト取得に伴ってエラーが発生しました", {

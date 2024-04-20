@@ -5,13 +5,16 @@ import {
   Burger,
 } from "@mantine/core";
 import { Link } from "@remix-run/react";
+import { useAtom } from "jotai";
+import { menuOpenedAtom } from "~/features/Player/atoms/menuOpendAtom";
 
 type Props = {
   opened: boolean;
-  toggle: () => void;
+  
 };
 
-export const HeaderComponent = ({ opened, toggle }: Props) => {
+export const HeaderComponent = ({ opened}: Props) => {
+  const [, setMenuOpened] = useAtom(menuOpenedAtom);
   return (
     <Box w={"full"} bg={"blue"} h={"60"}>
       <Flex align={"center"} justify={"space-between"} p={"xs"} px={"sm"}>
@@ -20,7 +23,7 @@ export const HeaderComponent = ({ opened, toggle }: Props) => {
             RadiMoment
           </Text>
         </Link>
-        <Burger color="white" opened={opened} onClick={toggle} hiddenFrom="sm" size="md" />
+        <Burger color="white" opened={opened} onClick={() => setMenuOpened(prev => !prev)} hiddenFrom="sm" size="md" />
       </Flex>
     </Box>
   );

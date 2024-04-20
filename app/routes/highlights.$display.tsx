@@ -1,17 +1,23 @@
-import { ActionFunctionArgs, LoaderFunctionArgs } from "@remix-run/node";
-import { json } from "@remix-run/cloudflare";
-import { Grid } from "@mantine/core";
-import { useFetcher, useLoaderData } from "@remix-run/react";
-import { HighLightCardWithRadioshow } from "~/features/Highlight/components/HighLightCardWithRadioshow";
-import { updateHighlight } from "~/features/Highlight/apis/updateHighlight";
+import { Flex, Grid, Select, Title, rem } from "@mantine/core";
 import { useDisclosure } from "@mantine/hooks";
+import {
+  ActionFunctionArgs,
+  LoaderFunctionArgs,
+  json,
+} from "@remix-run/cloudflare";
+import { useFetcher, useLoaderData } from "@remix-run/react";
+import { useEffect, useState } from "react";
+import invariant from "tiny-invariant";
 import { LoginNavigateModal } from "~/features/Auth/components/LoginNavigateModal";
 import { authenticator } from "~/features/Auth/services/authenticator";
-import { getNewHighlights } from "~/features/Highlight/apis/getNewHighlights";
-import { EmptyHighlight } from "~/features/Highlight/components/EmptyHighlight";
+import { getHighlights } from "~/features/Highlight/apis/getHighlights";
 import { incrementTotalReplayTimes } from "~/features/Highlight/apis/incrementTotalReplayTimes";
-import { useEffect, useState } from "react";
+import { updateHighlight } from "~/features/Highlight/apis/updateHighlight";
+import { EmptyHighlight } from "~/features/Highlight/components/EmptyHighlight";
+import { HighLightCardWithRadioshow } from "~/features/Highlight/components/HighLightCardWithRadioshow";
 import InfiniteScroll from "~/features/Highlight/components/InfiniteScroll";
+import { RadioShowHeader } from "~/features/Highlight/components/RadioShowHeader";
+import { getRadioshowById } from "~/features/Radioshow/apis/getRadioshowById";
 
 export const action = async ({ request, context }: ActionFunctionArgs) => {
   const formData = await request.formData();
@@ -47,47 +53,88 @@ export const action = async ({ request, context }: ActionFunctionArgs) => {
   }
 };
 
-export const loader = async ({ request, context }: LoaderFunctionArgs) => {
-  const userId = await authenticator.isAuthenticated(request, {});
+export const loader = async ({
+  request,
+  context,
+  params,
+}: LoaderFunctionArgs) => {
+  const userId = await authenticator.isAuthenticated(request);
   const url = new URL(request.url);
   const offset = Number(url.searchParams.get("offset")) ?? 0;
   const limit = 13;
-  const highlightsData = await getNewHighlights(
+  const display = params.display;
+
+  invariant(display, "一覧が見つかりません。");
+
+  let narrowingBy: "saved" | "liked" | "notReplayed" | "all" | undefined;
+  let narrowingId: string | undefined;
+  switch (display) {
+    case "saved":
+      narrowingBy = "saved";
+      break;
+    case "liked":
+      narrowingBy = "liked";
+      break;
+    case "notReplayed":
+      narrowingBy = "notReplayed";
+      break;
+    case "all":
+      narrowingBy = "all";
+      break;
+    default:
+      narrowingId = display;
+      break;
+  }
+
+  
+  const radioshow = await getRadioshowById(narrowingId || "", context);
+
+  const highlightsData = await getHighlights(
     context,
     request,
     offset,
-    limit
+    limit,
+    "desc",
+    "totalReplayTimes",
+    narrowingBy,
+    narrowingId
   );
   if (!highlightsData) {
     throw new Response("Not Found", { status: 404 });
   }
 
-  // 目一杯取れているということは次もあるということだ。
+  // 取得限界値と同じ長さのデータを取得できた場合は、次のページがある
   const hasNextPage = highlightsData.length === limit;
- // もし次のページが有るなら1切り取るが、最後のページならそのまま返す
-  const resultHighlightData = hasNextPage ?  highlightsData.slice(0, -1): highlightsData
+  // 次のページがあるなら末尾1つを切り取る、最後のページなら取得データをすべて返す
+  const resultHighlightData = hasNextPage
+    ? highlightsData.slice(0, -1)
+    : highlightsData;
 
-  return json({ resultHighlightData, userId, offset, hasNextPage, limit });
+  return json({
+    resultHighlightData,
+    userId,
+    offset,
+    hasNextPage,
+    limit,
+    radioshow,
+  });
 };
 
-export default function NewHighlights() {
+export default function Hightlights() {
   const {
     resultHighlightData: initialHighlightsData,
     hasNextPage: initialHasNextPage,
     offset: initialOffset,
     userId,
     limit,
+    radioshow,
   } = useLoaderData<typeof loader>();
-
-  const [highlightsData, setHighlightsData] = useState(initialHighlightsData);
-  const [offset, setOffset] = useState(initialOffset);
-
-  const [hasNextPage, setHasNextPage] = useState(initialHasNextPage);
   const fetcher = useFetcher<typeof loader>();
 
- 
-
   const [opened, { open, close }] = useDisclosure(false);
+  const [highlightsData, setHighlightsData] = useState(initialHighlightsData);
+  const [hasNextPage, setHasNextPage] = useState(initialHasNextPage);
+  const [offset, setOffset] = useState(initialOffset);
   const isEnabledUserAction = userId ? true : false;
 
   const handleAction = (
@@ -112,11 +159,28 @@ export default function NewHighlights() {
       setOffset(fetchedData.offset);
       setHasNextPage(fetchedData.hasNextPage);
     }
-    console.log(fetchedData,"fetchedData")
   }, [fetcher.data, limit]);
 
   return (
     <>
+      {radioshow && (
+        <RadioShowHeader
+          radioshowImageUrl={radioshow.imageUrl ?? ""}
+          radioshowTitle={radioshow.title ?? ""}
+        />
+      )}
+
+      <Flex justify={"space-between"} m={"md"}>
+        <Title order={2}>ハイライト一覧</Title>
+        <Select
+          withCheckIcon={false}
+          w={rem(120)}
+          data={["人気順", "新しい順"]}
+          defaultValue={"人気順"}
+          clearable={false}
+          allowDeselect={false}
+        />
+      </Flex>
       {highlightsData.length > 0 ? (
         <>
           <InfiniteScroll
@@ -127,7 +191,6 @@ export default function NewHighlights() {
             }}
             hasNextPage={hasNextPage}
           >
-           
             <Grid mt={10} mx={"sm"}>
               {highlightsData.map((highlightData) => (
                 <Grid.Col
@@ -137,10 +200,7 @@ export default function NewHighlights() {
                   <HighLightCardWithRadioshow
                     key={highlightData.highlight.id}
                     id={highlightData.highlight.id}
-                    imageUrl={
-                      highlightData.radioshow?.imageUrl ??
-                      "https://picsum.photos/200/300"
-                    }
+                    imageUrl={highlightData.radioshow?.imageUrl ?? ""}
                     title={highlightData.highlight.title}
                     description={highlightData.highlight.description ?? ""}
                     replayUrl={highlightData.highlight.replayUrl}
@@ -155,6 +215,8 @@ export default function NewHighlights() {
                     isEnabledUserAction={isEnabledUserAction}
                     open={open}
                     onAction={handleAction}
+                    startHHmmss={highlightData.highlight.startHHmmss}
+                    endHHmmss={highlightData.highlight.endHHmmss}
                   />
                 </Grid.Col>
               ))}
