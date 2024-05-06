@@ -11,7 +11,6 @@ import {
   Image,
   rem,
 } from "@mantine/core";
-import { notifications } from "@mantine/notifications";
 import { Link } from "@remix-run/react";
 import {
   IconBookmark,
@@ -19,24 +18,11 @@ import {
   IconHeart,
   IconPlayerPlayFilled,
   IconPlayerStopFilled,
-  IconX,
 } from "@tabler/icons-react";
 import { parseISO, isWithinInterval, add } from "date-fns";
-import { useAtom } from "jotai";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { customeDomain } from "~/consts/customeDomain";
-import { playingHighlightIdAtom } from "~/features/Player/atoms/playingStatusAtom";
-import { spotifyEmbedRefAtom } from "~/features/Player/atoms/spotifyEmbedRefAtom";
-import { youtubeEmbedRefAtom } from "~/features/Player/atoms/youtubeEmbedRefAtom";
-import { convertHHMMSSToSeconds } from "~/features/Player/functions/convertHHmmssToSeconds";
-import { convertUrlToId } from "~/features/Player/functions/convertUrlToId";
-import { isIOS, isChrome } from "react-device-detect";
-import { useDisclosure } from "@mantine/hooks";
-import { menuOpenedAtom } from "~/features/Player/atoms/menuOpendAtom";
 import { highlightCardWithRadioshowProps } from "../types/highlightCardWithRadioshowProps";
-import { isListPlayingAtom, playingIndexAtom } from "~/features/Player/atoms/listPlayingAtom";
-import { loader } from "~/routes/create";
-import { loadRouteModule } from "@remix-run/react/dist/routeModules";
 
 export const HighLightCardWithRadioshow = (
   props: highlightCardWithRadioshowProps
@@ -57,68 +43,16 @@ export const HighLightCardWithRadioshow = (
     endHHmmss,
     open,
     onAction,
+    onPlay,
+    playing,
+    handleStop
   } = props;
 
   const correctImageUrl = `${customeDomain}${imageUrl}`;
   const theme = useMantineTheme();
-  const [, setMenuOpened] = useAtom(menuOpenedAtom);
 
   const [likedState, setLikedState] = useState(liked);
   const [savedState, setSavedState] = useState(saved);
-  const [spotifyEmbedRef] = useAtom(spotifyEmbedRefAtom);
-  const [youtubeEmbedRef] = useAtom(youtubeEmbedRefAtom);
-  const [isListPlaying, setIsListPlaying] = useAtom(isListPlayingAtom);
-  const [playingIndex, setPlayingIndex] = useAtom(playingIndexAtom);
-  const [playingHighlightId, setPlayingHighlightId] = useAtom(
-    playingHighlightIdAtom
-  );
-
-  const handlePlayHighlight = (highlight: highlightCardWithRadioshowProps) => {
-    const { platform, idOrUri } = convertUrlToId(highlight.replayUrl);
-    const convertedStartSeconds = convertHHMMSSToSeconds(highlight.startHHmmss);
-    const convertedEndSeconds = convertHHMMSSToSeconds(highlight.endHHmmss);
-    console.log(idOrUri, convertedStartSeconds, "idOrUri");
-    if (!idOrUri) {
-      notifications.show({
-        withCloseButton: true,
-        autoClose: 5000,
-        title: "再生エラーです",
-        message: "登録されたURIの不備です",
-        color: "red",
-        icon: <IconX />,
-      });
-      return;
-    }
-    setPlayingHighlightId(highlight.id);
-    if (platform === "spotify") {
-      youtubeEmbedRef?.current?.stopVideo();
-      spotifyEmbedRef?.current?.playEpisode(
-        idOrUri,
-        convertedStartSeconds ?? 0,
-        convertedEndSeconds ?? 0
-      );
-    } else if (platform === "youtube" && youtubeEmbedRef?.current) {
-      spotifyEmbedRef?.current?.stop();
-      youtubeEmbedRef?.current?.loadVideoById({
-        videoId: idOrUri,
-        startSeconds: convertedStartSeconds,
-        endSeconds: convertedEndSeconds,
-        suggestedQuality: "small",
-      });
-    } else {
-      console.log("特に何もしない");
-    }
-  };
-
-  const handleOpenMenu = () => {
-    setMenuOpened(true);
-  };
-
-  const handleStopHighlight = () => {
-    setPlayingHighlightId(null);
-    youtubeEmbedRef?.current?.stopVideo();
-    spotifyEmbedRef?.current?.stop();
-  };
 
   const isWithinAWeek = (dateString: string) => {
     const date = parseISO(dateString);
@@ -142,17 +76,6 @@ export const HighLightCardWithRadioshow = (
         }
       }
     };
-
-
-    // isListPlaying（）
-
-    useEffect(() => {
-     // もし連続再生中なら、handlePlayHighlight()を呼び出す。
-     if (isListPlaying){
-      handlePlayHighlight(props);
-     }
-     // 
-    }, [playingIndex, isListPlaying]);
 
   return (
     <>
@@ -244,12 +167,12 @@ export const HighLightCardWithRadioshow = (
               {totalReplayTimes}
             </Text>
           </Flex>
-          {playingHighlightId === id ? (
+          {playing ? (
             <Button
               leftSection={
                 <IconPlayerStopFilled stroke={0.5} width={20} height={20} />
               }
-              onClick={handleStopHighlight}
+              onClick={handleStop}
               radius="xl"
               bg={"gray.5"}
             >
@@ -261,11 +184,9 @@ export const HighLightCardWithRadioshow = (
                 <IconPlayerPlayFilled stroke={0.5} width={20} height={20} />
               }
               onClick={() => {
-                if (isIOS) {
-                  handleOpenMenu();
-                }
+              
                 onAction(id, "replayed", true);
-                handlePlayHighlight(props);
+                onPlay()
               }}
               radius="xl"
               bg={"blue.5"}

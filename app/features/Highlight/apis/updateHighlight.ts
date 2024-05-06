@@ -33,9 +33,9 @@ export const updateHighlight = async (
       .values({
         userId: userId,
         highlightId: highlightId,
-        replayed: replayed ?? false,
-        saved: saved ?? false,
-        liked: liked ?? false,
+        replayed: replayed || false,
+        saved: saved || false,
+        liked: liked || false,
       })
       .onConflictDoUpdate({
         target: [userHighlights.userId, userHighlights.highlightId],

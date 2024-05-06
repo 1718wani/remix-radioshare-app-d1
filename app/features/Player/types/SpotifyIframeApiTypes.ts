@@ -23,7 +23,7 @@ export interface SpotifyIFrameAPI {
 }
 
 export interface SpotifyEmbedController {
-  loadUri(spotifyUri: string): void;
+  loadUri(spotifyUri: string ,preferVideo:boolean, timestampInSeconds:number ): void;
   play(): void;
   togglePlay(): void;
   seek(seconds: number): void;
@@ -38,6 +38,7 @@ export interface SpotifyEmbedController {
 export interface SpotifyPlayerRef {
   stop: () => void;
   playEpisode: (uri: string, seekSeconds: number,endSeconds:number) => void;
+  setIframeDimensions: (width: number, height: number) => void;  
 }
 
 declare global {

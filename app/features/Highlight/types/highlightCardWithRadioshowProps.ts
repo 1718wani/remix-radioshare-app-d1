@@ -19,4 +19,7 @@ export type highlightCardWithRadioshowProps = {
       actionType: "replayed" | "saved" | "liked",
       value: boolean
     ) => void;
+    onPlay: () => void;
+    playing:boolean;
+    handleStop:() => void;
   };

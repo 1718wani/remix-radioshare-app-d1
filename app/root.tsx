@@ -27,7 +27,7 @@ import {
 } from "@mantine/core";
 import { HeaderComponent } from "./components/HeaderComponent";
 import { Notifications } from "@mantine/notifications";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
 import { useDisclosure, useMediaQuery } from "@mantine/hooks";
 import {
   IconBookmark,
@@ -40,13 +40,7 @@ import { getRadioshows } from "./features/Radioshow/apis/getRadioshows";
 import { LoaderFunctionArgs } from "@remix-run/cloudflare";
 import { authenticator } from "./features/Auth/services/authenticator";
 import { LoginNavigateModal } from "./features/Auth/components/LoginNavigateModal";
-import { SpotifyPlayer } from "./features/Player/components/SpotifyPlayer";
-import { SpotifyPlayerRef } from "./features/Player/types/SpotifyIframeApiTypes";
-import { YoutubePlayer } from "./features/Player/components/YouTubePlayer";
 import { useAtom } from "jotai";
-import { spotifyEmbedRefAtom } from "./features/Player/atoms/spotifyEmbedRefAtom";
-import { youtubeEmbedRefAtom } from "./features/Player/atoms/youtubeEmbedRefAtom";
-import { playingHighlightIdAtom } from "./features/Player/atoms/playingStatusAtom";
 import { menuOpenedAtom } from "./features/Player/atoms/menuOpendAtom";
 
 export const loader = async ({ context, request }: LoaderFunctionArgs) => {
@@ -90,25 +84,9 @@ export default function App() {
   const navigate = useNavigate();
   const isMobile = useMediaQuery("(max-width: 48em)");
 
-  const [, setPlayingHighlightId] = useAtom(playingHighlightIdAtom);
-
   const matches = useMatches();
   const currentPath = matches[matches.length - 1]?.pathname ?? "";
 
-  const [, setSpotifyEmbedRef] = useAtom(spotifyEmbedRefAtom);
-  const spotifyPlayerRef = useRef<SpotifyPlayerRef>(null);
-
-  const [, setYoutubeEmbedRef] = useAtom(youtubeEmbedRefAtom);
-  const youtubePlayerRef = useRef<YT.Player | null>(null);
-
-  useEffect(() => {
-    setSpotifyEmbedRef(spotifyPlayerRef);
-  }, [spotifyPlayerRef, setSpotifyEmbedRef]);
-
-  useEffect(() => {
-    setYoutubeEmbedRef(youtubePlayerRef);
-    console.log("youtubePlayerRef", youtubePlayerRef);
-  }, [youtubePlayerRef, setYoutubeEmbedRef]);
 
   // ちらつき防止に遅延させて
   useEffect(() => {
@@ -166,7 +144,7 @@ export default function App() {
             active={currentPath === "/highlights/saved"}
           />
           <Divider my="sm" />
-          <ScrollArea style={{ height: "45%" }}>
+          <ScrollArea style={{ height: "72%" }}>
             {radioShows.map((show) => (
               <NavLink
                 key={show.id}
@@ -177,18 +155,6 @@ export default function App() {
             ))}
           </ScrollArea>
           <Divider my="sm" />
-
-          <SpotifyPlayer
-            ref={spotifyPlayerRef}
-            uri="spotify:episode:67hjIN8AH2KiIhWiA8XyuO"
-            onStop={() => setPlayingHighlightId(null)}
-          />
-
-          <YoutubePlayer
-            ref={youtubePlayerRef}
-            initialVideoId=""
-            initialStartSeconds={0}
-          />
 
           <Button
             mt={"sm"}

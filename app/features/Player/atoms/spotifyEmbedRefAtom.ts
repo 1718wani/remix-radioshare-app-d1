@@ -1,5 +1,5 @@
 import { atom } from "jotai";
-import { SpotifyPlayerRef } from "../types/SpotifyIframeApiTypes";
-import { RefObject } from "react";
+import { MutableRefObject } from "react";
+import { SpotifyEmbedController } from "../types/SpotifyIframeApiTypes";
 
-export const spotifyEmbedRefAtom = atom<RefObject<SpotifyPlayerRef> | null>(null);
+export const spotifyPlayerAtom = atom<MutableRefObject<SpotifyEmbedController | null> | null>(null);

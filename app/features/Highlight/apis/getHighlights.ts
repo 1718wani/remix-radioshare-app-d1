@@ -13,8 +13,13 @@ export const getHighlights = async (
   request: Request,
   offset: number,
   limit: number,
-  ascOrDesc: "asc" | "desc",
-  orderBy: "totalReplayTimes" | "totalLikedTimes" | "totalSavedTimes",
+  ascOrDesc: "asc" | "desc" | string,
+  orderBy:
+    | "totalReplayTimes"
+    | "totalLikedTimes"
+    | "totalSavedTimes"
+    | "createdAt"
+    | string,
   pick?: "all" | "saved" | "liked" | "notReplayed",
   radioshowId?: string
 ) => {
@@ -56,8 +61,6 @@ export const getHighlights = async (
           eq(userHighlights.userId, userId ?? "")
         )
       );
-
-    console.log(query, "query");
 
     // pickの値に応じてフィルタリングする条件を追加
     if (pick) {

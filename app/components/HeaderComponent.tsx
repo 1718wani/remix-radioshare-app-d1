@@ -6,6 +6,7 @@ import {
 } from "@mantine/core";
 import { Link } from "@remix-run/react";
 import { useAtom } from "jotai";
+import { ShareButton } from "~/features/Highlight/components/ShareButton";
 import { menuOpenedAtom } from "~/features/Player/atoms/menuOpendAtom";
 
 type Props = {
@@ -13,7 +14,7 @@ type Props = {
   
 };
 
-export const HeaderComponent = ({ opened}: Props) => {
+export const HeaderComponent = ({ opened }: Props) => {
   const [, setMenuOpened] = useAtom(menuOpenedAtom);
   return (
     <Box w={"full"} bg={"blue"} h={"60"}>
@@ -23,7 +24,17 @@ export const HeaderComponent = ({ opened}: Props) => {
             RadiMoment
           </Text>
         </Link>
-        <Burger color="white" opened={opened} onClick={() => setMenuOpened(prev => !prev)} hiddenFrom="sm" size="md" />
+        <Flex align={"center"}>
+          <ShareButton />
+          <Burger
+            color="white"
+            opened={opened}
+            onClick={() => setMenuOpened((prev) => !prev)}
+            hiddenFrom="sm"
+            size="md"
+            ml={"sm"}
+          />
+        </Flex>
       </Flex>
     </Box>
   );

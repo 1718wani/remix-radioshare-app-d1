@@ -1,4 +1,4 @@
 import { atom } from "jotai";
-import { MutableRefObject} from "react";
+import { MutableRefObject } from "react";
 
-export const youtubeEmbedRefAtom = atom<MutableRefObject<YT.Player | null> | null>(null);
+export const youtubePlayerAtom = atom<MutableRefObject<YT.Player | null> | null>(null);
