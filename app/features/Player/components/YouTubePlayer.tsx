@@ -5,18 +5,19 @@ import {
   useEffect,
   forwardRef,
 } from "react";
-import { useYoutubeIframeApi } from "../hooks/useYouTubeIframeApi";
 import { YoutubeIFrameAPIOptions } from "../types/YoutubeIframeApiTypes";
 import { useAtom } from "jotai";
-import { youtubeEmbedRefAtom } from "../atoms/youtubeEmbedRefAtom";
+import { useYoutubeIframeApi } from "../hooks/useYouTubeIframeApi";
+import { youtubePlayerAtom } from "../atoms/youtubeEmbedRefAtom";
 
 
 export const YoutubePlayer = forwardRef<YT.Player, YoutubeIFrameAPIOptions>(
   (
     {
       initialVideoId,
-      width = "full",
-      height = "20%",
+      width = 0,
+      height = 0,
+      onStop, 
     }: YoutubeIFrameAPIOptions,
   ) => {
     YoutubePlayer.displayName = "YoutubePlayer";
@@ -24,7 +25,7 @@ export const YoutubePlayer = forwardRef<YT.Player, YoutubeIFrameAPIOptions>(
     const playerRef = useRef<HTMLDivElement>(null);
     // YouTube プレイヤーのインスタンス自体
     const player = useRef<YT.Player | null>(null);
-    const [, setYoutubeEmbedRef] = useAtom(youtubeEmbedRefAtom);
+    const [, setYoutubePlayer] = useAtom(youtubePlayerAtom);
 
     useYoutubeIframeApi(() => {
       if (playerRef.current) {
@@ -36,7 +37,13 @@ export const YoutubePlayer = forwardRef<YT.Player, YoutubeIFrameAPIOptions>(
             onReady: () => {
               if (player.current) {
                 console.log("Youtube Iframe onReady",player);
-                setYoutubeEmbedRef(player)
+                setYoutubePlayer(player)
+              }
+            },
+            onStateChange: (event) => {
+              if (event.data === YT.PlayerState.ENDED  ) {
+                console.log("Youtube Iframe onStateChange stopなんだよね", event.data);
+                onStop();  // ビデオが終了したときに onStop を呼び出す
               }
             },
           },

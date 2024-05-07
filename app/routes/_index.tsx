@@ -8,7 +8,7 @@ export const meta: MetaFunction = () => {
 };
 
 export const loader = async () => {
-  return redirect("/highlights/popular");
+  return redirect("/highlights/all");
 };
 
 export default function Index() {

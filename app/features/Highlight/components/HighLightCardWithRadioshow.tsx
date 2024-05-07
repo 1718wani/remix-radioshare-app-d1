@@ -11,7 +11,6 @@ import {
   Image,
   rem,
 } from "@mantine/core";
-import { notifications } from "@mantine/notifications";
 import { Link } from "@remix-run/react";
 import {
   IconBookmark,
@@ -19,44 +18,15 @@ import {
   IconHeart,
   IconPlayerPlayFilled,
   IconPlayerStopFilled,
-  IconX,
 } from "@tabler/icons-react";
 import { parseISO, isWithinInterval, add } from "date-fns";
-import { useAtom } from "jotai";
 import { useState } from "react";
 import { customeDomain } from "~/consts/customeDomain";
-import {
-  playingHighlightIdAtom
-} from "~/features/Player/atoms/playingStatusAtom";
-import { spotifyEmbedRefAtom } from "~/features/Player/atoms/spotifyEmbedRefAtom";
-import { youtubeEmbedRefAtom } from "~/features/Player/atoms/youtubeEmbedRefAtom";
-import { convertHHMMSSToSeconds } from "~/features/Player/functions/convertHHmmssToSeconds";
-import { convertUrlToId } from "~/features/Player/functions/convertUrlToId";
+import { highlightCardWithRadioshowProps } from "../types/highlightCardWithRadioshowProps";
 
-type props = {
-  id: string;
-  title: string;
-  description: string;
-  replayUrl: string;
-  createdAt: string;
-  liked: boolean;
-  saved: boolean;
-  replayed: boolean;
-  imageUrl: string;
-  radioshowId: string;
-  totalReplayTimes: number;
-  isEnabledUserAction: boolean;
-  startHHmmss: string;
-  endHHmmss: string;
-  open: () => void;
-  onAction: (
-    id: string,
-    actionType: "replayed" | "saved" | "liked",
-    value: boolean
-  ) => void;
-};
-
-export const HighLightCardWithRadioshow = (props: props) => {
+export const HighLightCardWithRadioshow = (
+  props: highlightCardWithRadioshowProps
+) => {
   const {
     id,
     title,
@@ -73,63 +43,16 @@ export const HighLightCardWithRadioshow = (props: props) => {
     endHHmmss,
     open,
     onAction,
+    onPlay,
+    playing,
+    handleStop
   } = props;
+
   const correctImageUrl = `${customeDomain}${imageUrl}`;
   const theme = useMantineTheme();
 
   const [likedState, setLikedState] = useState(liked);
   const [savedState, setSavedState] = useState(saved);
-  const [spotifyEmbedRef] = useAtom(spotifyEmbedRefAtom);
-  const [youtubeEmbedRef] = useAtom(youtubeEmbedRefAtom);
-  const [playingHighlightId, setPlayingHighlightId] = useAtom(
-    playingHighlightIdAtom
-  );
-
-  const handlePlayHighlight = (highlight: props) => {
-    console.log("spotifyEmbedRefのグローバルな状態",spotifyEmbedRef)
-    const { platform, idOrUri } = convertUrlToId(highlight.replayUrl);
-    const convertedStartSeconds = convertHHMMSSToSeconds(highlight.startHHmmss);
-    const convertedEndSeconds = convertHHMMSSToSeconds(highlight.endHHmmss);
-    console.log(idOrUri, convertedStartSeconds, "idOrUri");
-    if (!idOrUri) {
-      notifications.show({
-        withCloseButton: true,
-        autoClose: 5000,
-        title: "再生エラーです",
-        message: "登録されたURIの不備です",
-        color: "red",
-        icon: <IconX />,
-      });
-      return;
-    }
-    setPlayingHighlightId(highlight.id);
-    if (platform === "spotify" && spotifyEmbedRef?.current) {
-      youtubeEmbedRef?.current?.stopVideo();
-      spotifyEmbedRef?.current?.loadUri(idOrUri,false,convertedStartSeconds);
-      spotifyEmbedRef.current?.play();
-
-      spotifyEmbedRef.current.setStopPosition(convertedEndSeconds)
-
-    } else if (platform === "youtube" && youtubeEmbedRef?.current) {
-      spotifyEmbedRef?.current?.pause();
-      youtubeEmbedRef?.current?.loadVideoById(
-        {
-          videoId: idOrUri,
-          startSeconds: convertedStartSeconds,
-          endSeconds: convertedEndSeconds,
-          suggestedQuality: "small",
-        }
-      )
-    }else{
-      console.log("何も再生しない")
-    }
-  };
-
-  const handleStopHighlight = () => {
-    setPlayingHighlightId(null);
-    youtubeEmbedRef?.current?.stopVideo();
-    spotifyEmbedRef?.current?.pause();
-  };
 
   const isWithinAWeek = (dateString: string) => {
     const date = parseISO(dateString);
@@ -158,7 +81,7 @@ export const HighLightCardWithRadioshow = (props: props) => {
     <>
       <Card withBorder padding="md" radius="md" mx={"sm"}>
         <Card.Section mb={"sm"}>
-          <Link to={`/${radioshowId}`}>
+          <Link to={`/highlights/${radioshowId}`}>
             <Image
               src={correctImageUrl}
               fallbackSrc="/radiowaiting.png"
@@ -244,12 +167,12 @@ export const HighLightCardWithRadioshow = (props: props) => {
               {totalReplayTimes}
             </Text>
           </Flex>
-          {playingHighlightId === id ? (
+          {playing ? (
             <Button
               leftSection={
                 <IconPlayerStopFilled stroke={0.5} width={20} height={20} />
               }
-              onClick={handleStopHighlight}
+              onClick={handleStop}
               radius="xl"
               bg={"gray.5"}
             >
@@ -261,8 +184,9 @@ export const HighLightCardWithRadioshow = (props: props) => {
                 <IconPlayerPlayFilled stroke={0.5} width={20} height={20} />
               }
               onClick={() => {
+              
                 onAction(id, "replayed", true);
-                handlePlayHighlight(props);
+                onPlay()
               }}
               radius="xl"
               bg={"blue.5"}

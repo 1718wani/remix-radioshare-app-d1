@@ -1,11 +1,4 @@
 {
-    "cssVariables.lookupFiles": [
-      "**/*.css",
-      "**/*.scss",
-      "**/*.sass",
-      "**/*.less",
-      "node_modules/@mantine/core/styles.css"
-    ],
-    "window.zoomLevel": -0.5,
-    "editor.codeActionsOnSave": ["source.addMissingImports"]
-  }
+  "window.zoomLevel": -0.5,
+  "editor.codeActionsOnSave": ["source.addMissingImports"]
+}

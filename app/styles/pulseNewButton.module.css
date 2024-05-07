@@ -1,16 +1,15 @@
 :global(.pulse-new-button) {
-    animation: pulse 2s infinite;
+  animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+  0% {
+    box-shadow: 0 0 0 0 rgba(255, 255, 255, 0.7); /* 白っぽい色に変更 */
   }
-  
-  @keyframes pulse {
-    0% {
-      box-shadow: 0 0 0 0 rgba(7, 104, 201, 0.7);
-    }
-    70% {
-      box-shadow: 0 0 0 10px rgba(29, 78, 125, 0);
-    }
-    100% {
-      box-shadow: 0 0 0 0 rgba(3, 144, 245, 0);
-    }
+  70% {
+    box-shadow: 0 0 0 10px rgba(255, 255, 255, 0); /* 完全に透明な白 */
   }
-  
+  100% {
+    box-shadow: 0 0 0 0 rgba(255, 255, 255, 0); /* 完全に透明な白 */
+  }
+}

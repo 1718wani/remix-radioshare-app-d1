@@ -5,18 +5,17 @@ import {
   Burger,
 } from "@mantine/core";
 import { Link } from "@remix-run/react";
-import { useRef } from "react";
-import { SpotifyPlayer } from "~/features/Player/components/SpotifyPlayer";
-import { YoutubePlayer } from "~/features/Player/components/YouTubePlayer";
-import { SpotifyPlayerRef } from "~/features/Player/types/SpotifyIframeApiTypes";
+import { useAtom } from "jotai";
+import { ShareButton } from "~/features/Highlight/components/ShareButton";
+import { menuOpenedAtom } from "~/features/Player/atoms/menuOpendAtom";
 
 type Props = {
   opened: boolean;
-  toggle: () => void;
+  
 };
 
-export const HeaderComponent = ({ opened, toggle }: Props) => {
-  const spotifyPlayerRef = useRef<SpotifyPlayerRef>(null);
+export const HeaderComponent = ({ opened }: Props) => {
+  const [, setMenuOpened] = useAtom(menuOpenedAtom);
   return (
     <Box w={"full"} bg={"blue"} h={"60"}>
       <Flex align={"center"} justify={"space-between"} p={"xs"} px={"sm"}>
@@ -25,14 +24,17 @@ export const HeaderComponent = ({ opened, toggle }: Props) => {
             RadiMoment
           </Text>
         </Link>
-        <SpotifyPlayer
-            ref={spotifyPlayerRef}
-            uri="spotify:episode:67hjIN8AH2KiIhWiA8XyuO"
-            onStop={() => console.log("ストップ")}
-            width={0}
-            height={0}
+        <Flex align={"center"}>
+          <ShareButton />
+          <Burger
+            color="white"
+            opened={opened}
+            onClick={() => setMenuOpened((prev) => !prev)}
+            hiddenFrom="sm"
+            size="md"
+            ml={"sm"}
           />
-        <Burger color="white" opened={opened} onClick={toggle} hiddenFrom="sm" size="md" />
+        </Flex>
       </Flex>
     </Box>
   );
