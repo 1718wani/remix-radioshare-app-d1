@@ -182,10 +182,14 @@ export default function Hightlights() {
 
   const handlePlaySpotify = () => {
     if (spotifyController) {
+      spotifyController.play();
+    }
+  };
+
+  const handleSeekSpotify = () => {
+    if (spotifyController) {
       spotifyController.loadUri("spotify:episode:0HnmKqu48tJ0ec415Dxidq", false, 120);
-      setTimeout(() => {
-        spotifyController.play();
-      }, 1000);
+
     }
   };
   
@@ -438,6 +442,9 @@ export default function Hightlights() {
       <div id="embed-iframe"></div>
       <Button onClick={handlePlaySpotify}>
         Play
+      </Button>
+      <Button onClick={handleSeekSpotify}>
+        Seek
       </Button>
     </>
   );
