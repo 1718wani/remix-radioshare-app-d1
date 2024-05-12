@@ -8,7 +8,7 @@ import {
 } from "@remix-run/cloudflare";
 import { useFetcher, useLoaderData } from "@remix-run/react";
 import { IconX } from "@tabler/icons-react";
-import { useAtomValue } from "jotai";
+import { useAtom, useAtomValue } from "jotai";
 import { MutableRefObject, useEffect, useRef, useState } from "react";
 import invariant from "tiny-invariant";
 import { LoginNavigateModal } from "~/features/Auth/components/LoginNavigateModal";
@@ -20,7 +20,7 @@ import { EmptyHighlight } from "~/features/Highlight/components/EmptyHighlight";
 import { HighLightCardWithRadioshow } from "~/features/Highlight/components/HighLightCardWithRadioshow";
 import InfiniteScroll from "~/features/Highlight/components/InfiniteScroll";
 import { RadioShowHeader } from "~/features/Highlight/components/RadioShowHeader";
-import { highlightCardWithRadioshowProps } from "~/features/Highlight/types/highlightCardWithRadioshowProps";
+import { playingHighlightIndexAtom } from "~/features/Player/atoms/playingHighlightIndex";
 import { spotifyPlayerAtom } from "~/features/Player/atoms/spotifyEmbedRefAtom";
 import { youtubePlayerAtom } from "~/features/Player/atoms/youtubeEmbedRefAtom";
 import { SpotifyPlayer } from "~/features/Player/components/SpotifyPlayer";
@@ -153,6 +153,8 @@ export default function Hightlights() {
   const [highlightsData, setHighlightsData] = useState(initialHighlightsData);
   console.log("これが再生されるデータ", highlightsData);
 
+  const [playingHighlightIndex, setPlayingHighlightIndex] = useAtom(playingHighlightIndexAtom);
+
   const [hasNextPage, setHasNextPage] = useState(initialHasNextPage);
   const [offset, setOffset] = useState(initialOffset);
   const [orderBy, setOrderBy] = useState("totalReplayTimes");
@@ -174,17 +176,13 @@ export default function Hightlights() {
 
   const [endTime, setEndTime] = useState<number | null>(null);
 
-  // 再生しているIndex（連続再生用に） そしてこれはコンポーネントにわたす。
-  const [playingHighlightIndex, setPlayingHighlightIndex] = useState<
-    number | null
-  >(null);
-
   // 再生する関数
   const handlePlayHighlight = (
     index: number,
     highlightData: (typeof highlightsData)[0]
   ) => {
     console.log("再生されるindex", index);
+
     setPlayingHighlightIndex(index);
     const { platform, idOrUri } = convertUrlToId(
       highlightData.highlight.replayUrl
@@ -237,36 +235,18 @@ export default function Hightlights() {
 
   const handlePauseHighlight = () => {
     console.log(playingHighlightIndex, "indexはこれ");
+
     setPlayingHighlightIndex(null);
     youtubePlayer?.stopVideo();
     spotifyPlayer?.pause();
   };
-
-  // // 次のハイライトを再生する関数
-  // const playNextHighlight = () => {
-  //   const playingHighlightIndexQueue = playingHighlightIndex ?? 0;
-  //   console.log("playNextHighlight", playingHighlightIndexQueue);
-  //   //  if (!playingHighlightIndex) {
-  //   //    console.log("再生できません")
-  //   //    return
-  //   //  }
-  //   // const nextIndex = playingHighlightIndex + 1;
-  //   const nextIndex = playingHighlightIndexQueue !== null ? playingHighlightIndexQueue + 1 : 0;
-  //   console.log("nextIndex", nextIndex);
-  //   if (nextIndex < highlightsData.length) {
-
-  //     handlePlayHighlight(nextIndex, highlightsData[nextIndex]);
-  //   } else {
-  //     console.log("終了しました");
-  //   }
-  // };
 
   const handleAutoStopHighlight = () => {
     console.log("playingHighlightIndex", playingHighlightIndex);
     if (playingHighlightIndex !== null) {
       handlePlayHighlight(
         playingHighlightIndex + 1,
-        highlightsData[playingHighlightIndex]
+        highlightsData[playingHighlightIndex + 1]
       );
     } else {
       console.log("playingHighlightIdがnullになっています。");

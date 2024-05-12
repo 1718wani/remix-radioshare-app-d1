@@ -41,7 +41,7 @@ export const YoutubePlayer = forwardRef<YT.Player, YoutubeIFrameAPIOptions>(
               }
             },
             onStateChange: (event) => {
-              if (event.data === YT.PlayerState.ENDED  ) {
+              if (event.data === YT.PlayerState.PAUSED  ) {
                 console.log("Youtube Iframe onStateChange stopなんだよね", event.data);
                 onStop();  // ビデオが終了したときに onStop を呼び出す
               }
