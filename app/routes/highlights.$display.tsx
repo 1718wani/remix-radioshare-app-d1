@@ -188,11 +188,17 @@ export default function Hightlights() {
 
   const handleSeekSpotify = () => {
     if (spotifyController) {
-      spotifyController.loadUri("spotify:episode:0HnmKqu48tJ0ec415Dxidq", false, 120);
-
+      spotifyController.loadUri(
+        "spotify:episode:0HnmKqu48tJ0ec415Dxidq",
+        false,
+        120
+      );
+      setTimeout(() => {
+        spotifyController.play();
+      }, 1000);
     }
   };
-  
+
   // 再生する関数
   const handlePlayHighlight = (
     index: number,
@@ -269,8 +275,6 @@ export default function Hightlights() {
       console.log("playingHighlightIdがnullになっています。");
     }
   };
-
- 
 
   const handleAction = (
     id: string,
@@ -440,12 +444,8 @@ export default function Hightlights() {
       <LoginNavigateModal opened={opened} close={close} />
 
       <div id="embed-iframe"></div>
-      <Button onClick={handlePlaySpotify}>
-        Play
-      </Button>
-      <Button onClick={handleSeekSpotify}>
-        Seek
-      </Button>
+      <Button onClick={handlePlaySpotify}>Play</Button>
+      <Button onClick={handleSeekSpotify}>Seek</Button>
     </>
   );
 }
