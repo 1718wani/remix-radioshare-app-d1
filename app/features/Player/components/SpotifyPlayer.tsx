@@ -51,6 +51,7 @@ export const SpotifyPlayer = forwardRef(
         const handlePlaybackUpdate = (e) => {
           if (e && endTime > 0 && e.data.position / 1000 > endTime) {
             console.log("Playback should stop");
+    
             currentPlayer.pause();
             onStop();
           }

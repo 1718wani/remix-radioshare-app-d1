@@ -151,7 +151,7 @@ export default function Hightlights() {
   const fetcher = useFetcher<typeof loader>();
   const [opened, { open, close }] = useDisclosure(false);
   const [highlightsData, setHighlightsData] = useState(initialHighlightsData);
-  console.log("これが再生されるデータ",highlightsData)
+  console.log("これが再生されるデータ", highlightsData);
 
   const [hasNextPage, setHasNextPage] = useState(initialHasNextPage);
   const [offset, setOffset] = useState(initialOffset);
@@ -179,14 +179,13 @@ export default function Hightlights() {
     number | null
   >(null);
 
-  // const [isListPlaying,se]
-
   // 再生する関数
   const handlePlayHighlight = (
     index: number,
     highlightData: (typeof highlightsData)[0]
   ) => {
     console.log("再生されるindex", index);
+    setPlayingHighlightIndex(index);
     const { platform, idOrUri } = convertUrlToId(
       highlightData.highlight.replayUrl
     );
@@ -209,9 +208,7 @@ export default function Hightlights() {
       return;
     }
 
-    console.log("index", index)
-
-    setPlayingHighlightIndex(index);
+    console.log("index", index);
 
     if (platform === "spotify") {
       console.log("Spotifyのほうが呼び出されました", spotifyPlayerRef);
@@ -239,7 +236,7 @@ export default function Hightlights() {
   };
 
   const handlePauseHighlight = () => {
-    console.log("これは呼び出されてると良くない")
+    console.log(playingHighlightIndex, "indexはこれ");
     setPlayingHighlightIndex(null);
     youtubePlayer?.stopVideo();
     spotifyPlayer?.pause();
@@ -253,8 +250,8 @@ export default function Hightlights() {
   //   //    console.log("再生できません")
   //   //    return
   //   //  }
-  //   // const nextIndex = playingHighlightIndex + 1; 
-  //   const nextIndex = playingHighlightIndexQueue !== null ? playingHighlightIndexQueue + 1 : 0; 
+  //   // const nextIndex = playingHighlightIndex + 1;
+  //   const nextIndex = playingHighlightIndexQueue !== null ? playingHighlightIndexQueue + 1 : 0;
   //   console.log("nextIndex", nextIndex);
   //   if (nextIndex < highlightsData.length) {
 
@@ -264,15 +261,17 @@ export default function Hightlights() {
   //   }
   // };
 
-  // 再生終了時のイベントハンドラ
-  // const handleStop = () => {
-    
-  //   setTimeout(() => {
-  //     playNextHighlight(); // 次のハイライトを再生
-  //   }, 100); 
-  // };
-
-  
+  const handleAutoStopHighlight = () => {
+    console.log("playingHighlightIndex", playingHighlightIndex);
+    if (playingHighlightIndex !== null) {
+      handlePlayHighlight(
+        playingHighlightIndex + 1,
+        highlightsData[playingHighlightIndex]
+      );
+    } else {
+      console.log("playingHighlightIdがnullになっています。");
+    }
+  };
 
   const handleAction = (
     id: string,
@@ -417,7 +416,7 @@ export default function Hightlights() {
         <SpotifyPlayer
           ref={spotifyPlayerRef}
           uri="spotify:episode:67hjIN8AH2KiIhWiA8XyuO"
-          onStop={handlePauseHighlight}
+          onStop={handleAutoStopHighlight}
           endTime={endTime}
         />
       </Box>
@@ -435,7 +434,7 @@ export default function Hightlights() {
           ref={youtubePlayerRef}
           initialVideoId=""
           initialStartSeconds={0}
-          onStop={handlePauseHighlight}
+          onStop={handleAutoStopHighlight}
         />
       </Box>
 
