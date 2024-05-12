@@ -183,7 +183,9 @@ export default function Hightlights() {
   const handlePlaySpotify = () => {
     if (spotifyController) {
       spotifyController.loadUri("spotify:episode:0HnmKqu48tJ0ec415Dxidq", false, 120);
-      spotifyController.play();
+      setTimeout(() => {
+        spotifyController.play();
+      }, 1000);
     }
   };
   
