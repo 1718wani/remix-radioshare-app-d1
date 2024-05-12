@@ -1,4 +1,4 @@
-import { Box, Flex, Grid, Select, Title, rem } from "@mantine/core";
+import { Box, Button, Flex, Grid, Select, Title, rem } from "@mantine/core";
 import { useDisclosure, useMediaQuery } from "@mantine/hooks";
 import { notifications } from "@mantine/notifications";
 import {
@@ -6,7 +6,7 @@ import {
   LoaderFunctionArgs,
   json,
 } from "@remix-run/cloudflare";
-import { useFetcher, useLoaderData } from "@remix-run/react";
+import { Scripts, useFetcher, useLoaderData } from "@remix-run/react";
 import { IconX } from "@tabler/icons-react";
 import { useAtom, useAtomValue } from "jotai";
 import { MutableRefObject, useEffect, useRef, useState } from "react";
@@ -153,7 +153,9 @@ export default function Hightlights() {
   const [highlightsData, setHighlightsData] = useState(initialHighlightsData);
   console.log("これが再生されるデータ", highlightsData);
 
-  const [playingHighlightIndex, setPlayingHighlightIndex] = useAtom(playingHighlightIndexAtom);
+  const [playingHighlightIndex, setPlayingHighlightIndex] = useAtom(
+    playingHighlightIndexAtom
+  );
 
   const [hasNextPage, setHasNextPage] = useState(initialHasNextPage);
   const [offset, setOffset] = useState(initialOffset);
@@ -175,6 +177,8 @@ export default function Hightlights() {
   const isEnabledUserAction = userId ? true : false;
 
   const [endTime, setEndTime] = useState<number | null>(null);
+
+  const [spotifyController, setSpotifyController] = useState<SpotifyEmbedController | null>(null);
 
   // 再生する関数
   const handlePlayHighlight = (
@@ -252,6 +256,34 @@ export default function Hightlights() {
       console.log("playingHighlightIdがnullになっています。");
     }
   };
+
+  useEffect(() => {
+    // Spotify iFrame APIが利用可能になったときの処理を定義
+    window.onSpotifyIframeApiReady = (IFrameAPI) => {
+      const element = document.getElementById('embed-iframe');
+      const options = {
+        uri: 'spotify:episode:7makk4oTQel546B0PZlDM5'
+      };
+      const callback = (EmbedController: SpotifyEmbedController) => {
+        console.log("セットされました");
+        setSpotifyController(EmbedController);
+      };
+      if (element) {
+        IFrameAPI.createController(element, options, callback);
+      }
+    };
+
+    // スクリプトタグを動的に作成してページに追加
+    const script = document.createElement('script');
+    script.src = "https://open.spotify.com/embed/iframe-api/v1";
+    script.async = true;
+    document.body.appendChild(script);
+
+    // コンポーネントのアンマウント時にスクリプトを削除
+    return () => {
+      document.body.removeChild(script);
+    };
+  }, []);
 
   const handleAction = (
     id: string,
@@ -384,7 +416,7 @@ export default function Hightlights() {
         <EmptyHighlight />
       )}
 
-      <Box
+      {/* <Box
         style={{
           position: "fixed",
           right: isMobile ? "50%" : "3%",
@@ -399,7 +431,7 @@ export default function Hightlights() {
           onStop={handleAutoStopHighlight}
           endTime={endTime}
         />
-      </Box>
+      </Box> */}
 
       <Box
         style={{
@@ -419,6 +451,11 @@ export default function Hightlights() {
       </Box>
 
       <LoginNavigateModal opened={opened} close={close} />
+      
+      <div id="embed-iframe" ></div>
+      <Button onClick={() => spotifyController && spotifyController.play()}>
+        Play
+      </Button>
     </>
   );
 }
