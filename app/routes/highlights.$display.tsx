@@ -27,6 +27,7 @@ import { SpotifyPlayer } from "~/features/Player/components/SpotifyPlayer";
 import { YoutubePlayer } from "~/features/Player/components/YouTubePlayer";
 import { convertHHMMSSToSeconds } from "~/features/Player/functions/convertHHmmssToSeconds";
 import { convertUrlToId } from "~/features/Player/functions/convertUrlToId";
+import { useSpotifyPlayer } from "~/features/Player/hooks/useSpotifyPlayer";
 import {
   SpotifyEmbedController,
   SpotifyPlayerRef,
@@ -177,9 +178,14 @@ export default function Hightlights() {
   const isEnabledUserAction = userId ? true : false;
 
   const [endTime, setEndTime] = useState<number | null>(null);
+  const spotifyController = useSpotifyPlayer();
 
-  const [spotifyController, setSpotifyController] = useState<SpotifyEmbedController | null>(null);
-
+  const handlePlaySpotify = () => {
+    if (spotifyController) {
+      spotifyController.play();
+    }
+  };
+  
   // 再生する関数
   const handlePlayHighlight = (
     index: number,
@@ -257,33 +263,7 @@ export default function Hightlights() {
     }
   };
 
-  useEffect(() => {
-    // Spotify iFrame APIが利用可能になったときの処理を定義
-    window.onSpotifyIframeApiReady = (IFrameAPI) => {
-      const element = document.getElementById('embed-iframe');
-      const options = {
-        uri: 'spotify:episode:7makk4oTQel546B0PZlDM5'
-      };
-      const callback = (EmbedController: SpotifyEmbedController) => {
-        console.log("セットされました");
-        setSpotifyController(EmbedController);
-      };
-      if (element) {
-        IFrameAPI.createController(element, options, callback);
-      }
-    };
-
-    // スクリプトタグを動的に作成してページに追加
-    const script = document.createElement('script');
-    script.src = "https://open.spotify.com/embed/iframe-api/v1";
-    script.async = true;
-    document.body.appendChild(script);
-
-    // コンポーネントのアンマウント時にスクリプトを削除
-    return () => {
-      document.body.removeChild(script);
-    };
-  }, []);
+ 
 
   const handleAction = (
     id: string,
@@ -451,9 +431,9 @@ export default function Hightlights() {
       </Box>
 
       <LoginNavigateModal opened={opened} close={close} />
-      
-      <div id="embed-iframe" ></div>
-      <Button onClick={() => spotifyController && spotifyController.play()}>
+
+      <div id="embed-iframe"></div>
+      <Button onClick={handlePlaySpotify}>
         Play
       </Button>
     </>
