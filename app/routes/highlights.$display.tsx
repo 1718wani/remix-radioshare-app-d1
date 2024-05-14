@@ -1,4 +1,4 @@
-import { Box, Button, Flex, Grid, Select, Title, rem } from "@mantine/core";
+import { Box, Flex, Grid, Select, Title, rem } from "@mantine/core";
 import { useDisclosure, useMediaQuery } from "@mantine/hooks";
 import { notifications } from "@mantine/notifications";
 import {
@@ -6,10 +6,9 @@ import {
   LoaderFunctionArgs,
   json,
 } from "@remix-run/cloudflare";
-import { Scripts, useFetcher, useLoaderData } from "@remix-run/react";
+import { useFetcher, useLoaderData } from "@remix-run/react";
 import { IconX } from "@tabler/icons-react";
-import { useAtom, useAtomValue } from "jotai";
-import { MutableRefObject, useEffect, useRef, useState } from "react";
+import { useEffect,  useState } from "react";
 import invariant from "tiny-invariant";
 import { LoginNavigateModal } from "~/features/Auth/components/LoginNavigateModal";
 import { authenticator } from "~/features/Auth/services/authenticator";
@@ -20,18 +19,10 @@ import { EmptyHighlight } from "~/features/Highlight/components/EmptyHighlight";
 import { HighLightCardWithRadioshow } from "~/features/Highlight/components/HighLightCardWithRadioshow";
 import InfiniteScroll from "~/features/Highlight/components/InfiniteScroll";
 import { RadioShowHeader } from "~/features/Highlight/components/RadioShowHeader";
-import { playingHighlightIndexAtom } from "~/features/Player/atoms/playingHighlightIndex";
-import { spotifyPlayerAtom } from "~/features/Player/atoms/spotifyEmbedRefAtom";
-import { youtubePlayerAtom } from "~/features/Player/atoms/youtubeEmbedRefAtom";
-import { SpotifyPlayer } from "~/features/Player/components/SpotifyPlayer";
-import { YoutubePlayer } from "~/features/Player/components/YouTubePlayer";
 import { convertHHMMSSToSeconds } from "~/features/Player/functions/convertHHmmssToSeconds";
 import { convertUrlToId } from "~/features/Player/functions/convertUrlToId";
 import { useSpotifyPlayer } from "~/features/Player/hooks/useSpotifyPlayer";
-import {
-  SpotifyEmbedController,
-  SpotifyPlayerRef,
-} from "~/features/Player/types/SpotifyIframeApiTypes";
+import { useYouTubePlayer } from "~/features/Player/hooks/useYoutubePlayer";
 import { getRadioshowById } from "~/features/Radioshow/apis/getRadioshowById";
 
 export const action = async ({ request, context }: ActionFunctionArgs) => {
@@ -152,60 +143,45 @@ export default function Hightlights() {
   const fetcher = useFetcher<typeof loader>();
   const [opened, { open, close }] = useDisclosure(false);
   const [highlightsData, setHighlightsData] = useState(initialHighlightsData);
-  console.log("これが再生されるデータ", highlightsData);
-
-  const [playingHighlightIndex, setPlayingHighlightIndex] = useAtom(
-    playingHighlightIndexAtom
-  );
 
   const [hasNextPage, setHasNextPage] = useState(initialHasNextPage);
   const [offset, setOffset] = useState(initialOffset);
   const [orderBy, setOrderBy] = useState("totalReplayTimes");
   const [ascOrDesc, setAscOrDesc] = useState("desc");
   const isMobile = useMediaQuery("(max-width: 768px)");
-
-  const spotifyPlayerRef = useRef<SpotifyPlayerRef>(null);
-  const youtubePlayerRef = useRef<YT.Player | null>(null);
-  const youtubePlayerAtomValue =
-    useAtomValue<MutableRefObject<YT.Player | null> | null>(youtubePlayerAtom);
-  const spotifyPlayerAtomValue =
-    useAtomValue<MutableRefObject<SpotifyEmbedController | null> | null>(
-      spotifyPlayerAtom
-    );
-  const youtubePlayer = youtubePlayerAtomValue?.current;
-  const spotifyPlayer = spotifyPlayerAtomValue?.current;
+  const [playingHighlightIndex, setPlayingHighlightIndex] = useState<
+    number | null
+  >(null);
 
   const isEnabledUserAction = userId ? true : false;
 
-  const [endTime, setEndTime] = useState<number | null>(null);
-  const spotifyController = useSpotifyPlayer();
-
-  const handlePlaySpotify = () => {
-    if (spotifyController) {
-      spotifyController.play();
-    }
+  const handlePauseHighlight = () => {
+    setPlayingHighlightIndex(null);
+    pauseSpotifyHighlight();
+    pauseYoutubeHighlight();
   };
 
-  const handleSeekSpotify = () => {
-    if (spotifyController) {
-      spotifyController.loadUri(
-        "spotify:episode:0HnmKqu48tJ0ec415Dxidq",
-        false,
-        120
+  const handleAutoStopHighlight = () => {
+    console.log("playingHighlightIndex", playingHighlightIndex);
+    if (playingHighlightIndex !== null) {
+      handlePlayHighlight(
+        playingHighlightIndex + 1,
+        highlightsData[playingHighlightIndex + 1]
       );
-      setTimeout(() => {
-        spotifyController.play();
-      }, 1000);
+    } else {
+      console.log("playingHighlightIdがnullになっています。");
     }
   };
+
+  const { playSpotifyHighlight, pauseSpotifyHighlight } = useSpotifyPlayer(handleAutoStopHighlight);
+  const { playYoutubeHighlight, pauseYoutubeHighlight } = useYouTubePlayer(handleAutoStopHighlight);
 
   // 再生する関数
   const handlePlayHighlight = (
     index: number,
     highlightData: (typeof highlightsData)[0]
   ) => {
-    console.log("再生されるindex", index);
-
+    console.log("index", index);
     setPlayingHighlightIndex(index);
     const { platform, idOrUri } = convertUrlToId(
       highlightData.highlight.replayUrl
@@ -229,52 +205,26 @@ export default function Hightlights() {
       return;
     }
 
-    console.log("index", index);
-
-    if (platform === "spotify") {
-      console.log("Spotifyのほうが呼び出されました", spotifyPlayerRef);
-      setEndTime(convertedEndSeconds ?? 0);
-      // Youtubeの再生をストップする
-      youtubePlayer?.stopVideo();
-      // Youtubeを非表示にする
-      youtubePlayer?.setSize(0, 0);
-      spotifyPlayer?.setIframeDimensions(320, 80);
-      spotifyPlayer?.loadUri(idOrUri, false, convertedStartSeconds ?? 0);
-      spotifyPlayer?.play();
-    } else if (platform === "youtube") {
-      spotifyPlayer?.pause();
-      youtubePlayer?.setSize(320, 80);
-      console.log("Youtubeのほうが呼び出されました", youtubePlayerRef);
-      youtubePlayer?.loadVideoById({
-        videoId: idOrUri,
-        startSeconds: convertedStartSeconds,
-        endSeconds: convertedEndSeconds,
-        suggestedQuality: "small",
-      });
+    if (
+      platform === "spotify" &&
+      convertedStartSeconds &&
+      convertedEndSeconds
+    ) {
+      pauseYoutubeHighlight();
+      playSpotifyHighlight(idOrUri, convertedStartSeconds, convertedEndSeconds);
+    } else if (
+      platform === "youtube" &&
+      convertedStartSeconds &&
+      convertedEndSeconds
+    ) {
+      pauseSpotifyHighlight();
+      playYoutubeHighlight(idOrUri, convertedStartSeconds, convertedEndSeconds);
     } else {
-      console.log("特に何もしない");
+      console.log("何も再生しない");
     }
   };
 
-  const handlePauseHighlight = () => {
-    console.log(playingHighlightIndex, "indexはこれ");
-
-    setPlayingHighlightIndex(null);
-    youtubePlayer?.stopVideo();
-    spotifyPlayer?.pause();
-  };
-
-  const handleAutoStopHighlight = () => {
-    console.log("playingHighlightIndex", playingHighlightIndex);
-    if (playingHighlightIndex !== null) {
-      handlePlayHighlight(
-        playingHighlightIndex + 1,
-        highlightsData[playingHighlightIndex + 1]
-      );
-    } else {
-      console.log("playingHighlightIdがnullになっています。");
-    }
-  };
+ 
 
   const handleAction = (
     id: string,
@@ -407,7 +357,7 @@ export default function Hightlights() {
         <EmptyHighlight />
       )}
 
-      {/* <Box
+      <Box
         style={{
           position: "fixed",
           right: isMobile ? "50%" : "3%",
@@ -416,13 +366,8 @@ export default function Hightlights() {
           zIndex: 3,
         }}
       >
-        <SpotifyPlayer
-          ref={spotifyPlayerRef}
-          uri="spotify:episode:67hjIN8AH2KiIhWiA8XyuO"
-          onStop={handleAutoStopHighlight}
-          endTime={endTime}
-        />
-      </Box> */}
+        <div id="embed-iframe"></div>
+      </Box>
 
       <Box
         style={{
@@ -433,19 +378,10 @@ export default function Hightlights() {
           zIndex: 3,
         }}
       >
-        <YoutubePlayer
-          ref={youtubePlayerRef}
-          initialVideoId=""
-          initialStartSeconds={0}
-          onStop={handleAutoStopHighlight}
-        />
+        <div id="youtube-iframe"></div>
       </Box>
 
       <LoginNavigateModal opened={opened} close={close} />
-
-      <div id="embed-iframe"></div>
-      <Button onClick={handlePlaySpotify}>Play</Button>
-      <Button onClick={handleSeekSpotify}>Seek</Button>
     </>
   );
 }
