@@ -16,8 +16,8 @@ import { IconCheck, IconX } from "@tabler/icons-react";
 import { useEffect } from "react";
 import { z } from "zod";
 import { checkUserExists } from "~/features/Auth/apis/checkUserExists";
-import { authenticator } from "~/features/Auth/services/authenticator";
-import { commitSession, getSession } from "~/features/Auth/sessionStrage";
+import { authenticator } from "~/features/Auth/services/auth.server";
+import { commitSession, getSession } from "~/features/Auth/session.server";
 
 export const loader = async ({ request }: LoaderFunctionArgs) => {
   await authenticator.isAuthenticated(request, {
@@ -108,8 +108,6 @@ export default function Signin() {
     },
   });
 
-  
-
   useEffect(() => {
     if (toastMessage) {
       console.log(toastMessage, "toastmessageが呼び出されるはずの場所");
@@ -134,8 +132,6 @@ export default function Signin() {
         icon: <IconX />,
       });
     }
-
-    
 
     console.log(data);
     // {

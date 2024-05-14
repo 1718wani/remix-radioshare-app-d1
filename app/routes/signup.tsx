@@ -1,7 +1,7 @@
 import { ActionFunctionArgs } from "@remix-run/node";
 import { LoaderFunctionArgs, json, redirect } from "@remix-run/cloudflare";
 import { Link, Form, useActionData } from "@remix-run/react";
-import { authenticator } from "~/features/Auth/services/authenticator";
+import { authenticator } from "~/features/Auth/services/auth.server";
 import {
   Button,
   PasswordInput,
@@ -18,7 +18,7 @@ import { createUser } from "~/features/Auth/apis/createUser";
 import { IconX } from "@tabler/icons-react";
 import { notifications } from "@mantine/notifications";
 import { checkUserExists } from "~/features/Auth/apis/checkUserExists";
-import { commitSession, getSession } from "~/features/Auth/sessionStrage";
+import { commitSession, getSession } from "~/features/Auth/session.server";
 
 export const loader = async ({ request }: LoaderFunctionArgs) => {
   const user = await authenticator.isAuthenticated(request, {
@@ -32,10 +32,8 @@ export async function action({ request, context }: ActionFunctionArgs) {
   console.log(formData, "requestSignup");
   const submission = parseWithZod(formData, { schema });
 
-  const session = await getSession(
-    request.headers.get("Cookie"),
-  )
-  session.flash("message", `Task created!`)
+  const session = await getSession(request.headers.get("Cookie"));
+  session.flash("message", `Task created!`);
 
   if (submission.status !== "success") {
     return json({
@@ -54,7 +52,7 @@ export async function action({ request, context }: ActionFunctionArgs) {
     });
   }
   await createUser(submission.value, context);
-  return redirect("/signin",{
+  return redirect("/signin", {
     headers: {
       "Set-Cookie": await commitSession(session),
     },

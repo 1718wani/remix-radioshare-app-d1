@@ -8,10 +8,10 @@ import {
 } from "@remix-run/cloudflare";
 import { useFetcher, useLoaderData } from "@remix-run/react";
 import { IconX } from "@tabler/icons-react";
-import { useEffect,  useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import invariant from "tiny-invariant";
 import { LoginNavigateModal } from "~/features/Auth/components/LoginNavigateModal";
-import { authenticator } from "~/features/Auth/services/authenticator";
+import { authenticator } from "~/features/Auth/services/auth.server";
 import { getHighlights } from "~/features/Highlight/apis/getHighlights";
 import { incrementTotalReplayTimes } from "~/features/Highlight/apis/incrementTotalReplayTimes";
 import { updateHighlight } from "~/features/Highlight/apis/updateHighlight";
@@ -162,69 +162,96 @@ export default function Hightlights() {
   };
 
   const handleAutoStopHighlight = () => {
-    console.log("playingHighlightIndex", playingHighlightIndex);
-    if (playingHighlightIndex !== null) {
-      handlePlayHighlight(
-        playingHighlightIndex + 1,
-        highlightsData[playingHighlightIndex + 1]
-      );
-    } else {
-      console.log("playingHighlightIdがnullになっています。");
-    }
+    console.log(
+      "handleAutoStopHighlight",
+      "playingHighlightIndex",
+      playingHighlightIndex
+    );
+
+    setPlayingHighlightIndex((prev) => (prev || 0) + 1);
   };
 
-  const { playSpotifyHighlight, pauseSpotifyHighlight } = useSpotifyPlayer(handleAutoStopHighlight);
-  const { playYoutubeHighlight, pauseYoutubeHighlight } = useYouTubePlayer(handleAutoStopHighlight);
+  const { playSpotifyHighlight, pauseSpotifyHighlight } = useSpotifyPlayer(
+    handleAutoStopHighlight
+  );
+  const { playYoutubeHighlight, pauseYoutubeHighlight } = useYouTubePlayer(
+    handleAutoStopHighlight
+  );
 
   // 再生する関数
-  const handlePlayHighlight = (
-    index: number,
-    highlightData: (typeof highlightsData)[0]
-  ) => {
-    console.log("index", index);
+  const playHighlight = useCallback(
+    (index: number, highlightData: (typeof highlightsData)[0]) => {
+      console.log("index", index);
+
+      const { platform, idOrUri } = convertUrlToId(
+        highlightData.highlight.replayUrl
+      );
+      const convertedStartSeconds = convertHHMMSSToSeconds(
+        highlightData.highlight.startHHmmss
+      );
+      const convertedEndSeconds = convertHHMMSSToSeconds(
+        highlightData.highlight.endHHmmss
+      );
+
+      if (!idOrUri) {
+        notifications.show({
+          withCloseButton: true,
+          autoClose: 5000,
+          title: "再生エラーです",
+          message: "登録されたURIの不備です",
+          color: "red",
+          icon: <IconX />,
+        });
+        return;
+      }
+
+      if (
+        platform === "spotify" &&
+        convertedStartSeconds &&
+        convertedEndSeconds
+      ) {
+        pauseYoutubeHighlight();
+        playSpotifyHighlight(
+          idOrUri,
+          convertedStartSeconds,
+          convertedEndSeconds
+        );
+      } else if (
+        platform === "youtube" &&
+        convertedStartSeconds &&
+        convertedEndSeconds
+      ) {
+        pauseSpotifyHighlight();
+        playYoutubeHighlight(
+          idOrUri,
+          convertedStartSeconds,
+          convertedEndSeconds
+        );
+      } else {
+        console.log("何も再生しない");
+      }
+    },
+    [
+      playSpotifyHighlight,
+      playYoutubeHighlight,
+      pauseSpotifyHighlight,
+      pauseYoutubeHighlight,
+    ]
+  );
+
+  useEffect(() => {
+    if (playingHighlightIndex !== null) {
+      playHighlight(
+        playingHighlightIndex,
+        highlightsData[playingHighlightIndex]
+      );
+    }
+    console.log("playingHighlightIndex", playingHighlightIndex);
+  }, [playingHighlightIndex, highlightsData, playHighlight]);
+
+  const handlePlayHighlight = (index: number) => {
     setPlayingHighlightIndex(index);
-    const { platform, idOrUri } = convertUrlToId(
-      highlightData.highlight.replayUrl
-    );
-    const convertedStartSeconds = convertHHMMSSToSeconds(
-      highlightData.highlight.startHHmmss
-    );
-    const convertedEndSeconds = convertHHMMSSToSeconds(
-      highlightData.highlight.endHHmmss
-    );
-
-    if (!idOrUri) {
-      notifications.show({
-        withCloseButton: true,
-        autoClose: 5000,
-        title: "再生エラーです",
-        message: "登録されたURIの不備です",
-        color: "red",
-        icon: <IconX />,
-      });
-      return;
-    }
-
-    if (
-      platform === "spotify" &&
-      convertedStartSeconds &&
-      convertedEndSeconds
-    ) {
-      pauseYoutubeHighlight();
-      playSpotifyHighlight(idOrUri, convertedStartSeconds, convertedEndSeconds);
-    } else if (
-      platform === "youtube" &&
-      convertedStartSeconds &&
-      convertedEndSeconds
-    ) {
-      pauseSpotifyHighlight();
-      playYoutubeHighlight(idOrUri, convertedStartSeconds, convertedEndSeconds);
-    } else {
-      console.log("何も再生しない");
-    }
   };
-
- 
 
   const handleAction = (
     id: string,
@@ -293,6 +320,7 @@ export default function Hightlights() {
       )}
 
       <Flex justify={"space-between"} m={"md"}>
+        <div>{playingHighlightIndex}</div>
         <Title order={2}>ハイライト一覧</Title>
         <Select
           withCheckIcon={false}
@@ -344,7 +372,7 @@ export default function Hightlights() {
                     onAction={handleAction}
                     startHHmmss={highlightData.highlight.startHHmmss}
                     endHHmmss={highlightData.highlight.endHHmmss}
-                    onPlay={() => handlePlayHighlight(index, highlightData)}
+                    onPlay={() => handlePlayHighlight(index)}
                     playing={index === playingHighlightIndex}
                     handleStop={handlePauseHighlight}
                   />

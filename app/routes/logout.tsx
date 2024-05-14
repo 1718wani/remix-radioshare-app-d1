@@ -1,11 +1,9 @@
 import { ActionFunctionArgs } from "@remix-run/node";
 import { redirect } from "@remix-run/cloudflare";
-import { authenticator } from "~/features/Auth/services/authenticator";
-import { destroySession, getSession } from "~/features/Auth/sessionStrage";
+import { authenticator } from "~/features/Auth/services/auth.server";
+import { destroySession, getSession } from "~/features/Auth/session.server";
 
-export const action = async ({
-  request,
-}: ActionFunctionArgs) => {
+export const action = async ({ request }: ActionFunctionArgs) => {
   await authenticator.logout(request, { redirectTo: "/" });
   const session = await getSession(request.headers.get("cookie"));
   return redirect("/signin", {

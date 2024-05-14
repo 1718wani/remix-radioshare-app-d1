@@ -6,7 +6,7 @@ import {
   radioshows,
   userHighlights,
 } from "~/drizzle/schema.server";
-import { authenticator } from "~/features/Auth/services/authenticator";
+import { authenticator } from "~/features/Auth/services/auth.server";
 
 export const getHighlights = async (
   context: AppLoadContext,

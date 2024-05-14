@@ -1,8 +1,6 @@
 import { LoaderFunctionArgs, json } from "@remix-run/cloudflare";
-import {
-  Outlet,
-} from "@remix-run/react";
-import { authenticator } from "~/features/Auth/services/authenticator";
+import { Outlet } from "@remix-run/react";
+import { authenticator } from "~/features/Auth/services/auth.server";
 
 export const loader = async ({ request }: LoaderFunctionArgs) => {
   const userId = await authenticator.isAuthenticated(request, {});

@@ -38,7 +38,7 @@ import {
 } from "@tabler/icons-react";
 import { getRadioshows } from "./features/Radioshow/apis/getRadioshows";
 import { LoaderFunctionArgs } from "@remix-run/cloudflare";
-import { authenticator } from "./features/Auth/services/authenticator";
+import { authenticator } from "./features/Auth/services/auth.server";
 import { LoginNavigateModal } from "./features/Auth/components/LoginNavigateModal";
 import { useAtom } from "jotai";
 import { menuOpenedAtom } from "./features/Player/atoms/menuOpendAtom";
@@ -86,7 +86,6 @@ export default function App() {
 
   const matches = useMatches();
   const currentPath = matches[matches.length - 1]?.pathname ?? "";
-
 
   // ちらつき防止に遅延させて
   useEffect(() => {
@@ -185,7 +184,7 @@ export default function App() {
             <Form
               onClick={() => {
                 navigate("/signin");
-                setMenuOpened(prev => !prev);
+                setMenuOpened((prev) => !prev);
               }}
               style={{ margin: 0 }}
             >

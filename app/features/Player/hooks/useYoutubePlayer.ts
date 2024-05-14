@@ -7,12 +7,12 @@ export function useYouTubePlayer(onStopCallback: () => void) {
 
   const onPlayerReady = (event: YT.PlayerEvent) => {
     console.log("onPlayerReady", event);
-    // プレイヤーが準備完了したときの処理
   };
 
   const onPlayerStateChange = useCallback(
     (event: YT.OnStateChangeEvent) => {
       if (event.data === YT.PlayerState.ENDED) {
+        console.log("onPlayerStateChange2回呼ばれるか", event);
         onStopCallback();
       }
     },
@@ -27,8 +27,8 @@ export function useYouTubePlayer(onStopCallback: () => void) {
 
     window.onYouTubeIframeAPIReady = () => {
       const newPlayer = new YT.Player("youtube-iframe", {
-        height: 0,
-        width: 0,
+        height: "0",
+        width: "0",
         videoId: "",
         events: {
           onReady: onPlayerReady,
