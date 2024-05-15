@@ -8,3 +8,6 @@ compatibility_flags = [ "nodejs_compat" ]
 [[r2_buckets]]
 binding = "BUCKET"
 bucket_name = "radioshow-header-image-bucket"
+
+[vars]
+RESEND_API_KEY = "re_JZEiPpx8_9eZbL1tiKezUHimmWGwDuFRb"
