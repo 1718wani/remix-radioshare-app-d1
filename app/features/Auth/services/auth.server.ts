@@ -25,9 +25,9 @@ authenticator.use(formStrategy, "user-signin");
 
 if (
   !(
-    process.env.GOOGLE_CLIENT_ID &&
-    process.env.GOOGLE_CLIENT_SECRET &&
-    process.env.CLIENT_URL
+    import.meta.env.GOOGLE_CLIENT_ID &&
+    import.meta.env.GOOGLE_CLIENT_SECRET &&
+    import.meta.env.CLIENT_URL
   )
 ) {
   throw new Error(
