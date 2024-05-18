@@ -37,9 +37,9 @@ if (
 
 const googleStrategy = new GoogleStrategy(
   {
-    clientID: process.env.GOOGLE_CLIENT_ID || "",
-    clientSecret: process.env.GOOGLE_CLIENT_SECRET || "",
-    callbackURL: `${process.env.CLIENT_URL}/api/auth/google/callback`,
+    clientID:import.meta.env.GOOGLE_CLIENT_ID || "",
+    clientSecret: import.meta.env.GOOGLE_CLIENT_SECRET || "",
+    callbackURL: `${import.meta.env.CLIENT_URL}/api/auth/google/callback`,
   },
   async ({ profile, context }) => {
     console.log("GoogleStrategy",profile,context);
