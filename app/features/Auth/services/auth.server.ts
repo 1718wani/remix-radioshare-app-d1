@@ -25,9 +25,9 @@ authenticator.use(formStrategy, "user-signin");
 
 if (
   !(
-    import.meta.env.GOOGLE_CLIENT_ID &&
-    import.meta.env.GOOGLE_CLIENT_SECRET &&
-    import.meta.env.CLIENT_URL
+    import.meta.env.VITE_GOOGLE_CLIENT_ID &&
+    import.meta.env.VITE_GOOGLE_CLIENT_SECRET &&
+    import.meta.env.VITE_CLIENT_URL
   )
 ) {
   throw new Error(
@@ -37,9 +37,9 @@ if (
 
 const googleStrategy = new GoogleStrategy(
   {
-    clientID:import.meta.env.GOOGLE_CLIENT_ID || "",
-    clientSecret: import.meta.env.GOOGLE_CLIENT_SECRET || "",
-    callbackURL: `${import.meta.env.CLIENT_URL}/api/auth/google/callback`,
+    clientID:import.meta.env.VITE_GOOGLE_CLIENT_ID || "",
+    clientSecret: import.meta.env.VITE_GOOGLE_CLIENT_SECRET || "",
+    callbackURL: `${import.meta.env.VITE_CLIENT_URL}/api/auth/google/callback`,
   },
   async ({ profile, context }) => {
     console.log("GoogleStrategy",profile,context);
