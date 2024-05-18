@@ -1,7 +1,7 @@
 import { Center, Image, Stack, Text, Title } from "@mantine/core";
 import { LoaderFunctionArgs } from "@remix-run/cloudflare";
 import { Link } from "@remix-run/react";
-import { authenticator } from "~/features/Auth/services/authenticator";
+import { authenticator } from "~/features/Auth/services/auth.server";
 
 export async function loader({ request }: LoaderFunctionArgs) {
   return await authenticator.isAuthenticated(request, {

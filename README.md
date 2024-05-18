@@ -1,48 +1,25 @@
-# Welcome to Remix + Vite!
-
-📖 See the [Remix docs](https://remix.run/docs) and the [Remix Vite docs](https://remix.run/docs/en/main/future/vite) for details on supported features.
-
-## Typegen
-
-Generate types for your Cloudflare bindings in `wrangler.toml`:
-
-```sh
-npm run typegen
-```
-
-You will need to rerun typegen whenever you make changes to `wrangler.toml`.
-
-## Development
-
-Run the Vite dev server:
-
-```sh
-npm run dev
-```
-
-To run Wrangler:
-
-```sh
-npm run build
-npm run start
-```
-
-## Deployment
-
-> [!WARNING]  
-> Cloudflare does _not_ use `wrangler.toml` to configure deployment bindings.
-> You **MUST** [configure deployment bindings manually in the Cloudflare dashboard][bindings].
-
-First, build your app for production:
-
-```sh
-npm run build
-```
-
-Then, deploy your app to Cloudflare Pages:
-
-```sh
-npm run deploy
-```
-
-[bindings]: https://developers.cloudflare.com/pages/functions/bindings/
+# サービスの説明
+  - ラジオ・音声コンテンツの面白かったところをシェアして、新しいラジオに入門したり、お気に入りの部分を聞き返せるようにするサービスです。
+  - クリックすると面白いところだけサービス内で聞くことができます。
+  - ログインするといいねや保存ができます。
+# 開発背景
+  - 今日、SpotifyやYoutubeで音声コンテンツが数多く配信されており、Covid-19の影響もあり音声コンテンツ市場は広がり続けています。その中でも芸人ラジオは意外と聞いている人がいます。
+  - ただ、芸人ラジオは独特な今までの「ノリ」や説明がない（あえて短くしている）コーナーも多く、どこから聞けばいいかもわからないため入門しづらいです。
+  - Youtube動画やテレビは、（正規の方法ではないものも含めて）切り抜きで流れてくることが多いですが、ラジオの切り抜きは多くありません。許可取りのしにくさや、単発だと面白さが伝わりにくいこともあると思います。
+  - そのためこのサービスでは、以下の2つをできるようにしています。
+  #### 1. 配信リンクと再生開始・終了時間を指定するだけで、気軽にラジオのおもしろいところをシェアできる
+  #### 2. 視聴回数ランキングが番組ごとにも表示できるため、面白い回から順番に聞いてみる事ができる。
+  - このサービスを通して、多くの人の新しいラジオに入門するきっかけを提供できればと思います。
+# UX観点で工夫した点
+- 切り抜きの登録時に整合性の取れている時間が入力できるようバリデーションをかけています。
+- 特定時間からの再生、終了ができるようにしています。
+- 無限ローディングを実装しています。
+# TECH
+- スケーラビリティを意識してCloudflare D1 を利用しています。（もともとPlanetScaleで構築していましたが、DBもSQLiteに移行）
+	- PlanetScale → Proプランのみになったため✗
+	- Turso → 日本リージョンがなかったため✗
+- オブジェクトストレージには、エグレス料金なしで利用できるCloudflare R2 を利用しています。
+# FUTURE
+- 複数の切り抜きを組み合わせたまとめを作れるようにする。
+- SearchBoxの設置
+- 切り抜きを配信元と協業し収益化

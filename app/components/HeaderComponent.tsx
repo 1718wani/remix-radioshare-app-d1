@@ -1,54 +1,40 @@
-import { Box, Flex, Text, Button, TextInput, Menu } from "@mantine/core";
-import { Form, Link, NavLink } from "@remix-run/react";
+import {
+  Box,
+  Flex,
+  Text,
+  Burger,
+} from "@mantine/core";
+import { Link } from "@remix-run/react";
+import { useAtom } from "jotai";
+import { ShareButton } from "~/features/Highlight/components/ShareButton";
+import { menuOpenedAtom } from "~/features/Player/atoms/menuOpendAtom";
 
-export const HeaderComponent = () => {
+type Props = {
+  opened: boolean;
+  
+};
+
+export const HeaderComponent = ({ opened }: Props) => {
+  const [, setMenuOpened] = useAtom(menuOpenedAtom);
   return (
-    <Box w={"full"} bg={"blue"} h={"42"}>
-      <Flex align={"center"} justify={"space-between"} mx={"sm"}>
+    <Box w={"full"} bg={"blue"} h={"60"}>
+      <Flex align={"center"} justify={"space-between"} p={"xs"} px={"sm"}>
         <Link to={"/"} style={{ textDecoration: "none" }}>
-          <Text fw={700} fs="italic" size="xl" c={"gray.1"}>
+          <Text fw={800} fs="italic" size="xl" c={"gray.1"}>
             RadiMoment
           </Text>
         </Link>
-        <Menu shadow="md" width={200}>
-          <Menu.Target>
-            <Button>menu</Button>
-          </Menu.Target>
-
-          <Menu.Dropdown>
-            <Menu.Item>
-              <NavLink to="/radioshows" style={{ textDecoration: "none" , color: "currentColor",}}>
-                番組一覧
-              </NavLink>
-            </Menu.Item>
-            <Menu.Divider />
-            <Menu.Item component="div">
-              <Form action="/logout" method="post" style={{ margin: 0 }}>
-                <input
-                  type="submit"
-                  value="ログアウト"
-                  style={{
-                    background: "none",
-                    color: "currentColor",
-                    border: "none",
-                    padding: 0,
-                    margin: 0,
-                    cursor: "pointer",
-                  }}
-                />
-              </Form>
-            </Menu.Item>
-
-            <Menu.Divider />
-
-            <TextInput
-              label="ユーザー名"
-              mx={"sm"}
-              placeholder="デフォルト"
-              size="xs"
-            />
-          </Menu.Dropdown>
-        </Menu>
+        <Flex align={"center"}>
+          <ShareButton />
+          <Burger
+            color="white"
+            opened={opened}
+            onClick={() => setMenuOpened((prev) => !prev)}
+            hiddenFrom="sm"
+            size="md"
+            ml={"sm"}
+          />
+        </Flex>
       </Flex>
     </Box>
   );

@@ -11,7 +11,6 @@ export const getRadioshows = async (
     const allRadioshows = await db
       .select()
       .from(radioshows)
-      .limit(30)
       .offset(offset)
       .execute();
     return allRadioshows;

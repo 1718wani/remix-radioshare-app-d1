@@ -2,7 +2,7 @@ import { createHighlightType } from "../types/createHighlightType";
 import { drizzle } from "drizzle-orm/d1";
 import { AppLoadContext, json } from "@remix-run/cloudflare";
 import { highlights } from "~/drizzle/schema.server";
-import { authenticator } from "~/features/Auth/services/authenticator";
+import { authenticator } from "~/features/Auth/services/auth.server";
 
 export const createHighlight = async (
   formData: createHighlightType,
@@ -10,7 +10,14 @@ export const createHighlight = async (
   context: AppLoadContext
 ) => {
   try {
-    const { title, description, replayUrl, radioshowData } = formData;
+    const {
+      title,
+      description,
+      replayUrl,
+      radioshowData,
+      startSeconds,
+      endSeconds,
+    } = formData;
     const userId = await authenticator.isAuthenticated(request);
     if (!userId) {
       throw new Error("User not authenticated");
@@ -25,6 +32,8 @@ export const createHighlight = async (
         replayUrl,
         createdBy: userId,
         radioshowId: radioshowData,
+        replayStartTime: startSeconds,
+        replayEndTime: endSeconds,
       })
       .execute();
 

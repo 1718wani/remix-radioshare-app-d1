@@ -1,6 +1,4 @@
-import {
-  type MetaFunction,
-} from "@remix-run/cloudflare";
+import { redirect, type MetaFunction } from "@remix-run/cloudflare";
 
 export const meta: MetaFunction = () => {
   return [
@@ -9,9 +7,10 @@ export const meta: MetaFunction = () => {
   ];
 };
 
+export const loader = async () => {
+  return redirect("/highlights/all");
+};
+
 export default function Index() {
-  return (
-    <>
-    </>
-  );
+  return <></>;
 }

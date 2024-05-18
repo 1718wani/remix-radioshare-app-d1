@@ -1,7 +1,7 @@
 import { AppLoadContext, json } from "@remix-run/cloudflare";
 import { drizzle } from "drizzle-orm/d1";
 import { userHighlights } from "~/drizzle/schema.server";
-import { authenticator } from "~/features/Auth/services/authenticator";
+import { authenticator } from "~/features/Auth/services/auth.server";
 
 type SetValuesType = {
   replayed?: boolean;
@@ -33,9 +33,9 @@ export const updateHighlight = async (
       .values({
         userId: userId,
         highlightId: highlightId,
-        replayed: replayed ?? false,
-        saved: saved ?? false,
-        liked: liked ?? false,
+        replayed: replayed || false,
+        saved: saved || false,
+        liked: liked || false,
       })
       .onConflictDoUpdate({
         target: [userHighlights.userId, userHighlights.highlightId],

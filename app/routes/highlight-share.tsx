@@ -16,12 +16,13 @@ import { Form, Link, useActionData, useLoaderData } from "@remix-run/react";
 import { IconX } from "@tabler/icons-react";
 import { useEffect, useState } from "react";
 import { z } from "zod";
-import { authenticator } from "~/features/Auth/services/authenticator";
+import { authenticator } from "~/features/Auth/services/auth.server";
 import { createHighlight } from "~/features/Highlight/apis/createHighlight";
 import { validateHighlightData } from "~/features/Highlight/functions/validateHighlightData";
 import { schemaForHighlightShare } from "~/features/Highlight/types/schemaForHighlightShare";
 import { getAllRadioshows } from "~/features/Radioshow/apis/getAllRadioshows";
 import { getRadioshows } from "~/features/Radioshow/apis/getRadioshows";
+import { TimeInput } from "@mantine/dates";
 
 export const loader = async ({ request, context }: LoaderFunctionArgs) => {
   const radioshows = await getRadioshows(context, 0);
@@ -33,6 +34,7 @@ export const loader = async ({ request, context }: LoaderFunctionArgs) => {
 
 export async function action({ request, context }: ActionFunctionArgs) {
   const formData = await request.formData();
+  console.log(formData, "formData");
   const radioshows = await getAllRadioshows(context);
   const radioshowsData = radioshows.map((show) => ({
     value: show.id.toString(),
@@ -75,10 +77,12 @@ export default function HightlightShare() {
   }));
 
   const data = useActionData<typeof action>();
-
   const schema: z.ZodTypeAny = schemaForHighlightShare(radioshowsData);
 
-  const [form, { title, description, replayUrl, radioshowData }] = useForm({
+  const [
+    form,
+    { title, description, replayUrl, radioshowData, startSeconds, endSeconds },
+  ] = useForm({
     onValidate({ formData }) {
       return parseWithZod(formData, { schema });
     },
@@ -139,6 +143,7 @@ export default function HightlightShare() {
           <TextInput
             {...getInputProps(description, { type: "text" })}
             name="description"
+            defaultValue={""}
             placeholder="ハイライトの説明"
             label="説明"
             error={description.errors}
@@ -152,6 +157,21 @@ export default function HightlightShare() {
             error={replayUrl.errors}
             required
           />
+          <TimeInput
+            {...getInputProps(startSeconds, { type: "text" })}
+            defaultValue={"00:00:00"}
+            error={startSeconds.errors}
+            label="開始時間を選択してください"
+            withSeconds
+          />
+          <TimeInput
+            {...getInputProps(endSeconds, { type: "text" })}
+            defaultValue={"00:00:00"}
+            error={endSeconds.errors}
+            label="終了時間を選択してください"
+            withSeconds
+          />
+
           <Link
             to="/create"
             style={{ textDecoration: "none", width: "fit-content" }}

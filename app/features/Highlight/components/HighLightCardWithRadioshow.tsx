@@ -11,34 +11,26 @@ import {
   Image,
   rem,
 } from "@mantine/core";
-import { Link, useFetcher } from "@remix-run/react";
-import { IconBookmark, IconHeadphones, IconHeart } from "@tabler/icons-react";
+import { Link } from "@remix-run/react";
+import {
+  IconBookmark,
+  IconHeadphones,
+  IconHeart,
+  IconPlayerPlayFilled,
+  IconPlayerStopFilled,
+} from "@tabler/icons-react";
 import { parseISO, isWithinInterval, add } from "date-fns";
+import { useState } from "react";
+import { customeDomain } from "~/consts/customeDomain";
+import { highlightCardWithRadioshowProps } from "../types/highlightCardWithRadioshowProps";
 
-type props = {
-  id: string;
-  title: string;
-  description: string;
-  replayUrl: string;
-  createdAt: string;
-  liked: boolean;
-  saved: boolean;
-  replayed: boolean;
-  imageUrl: string;
-  radioshowId: string;
-  totalReplayTimes: number;
-  isEnabledUserAction: boolean;
-  open: () => void;
-};
-
-export const HighLightCardWithRadioshow = (props: props) => {
-  const fetcher = useFetcher();
-
+export const HighLightCardWithRadioshow = (
+  props: highlightCardWithRadioshowProps
+) => {
   const {
     id,
     title,
     description,
-    replayUrl,
     createdAt,
     liked,
     saved,
@@ -47,21 +39,20 @@ export const HighLightCardWithRadioshow = (props: props) => {
     radioshowId,
     totalReplayTimes,
     isEnabledUserAction,
+    startHHmmss,
+    endHHmmss,
     open,
+    onAction,
+    onPlay,
+    playing,
+    handleStop
   } = props;
+
+  const correctImageUrl = `${customeDomain}${imageUrl}`;
   const theme = useMantineTheme();
-  console.log(radioshowId, "radioshowIdです");
 
-  // formDataから値を取得する前に、キーが存在するか確認
-  const likedState =
-    fetcher.formData && fetcher.formData.has("liked")
-      ? fetcher.formData.get("liked") === "true"
-      : liked;
-
-  const savedState =
-    fetcher.formData && fetcher.formData.has("saved")
-      ? fetcher.formData.get("saved") === "true"
-      : saved;
+  const [likedState, setLikedState] = useState(liked);
+  const [savedState, setSavedState] = useState(saved);
 
   const isWithinAWeek = (dateString: string) => {
     const date = parseISO(dateString);
@@ -70,14 +61,30 @@ export const HighLightCardWithRadioshow = (props: props) => {
     return isWithinInterval(date, { start: oneWeekAgo, end: now });
   };
 
+  const handleActionClick =
+    (actionType: "liked" | "saved", currentState: boolean) =>
+    (e: React.MouseEvent) => {
+      if (!isEnabledUserAction) {
+        e.preventDefault();
+        open();
+      } else {
+        onAction(id, actionType, !currentState);
+        if (actionType === "liked") {
+          setLikedState(!currentState);
+        } else if (actionType === "saved") {
+          setSavedState(!currentState);
+        }
+      }
+    };
+
   return (
     <>
       <Card withBorder padding="md" radius="md" mx={"sm"}>
         <Card.Section mb={"sm"}>
-          <Link to={`/${radioshowId}`}>
+          <Link to={`/highlights/${radioshowId}`}>
             <Image
-              src={imageUrl}
-              fallbackSrc="https://placehold.co/600x400?text=Placeholder"
+              src={correctImageUrl}
+              fallbackSrc="/radiowaiting.png"
               h={160}
             />
           </Link>
@@ -99,73 +106,47 @@ export const HighLightCardWithRadioshow = (props: props) => {
         </Flex>
 
         <Flex justify={"space-between"} align={"baseline"} mx={"sm"}>
-          <Text truncate fz="xl" fw={700} mt="sm">
+          <Text truncate fz="md" fw={700} mt="sm">
             {title}
           </Text>
           <Group align={"center"} gap={6}>
-            <fetcher.Form
-              method="post"
-              onClick={(e) => {
-                if (!isEnabledUserAction) {
-                  e.preventDefault();
-                  open();
-                }
-              }}
+            <ActionIcon
+              variant="subtle"
+              color="gray"
+              onClick={handleActionClick("liked", likedState)}
             >
-              <input type="hidden" name="id" value={id} />
-              <button
-                name="liked"
-                value={likedState ? "false" : "true"}
-                type="submit"
-                style={{ background: "none", border: "none", padding: 0 }}
-              >
-                <ActionIcon variant="subtle" color="gray">
-                  {likedState ? (
-                    <IconHeart
-                      color={theme.colors.red[6]}
-                      fill={theme.colors.red[6]}
-                    />
-                  ) : (
-                    <IconHeart color={theme.colors.red[6]} />
-                  )}
-                </ActionIcon>
-              </button>
-            </fetcher.Form>
+              {likedState ? (
+                <IconHeart
+                  color={theme.colors.red[6]}
+                  fill={theme.colors.red[6]}
+                />
+              ) : (
+                <IconHeart color={theme.colors.red[6]} />
+              )}
+            </ActionIcon>
 
-            <fetcher.Form
-              method="post"
-              onClick={(e) => {
-                if (!isEnabledUserAction) {
-                  e.preventDefault(); // フォームの送信を防ぐ
-                  open(); // ログインモーダルを開く
-                }
-              }}
+            <ActionIcon
+              variant="subtle"
+              color="gray"
+              onClick={handleActionClick("saved", savedState)}
             >
-              <input type="hidden" name="id" value={id} />
-              <button
-                type="submit"
-                name="saved"
-                value={savedState ? "false" : "true"}
-                style={{ background: "none", border: "none", padding: 0 }}
-              >
-                <ActionIcon variant="subtle" color="gray">
-                  {savedState ? (
-                    <IconBookmark
-                      fill={theme.colors.yellow[6]}
-                      color={theme.colors.yellow[6]}
-                    />
-                  ) : (
-                    <IconBookmark color={theme.colors.yellow[6]} />
-                  )}
-                </ActionIcon>
-              </button>
-            </fetcher.Form>
+              {savedState ? (
+                <IconBookmark
+                  fill={theme.colors.yellow[6]}
+                  color={theme.colors.yellow[6]}
+                />
+              ) : (
+                <IconBookmark color={theme.colors.yellow[6]} />
+              )}
+            </ActionIcon>
           </Group>
         </Flex>
 
         <Accordion>
           <Accordion.Item value="test">
-            <Accordion.Control>説明</Accordion.Control>
+            <Accordion.Control>
+              {startHHmmss}-{endHHmmss}
+            </Accordion.Control>
             <Accordion.Panel>
               <Text fz="sm" c="dimmed" mt={5}>
                 {description || "説明はありません"}
@@ -186,27 +167,35 @@ export const HighLightCardWithRadioshow = (props: props) => {
               {totalReplayTimes}
             </Text>
           </Flex>
-          <fetcher.Form method="post">
-            <input type="hidden" name="id" value={id} />
-            <input type="hidden" name="replayed" value="true" />
+          {playing ? (
             <Button
-              type="submit"
-              onClick={() => window.open(replayUrl, "_blank")}
+              leftSection={
+                <IconPlayerStopFilled stroke={0.5} width={20} height={20} />
+              }
+              onClick={handleStop}
               radius="xl"
-              variant="gradient"
-              gradient={{
-                from: "rgba(4, 201, 47, 1)",
-                to: "rgba(87, 70, 70, 1)",
-                deg: 158,
-              }}
+              bg={"gray.5"}
             >
-              Spotifyで再生する
+              停止する
             </Button>
-          </fetcher.Form>
+          ) : (
+            <Button
+              leftSection={
+                <IconPlayerPlayFilled stroke={0.5} width={20} height={20} />
+              }
+              onClick={() => {
+              
+                onAction(id, "replayed", true);
+                onPlay()
+              }}
+              radius="xl"
+              bg={"blue.5"}
+            >
+              再生する
+            </Button>
+          )}
         </Flex>
       </Card>
     </>
   );
 };
-
-// gradient={{ from: 'red', to: 'rgba(87, 70, 70, 1)', deg: 158 }}

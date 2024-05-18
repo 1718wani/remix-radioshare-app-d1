@@ -10,9 +10,9 @@ import {
   Badge,
   rem,
 } from "@mantine/core";
-import { useFetcher } from "@remix-run/react";
 import { IconBookmark, IconHeadphones, IconHeart } from "@tabler/icons-react";
 import { parseISO, isWithinInterval, add } from "date-fns";
+import { useState } from "react";
 
 type props = {
   id: string;
@@ -26,10 +26,14 @@ type props = {
   totalReplayTimes: number;
   isEnabledUserAction: boolean;
   open: () => void;
+  onAction: (
+    id: string,
+    actionType: "replayed" | "saved" | "liked",
+    value: boolean
+  ) => void;
 };
 
 export const HighLightCard = (props: props) => {
-  const fetcher = useFetcher();
   const {
     id,
     title,
@@ -42,19 +46,13 @@ export const HighLightCard = (props: props) => {
     totalReplayTimes,
     isEnabledUserAction,
     open,
+    onAction,
   } = props;
   const theme = useMantineTheme();
 
-  // formDataから値を取得する前に、キーが存在するか確認
-  const likedState =
-    fetcher.formData && fetcher.formData.has("liked")
-      ? fetcher.formData.get("liked") === "true"
-      : liked;
+  const [likedState, setLikedState] = useState(liked);
 
-  const savedState =
-    fetcher.formData && fetcher.formData.has("saved")
-      ? fetcher.formData.get("saved") === "true"
-      : saved;
+  const [savedState, setSavedState] = useState(saved);
 
   const isWithinAWeek = (dateString: string) => {
     const date = parseISO(dateString);
@@ -62,6 +60,22 @@ export const HighLightCard = (props: props) => {
     const oneWeekAgo = add(now, { weeks: -1 }); // 1週間前の日付を計算
     return isWithinInterval(date, { start: oneWeekAgo, end: now });
   };
+
+  const handleActionClick =
+    (actionType: "liked" | "saved", currentState: boolean) =>
+    (e: React.MouseEvent) => {
+      if (!isEnabledUserAction) {
+        e.preventDefault();
+        open();
+      } else {
+        onAction(id, actionType, !currentState);
+        if (actionType === "liked") {
+          setLikedState(!currentState);
+        } else if (actionType === "saved") {
+          setSavedState(!currentState);
+        }
+      }
+    };
 
   return (
     <>
@@ -87,63 +101,35 @@ export const HighLightCard = (props: props) => {
             {title}
           </Text>
           <Group align={"center"} gap={6}>
-            <fetcher.Form
-              method="post"
-              onClick={(e) => {
-                if (!isEnabledUserAction) {
-                  e.preventDefault();
-                  open();
-                }
-              }}
+            <ActionIcon
+              variant="subtle"
+              color="gray"
+              onClick={handleActionClick("liked", likedState)}
             >
-              <input type="hidden" name="id" value={id} />
-              <button
-                name="liked"
-                value={likedState ? "false" : "true"}
-                type="submit"
-                style={{ background: "none", border: "none", padding: 0 }}
-              >
-                <ActionIcon variant="subtle" color="gray">
-                  {likedState ? (
-                    <IconHeart
-                      color={theme.colors.red[6]}
-                      fill={theme.colors.red[6]}
-                    />
-                  ) : (
-                    <IconHeart color={theme.colors.red[6]} />
-                  )}
-                </ActionIcon>
-              </button>
-            </fetcher.Form>
+              {likedState ? (
+                <IconHeart
+                  color={theme.colors.red[6]}
+                  fill={theme.colors.red[6]}
+                />
+              ) : (
+                <IconHeart color={theme.colors.red[6]} />
+              )}
+            </ActionIcon>
 
-            <fetcher.Form
-              method="post"
-              onClick={(e) => {
-                if (!isEnabledUserAction) {
-                  e.preventDefault(); // フォームの送信を防ぐ
-                  open(); // ログインモーダルを開く
-                }
-              }}
+            <ActionIcon
+              variant="subtle"
+              color="gray"
+              onClick={handleActionClick("saved", savedState)}
             >
-              <input type="hidden" name="id" value={id} />
-              <button
-                type="submit"
-                name="saved"
-                value={savedState ? "false" : "true"}
-                style={{ background: "none", border: "none", padding: 0 }}
-              >
-                <ActionIcon variant="subtle" color="gray">
-                  {savedState ? (
-                    <IconBookmark
-                      fill={theme.colors.yellow[6]}
-                      color={theme.colors.yellow[6]}
-                    />
-                  ) : (
-                    <IconBookmark color={theme.colors.yellow[6]} />
-                  )}
-                </ActionIcon>
-              </button>
-            </fetcher.Form>
+              {savedState ? (
+                <IconBookmark
+                  fill={theme.colors.yellow[6]}
+                  color={theme.colors.yellow[6]}
+                />
+              ) : (
+                <IconBookmark color={theme.colors.yellow[6]} />
+              )}
+            </ActionIcon>
           </Group>
         </Flex>
 
@@ -170,23 +156,22 @@ export const HighLightCard = (props: props) => {
               {totalReplayTimes}
             </Text>
           </Flex>
-          <fetcher.Form method="post">
-            <input type="hidden" name="id" value={id} />
-            <input type="hidden" name="replayed" value="true" />
-            <Button
-              type="submit"
-              onClick={() => window.open(replayUrl, "_blank")}
-              radius="xl"
-              variant="gradient"
-              gradient={{
-                from: "rgba(4, 201, 47, 1)",
-                to: "rgba(87, 70, 70, 1)",
-                deg: 158,
-              }}
-            >
-              Spotifyで再生する
-            </Button>
-          </fetcher.Form>
+
+          <Button
+            onClick={() => {
+              onAction(id, "replayed", true);
+              window.open(replayUrl, "_blank");
+            }}
+            radius="xl"
+            variant="gradient"
+            gradient={{
+              from: "rgba(4, 201, 47, 1)",
+              to: "rgba(87, 70, 70, 1)",
+              deg: 158,
+            }}
+          >
+            Spotifyで再生する
+          </Button>
         </Flex>
       </Card>
     </>

@@ -2,7 +2,7 @@ import { createRadioshowType } from "../types/createRadioshowType";
 import { drizzle } from "drizzle-orm/d1";
 import { AppLoadContext, json } from "@remix-run/cloudflare";
 import { radioshows } from "~/drizzle/schema.server";
-import { authenticator } from "~/features/Auth/services/authenticator";
+import { authenticator } from "~/features/Auth/services/auth.server";
 
 export const createRadioshow = async (
   formData: createRadioshowType,

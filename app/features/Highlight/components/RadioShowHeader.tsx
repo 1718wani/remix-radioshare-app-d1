@@ -1,4 +1,5 @@
 import { AspectRatio, Box, Image, Overlay, Title } from "@mantine/core";
+import { customeDomain } from "~/consts/customeDomain";
 
 type RadioShowHeaderProps = {
   radioshowImageUrl: string | null;
@@ -9,6 +10,7 @@ export const RadioShowHeader = ({
   radioshowImageUrl,
   radioshowTitle,
 }: RadioShowHeaderProps) => {
+  const correctImageUrl = `${customeDomain}${radioshowImageUrl}`;
   return (
     <>
       <AspectRatio
@@ -18,10 +20,10 @@ export const RadioShowHeader = ({
         style={{ position: "relative" }}
       >
         <Image
-          src={radioshowImageUrl}
+          src={correctImageUrl}
           w={"full"}
           h={160}
-          fallbackSrc="https://placehold.co/600x400?text=Placeholder"
+          fallbackSrc="/radiowaiting.png"
         />
         <Overlay
           gradient="linear-gradient(180deg, rgba(0, 0, 0, 0) 0%, rgba(0, 0, 0, 1) 60%)"
@@ -33,7 +35,7 @@ export const RadioShowHeader = ({
           <Title
             order={3}
             c={"gray.0"}
-            style={{ position: "absolute", left: 0, bottom: 0, zIndex: 1000 }}
+            style={{ position: "absolute", left: 0, bottom: 0, zIndex: 202 }}
             p={8}
           >
             {radioshowTitle}

@@ -3,4 +3,6 @@ export interface createHighlightType {
   description: string;
   replayUrl: string;
   radioshowData: string;
+  startSeconds:string;
+  endSeconds:string;
 }

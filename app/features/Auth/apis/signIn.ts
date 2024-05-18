@@ -12,7 +12,6 @@ export async function signIn(
   context: AppLoadContext
 ) {
   const db = drizzle(context.cloudflare.env.DB);
-  console.log("db", db);
   const user = await db
     .select()
     .from(users)
