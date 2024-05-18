@@ -15,9 +15,10 @@ import { Form, Link, useActionData, useLoaderData } from "@remix-run/react";
 import { IconCheck, IconX } from "@tabler/icons-react";
 import { useEffect } from "react";
 import { z } from "zod";
-import { checkUserExists } from "~/features/Auth/apis/checkUserExists";
+import { getUserIdByEmail } from "~/features/Auth/apis/getUserIdByEmail";
 import { authenticator } from "~/features/Auth/services/auth.server";
 import { commitSession, getSession } from "~/features/Auth/session.server";
+import { GoogleButton } from "~/features/Auth/components/GoogleButton";
 
 export const loader = async ({ request }: LoaderFunctionArgs) => {
   await authenticator.isAuthenticated(request, {
@@ -41,46 +42,64 @@ export const loader = async ({ request }: LoaderFunctionArgs) => {
 export async function action({ request, context }: ActionFunctionArgs) {
   const clonedData = request.clone();
   const formData = await clonedData.formData();
-  const submission = parseWithZod(formData, { schema });
+  const action = formData.get("_action");
 
-  if (submission.status !== "success") {
-    return json({
-      success: false,
-      message: "データの送信に失敗しました",
-      submission: submission.reply(),
-    });
-  }
+  switch (action) {
+    case "emailSignIn": {
+      const submission = parseWithZod(formData, { schema });
 
-  const isEmailExisting = await checkUserExists(
-    submission.value.email,
-    context
-  );
+      if (submission.status !== "success") {
+        return json({
+          success: false,
+          message: "データの送信に失敗しました",
+          submission: submission.reply(),
+        });
+      }
 
-  if (!isEmailExisting) {
-    return json({
-      success: false,
-      message: "このメールアドレスは存在しません",
-      submission: submission.reply(),
-    });
-  }
+      const isEmailExisting = await getUserIdByEmail(
+        submission.value.email,
+        context
+      );
 
-  try {
-    const userId = await authenticator.authenticate("user-signin", request, {
-      failureRedirect: "/signin",
-      context: context,
-    });
+      if (isEmailExisting === null) {
+        return json({
+          success: false,
+          message: "このメールアドレスは存在しません",
+          submission: submission.reply(),
+        });
+      }
 
-    const session = await getSession(request.headers.get("cookie"));
-    session.set(authenticator.sessionKey, userId);
-    // commit the session
-    const headers = new Headers({ "Set-Cookie": await commitSession(session) });
-    return redirect("/success", { headers });
-  } catch (error) {
-    return json({
-      success: false,
-      message: "パスワードが異なっています",
-      submission: submission.reply(),
-    });
+      try {
+        const userId = await authenticator.authenticate(
+          "user-signin",
+          request,
+          {
+            failureRedirect: "/signin",
+            context: context,
+          }
+        );
+
+        const session = await getSession(request.headers.get("cookie"));
+        session.set(authenticator.sessionKey, userId);
+        // commit the session
+        const headers = new Headers({
+          "Set-Cookie": await commitSession(session),
+        });
+        return redirect("/success", { headers });
+      } catch (error) {
+        return json({
+          success: false,
+          message: "パスワードが異なっています",
+          submission: submission.reply(),
+        });
+      }
+    }
+    case "googleSignIn":
+      return authenticator.authenticate("google", request, {
+        failureRedirect: "/signin",
+        successRedirect: "/highlights/all",
+        context: context,
+      });
   }
 }
 
@@ -156,6 +175,7 @@ export default function Signin() {
             placeholder="メールアドレス"
             label="Email"
             error={email.errors}
+            defaultValue={"ikuya1293@gmail.com"}
           />
 
           <PasswordInput
@@ -164,6 +184,8 @@ export default function Signin() {
             placeholder="パスワード"
             label="Password"
             error={password.errors}
+            defaultValue={"Password123"}
+           
           />
 
           <Link
@@ -179,9 +201,12 @@ export default function Signin() {
               新規登録の方はこちら
             </Text>
           </Link>
-          <Button fullWidth type="submit">
+          <Button fullWidth type="submit" name="_action" value="emailSignIn">
             ログイン
           </Button>
+          <GoogleButton type="submit" name="_action" value="googleSignIn">
+            Google
+          </GoogleButton>
         </Stack>
       </Form>
     </>
