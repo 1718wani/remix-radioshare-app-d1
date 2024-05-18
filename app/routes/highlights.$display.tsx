@@ -320,7 +320,6 @@ export default function Hightlights() {
       )}
 
       <Flex justify={"space-between"} m={"md"}>
-        <div>{playingHighlightIndex}</div>
         <Title order={2}>ハイライト一覧</Title>
         <Select
           withCheckIcon={false}

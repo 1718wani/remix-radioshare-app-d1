@@ -3,18 +3,23 @@ import { eq } from "drizzle-orm";
 import { drizzle } from "drizzle-orm/d1";
 import { users } from "~/drizzle/schema.server";
 
-export const checkUserExists = async (
+export const getUserIdByEmail = async (
   email: string,
   context: AppLoadContext
-): Promise<boolean> => {
+): Promise<string|null> => {
+  console.log("これがcontext",context)
+
   const db = drizzle(context.cloudflare.env.DB);
+  console.log("ここはとおりますか？？？？")
   const user = await db
     .select()
     .from(users)
     .where(eq(users.email, email))
     .execute()
     .then((rows) => rows[0]);
+  if (!user) {
+    return null;
+  }
 
-  const isUserExists = user ? true : false;
-  return isUserExists;
+  return user.id;
 };
