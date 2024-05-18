@@ -11,7 +11,7 @@
     "start": "wrangler pages dev ./build/client",
     "typecheck": "tsc",
     "typegen": "wrangler types",
-    "drizzle:update": "drizzle-kit generate:sqlite --out ./app/drizzle/migrations --schema ./app/drizzle/schema.server.ts",
+    "drizzle:update": "drizzle-kit generate",
     "db:migrate:local": "npm run drizzle:update && npx wrangler d1 migrations apply db --local",
     "db:migrate:remote": "npm run drizzle:update && npx wrangler d1 migrations apply db --remote",
     "db:migrate": "npm run drizzle:update && npx wrangler d1 migrations apply db",
@@ -34,7 +34,7 @@
     "bcryptjs": "^2.4.3",
     "date-fns": "^3.3.1",
     "dayjs": "^1.11.10",
-    "drizzle-orm": "^0.30.4",
+    "drizzle-orm": "^0.30.10",
     "isbot": "^4.1.0",
     "jotai": "^2.7.2",
     "miniflare": "^3.20231030.4",
@@ -45,6 +45,7 @@
     "remix": "^2.8.1",
     "remix-auth": "^3.6.0",
     "remix-auth-form": "^1.4.0",
+    "remix-auth-google": "^2.0.0",
     "remix-auth-totp": "^3.3.0",
     "resend": "^3.2.0",
     "tiny-invariant": "^1.3.3",
@@ -64,7 +65,7 @@
     "@typescript-eslint/parser": "^6.7.4",
     "@vitest/coverage-v8": "^1.4.0",
     "better-sqlite3": "^9.4.3",
-    "drizzle-kit": "^0.20.17",
+    "drizzle-kit": "^0.21.2",
     "eslint": "^8.38.0",
     "eslint-import-resolver-typescript": "^3.6.1",
     "eslint-plugin-import": "^2.28.1",
@@ -81,7 +82,7 @@
     "vite": "^5.2.2",
     "vite-tsconfig-paths": "^4.3.2",
     "vitest": "^1.4.0",
-    "wrangler": "^3.24.0"
+    "wrangler": "^3.56.0"
   },
   "engines": {
     "node": ">=20"
