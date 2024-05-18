@@ -1,47 +1,9 @@
 {
-  "version": "5",
+  "version": "6",
   "dialect": "sqlite",
-  "id": "367c6130-d6ff-4cc8-a6f1-3037a3b8d072",
-  "prevId": "52702b7e-ef20-4c1a-9c0f-c48c4d9ee6f2",
-  "tables": {
-    "resources": {
-      "name": "resources",
-      "columns": {
-        "id": {
-          "name": "id",
-          "type": "integer",
-          "primaryKey": true,
-          "notNull": true,
-          "autoincrement": false
-        },
-        "title": {
-          "name": "title",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": true,
-          "autoincrement": false
-        },
-        "href": {
-          "name": "href",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": true,
-          "autoincrement": false
-        },
-        "description": {
-          "name": "description",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": false,
-          "autoincrement": false
-        }
-      },
-      "indexes": {},
-      "foreignKeys": {},
-      "compositePrimaryKeys": {},
-      "uniqueConstraints": {}
-    }
-  },
+  "id": "b60236dd-22f6-447f-8b07-61796e33c5bd",
+  "prevId": "4c8ff2b1-26c4-4e87-9b4c-1ed64f6348ab",
+  "tables": {},
   "enums": {},
   "_meta": {
     "schemas": {},

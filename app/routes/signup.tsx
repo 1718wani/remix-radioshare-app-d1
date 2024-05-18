@@ -1,7 +1,7 @@
 import { ActionFunctionArgs } from "@remix-run/node";
 import { LoaderFunctionArgs, json, redirect } from "@remix-run/cloudflare";
 import { Link, Form, useActionData } from "@remix-run/react";
-import { authenticator } from "~/features/Auth/services/authenticator";
+import { authenticator } from "~/features/Auth/services/auth.server";
 import {
   Button,
   PasswordInput,
@@ -17,8 +17,8 @@ import { useEffect } from "react";
 import { createUser } from "~/features/Auth/apis/createUser";
 import { IconX } from "@tabler/icons-react";
 import { notifications } from "@mantine/notifications";
-import { checkUserExists } from "~/features/Auth/apis/checkUserExists";
-import { commitSession, getSession } from "~/features/Auth/sessionStrage";
+import { getUserIdByEmail } from "~/features/Auth/apis/getUserIdByEmail";
+import { commitSession, getSession } from "~/features/Auth/session.server";
 
 export const loader = async ({ request }: LoaderFunctionArgs) => {
   const user = await authenticator.isAuthenticated(request, {
@@ -32,10 +32,8 @@ export async function action({ request, context }: ActionFunctionArgs) {
   console.log(formData, "requestSignup");
   const submission = parseWithZod(formData, { schema });
 
-  const session = await getSession(
-    request.headers.get("Cookie"),
-  )
-  session.flash("message", `Task created!`)
+  const session = await getSession(request.headers.get("Cookie"));
+  session.flash("message", `Task created!`);
 
   if (submission.status !== "success") {
     return json({
@@ -45,8 +43,9 @@ export async function action({ request, context }: ActionFunctionArgs) {
     });
   }
 
-  // emailが存在していたらチェックする
-  if (await checkUserExists(submission.value.email, context)) {
+  const userId = await getUserIdByEmail(submission.value.email, context);
+
+  if (userId !== null) {
     return json({
       success: false,
       message: "このメールアドレスはすでに登録されています",
@@ -54,7 +53,7 @@ export async function action({ request, context }: ActionFunctionArgs) {
     });
   }
   await createUser(submission.value, context);
-  return redirect("/signin",{
+  return redirect("/signin", {
     headers: {
       "Set-Cookie": await commitSession(session),
     },
@@ -96,13 +95,6 @@ export default function Signup() {
         icon: <IconX />,
       });
     }
-
-    console.log(data);
-    // {
-    //   message: <server message>,
-    //   submission: typeof SubmissionResult,
-    //   success: <boolean>,
-    // }
 
     if (data.success) {
       alert(data.message);

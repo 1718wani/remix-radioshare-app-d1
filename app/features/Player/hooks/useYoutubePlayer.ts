@@ -1,19 +1,24 @@
 /// <reference types="youtube" />
 
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 
 export function useYouTubePlayer(onStopCallback: () => void) {
   const [player, setPlayer] = useState<YT.Player | null>(null);
+  const hasEndedRef = useRef(false); // フラグを追加
 
   const onPlayerReady = (event: YT.PlayerEvent) => {
     console.log("onPlayerReady", event);
-    // プレイヤーが準備完了したときの処理
   };
 
   const onPlayerStateChange = useCallback(
     (event: YT.OnStateChangeEvent) => {
-      if (event.data === YT.PlayerState.ENDED) {
+      if (event.data === YT.PlayerState.ENDED && !hasEndedRef.current) {
+        console.log("onPlayerStateChange2回呼ばれるか", event);
+        hasEndedRef.current = true; // フラグをセット
         onStopCallback();
+        setTimeout(() => {
+          hasEndedRef.current = false; // 少し遅延させてフラグをリセット
+        }, 100); // 100msの遅延を追加
       }
     },
     [onStopCallback]
@@ -27,8 +32,8 @@ export function useYouTubePlayer(onStopCallback: () => void) {
 
     window.onYouTubeIframeAPIReady = () => {
       const newPlayer = new YT.Player("youtube-iframe", {
-        height: 0,
-        width: 0,
+        height: "0",
+        width: "0",
         videoId: "",
         events: {
           onReady: onPlayerReady,

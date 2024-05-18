@@ -16,7 +16,7 @@ import { Form, Link, useActionData, useLoaderData } from "@remix-run/react";
 import { IconX } from "@tabler/icons-react";
 import { useEffect, useState } from "react";
 import { z } from "zod";
-import { authenticator } from "~/features/Auth/services/authenticator";
+import { authenticator } from "~/features/Auth/services/auth.server";
 import { createHighlight } from "~/features/Highlight/apis/createHighlight";
 import { validateHighlightData } from "~/features/Highlight/functions/validateHighlightData";
 import { schemaForHighlightShare } from "~/features/Highlight/types/schemaForHighlightShare";

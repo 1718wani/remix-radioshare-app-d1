@@ -6,7 +6,7 @@ import {
   unstable_createMemoryUploadHandler,
   unstable_parseMultipartFormData,
 } from "@remix-run/cloudflare";
-import { authenticator } from "~/features/Auth/services/authenticator";
+import { authenticator } from "~/features/Auth/services/auth.server";
 import { z } from "zod";
 import { IconPhoto } from "@tabler/icons-react";
 import { Form } from "@remix-run/react";
@@ -73,7 +73,6 @@ export const action = async ({ request, context }: ActionFunctionArgs) => {
   );
   return redirect("/");
 };
-
 
 export default function RadioshowCreate() {
   const [form, { title, headerImage }] = useForm({

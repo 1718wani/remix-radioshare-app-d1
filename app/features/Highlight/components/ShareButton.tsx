@@ -1,6 +1,5 @@
 import { Button } from "@mantine/core";
 import {
-  useLoaderData,
   useNavigate,
   useRouteLoaderData,
 } from "@remix-run/react";
@@ -29,7 +28,7 @@ export const ShareButton = () => {
         className={"pulse-new-button"}
         size="md"
         variant="white"
-        radius={"xl"}
+        radius={"md"}
         // style={{ position: "fixed", right: 30, bottom: 50, zIndex: 3 }}
         key={classes.pulse}
       >
