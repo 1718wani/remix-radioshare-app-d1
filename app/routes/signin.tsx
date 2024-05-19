@@ -25,7 +25,7 @@ export const loader = async ({ request }: LoaderFunctionArgs) => {
     successRedirect: "/highlights/popular",
   });
 
-  const session = await getSession(request.headers.get("Cookie"));
+  const session = await getSession(request.headers.get("cookie"));
   const toastMessage = (session.get("message") as string) || null;
   console.log(toastMessage, "toastmessageがあります");
 
@@ -185,6 +185,7 @@ export default function Signin() {
             label="Password"
             error={password.errors}
             defaultValue={"Password123"}
+           
           />
 
           <Link

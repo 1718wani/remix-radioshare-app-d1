@@ -32,7 +32,7 @@ export async function action({ request, context }: ActionFunctionArgs) {
   console.log(formData, "requestSignup");
   const submission = parseWithZod(formData, { schema });
 
-  const session = await getSession(request.headers.get("Cookie"));
+  const session = await getSession(request.headers.get("cookie"));
   session.flash("message", `Task created!`);
 
   if (submission.status !== "success") {

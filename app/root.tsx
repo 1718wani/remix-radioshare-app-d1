@@ -31,7 +31,6 @@ import { useEffect, useState } from "react";
 import { useDisclosure, useMediaQuery } from "@mantine/hooks";
 import {
   IconBookmark,
-  IconLogin2,
   IconLogout,
   IconMusicPlus,
   IconRadio,
@@ -42,6 +41,7 @@ import { authenticator } from "./features/Auth/services/auth.server";
 import { LoginNavigateModal } from "./features/Auth/components/LoginNavigateModal";
 import { useAtom } from "jotai";
 import { menuOpenedAtom } from "./features/Player/atoms/menuOpendAtom";
+import { GoogleButton } from "./features/Auth/components/GoogleButton";
 
 export const loader = async ({ context, request }: LoaderFunctionArgs) => {
   const radioShows = await getRadioshows(context, 0);
@@ -50,7 +50,8 @@ export const loader = async ({ context, request }: LoaderFunctionArgs) => {
   if (!radioShows) {
     throw new Response("Not Found", { status: 404 });
   }
-  return json({ radioShows, user });
+
+  return json({ radioShows, user }, {});
 };
 
 export function Layout({ children }: { children: React.ReactNode }) {
@@ -78,7 +79,7 @@ export default function App() {
   const { radioShows, user } = useLoaderData<typeof loader>();
   const navigation = useNavigation();
   const [showLoadingOverlay, setShowLoadingOverlay] = useState(false);
-  const [menuOpened, setMenuOpened] = useAtom(menuOpenedAtom);
+  const [menuOpened] = useAtom(menuOpenedAtom);
   const [modalOpened, { open: openModal, close: closeModal }] =
     useDisclosure(false);
   const navigate = useNavigate();
@@ -100,6 +101,7 @@ export default function App() {
     // コンポーネントのアンマウント時、またはnavigation.stateが変更された時にタイマーをクリアする
     return () => clearTimeout(timeoutId);
   }, [navigation.state]);
+
   return (
     <>
       <LoadingOverlay
@@ -182,16 +184,13 @@ export default function App() {
             </Form>
           ) : (
             <Form
-              onClick={() => {
-                navigate("/signin");
-                setMenuOpened((prev) => !prev);
-              }}
+              method="post"
+              action="/google-sign-in-or-up"
               style={{ margin: 0 }}
             >
-              <Button w="100%" bg={"gray.5"}>
-                <IconLogin2 stroke={2} />
-                <span style={{ marginLeft: 4 }}>ログイン</span>
-              </Button>
+              <GoogleButton type="submit" my={"xs"} w={"100%"}>
+                Googleアカウントで ログイン or 登録
+              </GoogleButton>
             </Form>
           )}
         </AppShell.Navbar>

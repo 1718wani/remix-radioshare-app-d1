@@ -6,11 +6,9 @@ import { users } from "~/drizzle/schema.server";
 export const getUserIdByEmail = async (
   email: string,
   context: AppLoadContext
-): Promise<string|null> => {
-  console.log("これがcontext",context)
-
+): Promise<string | null> => {
   const db = drizzle(context.cloudflare.env.DB);
-  console.log("ここはとおりますか？？？？")
+
   const user = await db
     .select()
     .from(users)
