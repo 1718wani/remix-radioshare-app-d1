@@ -3,9 +3,13 @@ import { parseWithZod } from "@conform-to/zod";
 import {
   Autocomplete,
   Button,
+  Grid,
+  Image,
+  Modal,
   Stack,
   Text,
   TextInput,
+  Textarea,
   Title,
 } from "@mantine/core";
 import { notifications } from "@mantine/notifications";
@@ -23,11 +27,12 @@ import { schemaForHighlightShare } from "~/features/Highlight/types/schemaForHig
 import { getAllRadioshows } from "~/features/Radioshow/apis/getAllRadioshows";
 import { getRadioshows } from "~/features/Radioshow/apis/getRadioshows";
 import { TimeInput } from "@mantine/dates";
+import { useDisclosure, useMediaQuery } from "@mantine/hooks";
 
 export const loader = async ({ request, context }: LoaderFunctionArgs) => {
   const radioshows = await getRadioshows(context, 0);
   const user = await authenticator.isAuthenticated(request, {
-    failureRedirect: "/signin",
+    failureRedirect: "/",
   });
   return json({ user, radioshows });
 };
@@ -53,7 +58,6 @@ export async function action({ request, context }: ActionFunctionArgs) {
   }
 
   const highlightData = submission.value;
-  console.log(highlightData, "送信されたFormData");
 
   // highlightDataがcreateHighlightType型に合致するか検証
   try {
@@ -69,6 +73,8 @@ export async function action({ request, context }: ActionFunctionArgs) {
 
 export default function HightlightShare() {
   const [selectedRadioshow, setSelectedRadioshow] = useState("");
+  const [opened, { open, close }] = useDisclosure(true);
+  const isPc = useMediaQuery("(min-width: 64em)");
 
   const { radioshows } = useLoaderData<typeof loader>();
   const radioshowsData = radioshows.map((show) => ({
@@ -101,13 +107,6 @@ export default function HightlightShare() {
       });
     }
 
-    console.log(data);
-    // {
-    //   message: <server message>,
-    //   submission: typeof SubmissionResult,
-    //   success: <boolean>,
-    // }
-
     if (data.success) {
       alert(data.message);
     }
@@ -115,81 +114,108 @@ export default function HightlightShare() {
 
   return (
     <>
-      <Form method="post" {...getFormProps(form)}>
-        <Stack gap="md" mx={"xl"} mt={"lg"}>
-          <Title order={2}>ハイライトシェア</Title>
-          <Autocomplete
-            label="番組名"
-            placeholder="番組名"
-            data={radioshowsData}
-            maxDropdownHeight={200}
-            required
-            value={selectedRadioshow}
-            onChange={setSelectedRadioshow}
-            error={radioshowData.errors}
-          />
-          {/* 隠しフィールドを追加して、選択された番組IDを送信 */}
-          <input type="hidden" name="radioshowData" value={selectedRadioshow} />
+      <Modal
+        opened={opened}
+        onClose={close}
+        overlayProps={{
+          backgroundOpacity: 0.7,
+          blur: 10,
+        }}
+        size={"80%"}
+      >
+        <Grid>
+          <Grid.Col span={isPc ? 6 : 12}>
+            <Form method="post" {...getFormProps(form)}>
+              <Stack gap="md" mx={"xl"} mb={"xl"}>
+                <Title order={2}>切り抜きシェア</Title>
+                <Autocomplete
+                  label="番組名"
+                  placeholder="番組名"
+                  data={radioshowsData}
+                  maxDropdownHeight={200}
+                  required
+                  value={selectedRadioshow}
+                  onChange={setSelectedRadioshow}
+                  error={radioshowData.errors}
+                />
+                <input
+                  type="hidden"
+                  name="radioshowData"
+                  value={selectedRadioshow}
+                />
+                <Link
+                  to="/create"
+                  style={{ textDecoration: "none", width: "fit-content" }}
+                >
+                  <Text
+                    size="xs"
+                    variant="gradient"
+                    fw={700}
+                    gradient={{ from: "blue", to: "blue.3" }}
+                  >
+                    番組名が見つからない場合はこちらから作成してください
+                  </Text>
+                </Link>
 
-          <TextInput
-            {...getInputProps(title, { type: "text" })}
-            name="title"
-            placeholder="コーナー名/発言の内容など"
-            label="タイトル"
-            error={title.errors}
-            required
-          />
+                <TextInput
+                  {...getInputProps(title, { type: "text" })}
+                  name="title"
+                  placeholder="コーナー名/発言の内容など"
+                  label="タイトル"
+                  error={title.errors}
+                  required
+                />
 
-          <TextInput
-            {...getInputProps(description, { type: "text" })}
-            name="description"
-            defaultValue={""}
-            placeholder="ハイライトの説明"
-            label="説明"
-            error={description.errors}
-          />
+                <Textarea
+                  {...getInputProps(description, { type: "text" })}
+                  name="description"
+                  defaultValue={""}
+                  placeholder="切り抜きの説明"
+                  label="説明"
+                  error={description.errors}
+                />
 
-          <TextInput
-            {...getInputProps(replayUrl, { type: "url" })}
-            name="replayUrl"
-            placeholder="https://example.com"
-            label="再生用URL"
-            error={replayUrl.errors}
-            required
-          />
-          <TimeInput
-            {...getInputProps(startSeconds, { type: "text" })}
-            defaultValue={"00:00:00"}
-            error={startSeconds.errors}
-            label="開始時間を選択してください"
-            withSeconds
-          />
-          <TimeInput
-            {...getInputProps(endSeconds, { type: "text" })}
-            defaultValue={"00:00:00"}
-            error={endSeconds.errors}
-            label="終了時間を選択してください"
-            withSeconds
-          />
+                <TextInput
+                  {...getInputProps(replayUrl, { type: "url" })}
+                  name="replayUrl"
+                  placeholder="https://www.youtube.com/watch,https://open.spotify.com/episode"
+                  label="再生用リンク(SpotifyかYoutubeのみ)"
+                  error={replayUrl.errors}
+                  required
+                />
+                <TimeInput
+                  {...getInputProps(startSeconds, { type: "text" })}
+                  defaultValue={"00:00:00"}
+                  error={startSeconds.errors}
+                  label="開始時間を選択してください"
+                  withSeconds
+                />
+                <TimeInput
+                  {...getInputProps(endSeconds, { type: "text" })}
+                  defaultValue={"00:00:00"}
+                  error={endSeconds.errors}
+                  label="終了時間を選択してください"
+                  withSeconds
+                />
 
-          <Link
-            to="/create"
-            style={{ textDecoration: "none", width: "fit-content" }}
-          >
-            <Text
-              size="sm"
-              variant="gradient"
-              fw={700}
-              gradient={{ from: "blue", to: "blue.3" }}
-            >
-              番組名が見つからない場合はこちらから作成してください
-            </Text>
-          </Link>
-          <Button fullWidth type="submit">
-            ハイライトをシェア
-          </Button>
-        </Stack>
-      </Form>
+                <Button fullWidth type="submit">
+                  切り抜きをシェア
+                </Button>
+              </Stack>
+            </Form>
+          </Grid.Col>
+          <Grid.Col span={isPc ? 6 : 0}>
+            {isPc ? (
+              <Image
+                src="/greenlisteninggirl.png"
+                alt="装飾用のヘッドホンをした女の子のイラスト"
+              />
+            ) : (
+              <></>
+            )}
+          </Grid.Col>
+        </Grid>
+      </Modal>
     </>
   );
 }
