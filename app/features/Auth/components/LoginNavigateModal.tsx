@@ -1,5 +1,6 @@
-import { Button, Center, Image, Modal, Stack, Text } from "@mantine/core";
-import { Link, NavLink } from "@remix-run/react";
+import { Center, Image, Modal, Stack } from "@mantine/core";
+import { Form } from "@remix-run/react";
+import { GoogleButton } from "./GoogleButton";
 
 interface LoginNavigateModalProps {
   opened: boolean;
@@ -15,7 +16,6 @@ export const LoginNavigateModal = ({
       opened={opened}
       onClose={close}
       title="操作を続けるにはログインしてください"
-   
     >
       <Stack>
         <Image
@@ -27,19 +27,11 @@ export const LoginNavigateModal = ({
         />
         <Center>
           <Stack>
-            <NavLink to={"/signin"}>
-              <Button>ログイン画面へ</Button>
-            </NavLink>
-            <Link to="/signup" style={{ textDecoration: "none" }}>
-              <Text
-                size="sm"
-                variant="gradient"
-                fw={700}
-                gradient={{ from: "blue", to: "blue.3" }}
-              >
-                新規登録の方はこちら
-              </Text>
-            </Link>
+            <Form method="post" action="/google-sign-in-or-up" onClick={close}>
+              <GoogleButton type="submit" my={"md"}>
+                Googleアカウントで ログイン or 登録
+              </GoogleButton>
+            </Form>
           </Stack>
         </Center>
       </Stack>

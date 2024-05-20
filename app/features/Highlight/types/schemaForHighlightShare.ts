@@ -2,9 +2,12 @@ import { z } from "zod";
 import { convertHHMMSSToSeconds } from "~/features/Player/functions/convertHHmmssToSeconds";
 
 export const schemaForHighlightShare = (
-  radioshowsData: { label: string; value: string }[]
+  radioshowsData: { label: string; value: string }[] | undefined
 ) => {
-  console.log("バリデーションは実行");
+  if (!radioshowsData) {
+    return z.never();
+  }
+
   return z
     .object({
       title: z.string({ required_error: "タイトルは必要です" }),
@@ -48,7 +51,9 @@ export const schemaForHighlightShare = (
         const { startSeconds, endSeconds } = args;
         const startSecondsData = convertHHMMSSToSeconds(startSeconds);
         const endSecondsData = convertHHMMSSToSeconds(endSeconds);
-        return startSecondsData < endSecondsData;
+        return (
+          (startSecondsData ?? 0) < (endSecondsData ?? 0)
+        );
       },
       {
         message: "終了時間は開始時間よりあとの時間にしてください",

@@ -42,7 +42,6 @@ const googleStrategy = new GoogleStrategy(
     callbackURL: `${import.meta.env.VITE_CLIENT_URL}/api/auth/google/callback`,
   },
   async ({ profile, context }) => {
-    console.log("GoogleStrategy",profile,context);
     const userId = await getUserIdByEmail(
       profile.emails[0].value,
       context as AppLoadContext

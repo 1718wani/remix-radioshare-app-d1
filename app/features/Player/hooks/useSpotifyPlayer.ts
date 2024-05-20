@@ -7,6 +7,7 @@ export function useSpotifyPlayer(onPlaybackEnd: () => void) {
   const stopAtRef = useRef<number | null>(null);
 
   useEffect(() => {
+    const node = document.getElementById("spotify-player");
     window.onSpotifyIframeApiReady = (IFrameAPI) => {
       const element = document.getElementById("embed-iframe");
       const options = {
@@ -50,7 +51,9 @@ export function useSpotifyPlayer(onPlaybackEnd: () => void) {
     document.body.appendChild(script);
 
     return () => {
-      document.body.removeChild(script);
+      if (node && node.parentNode) {
+        node.parentNode.removeChild(node);
+      }
     };
   }, [onPlaybackEnd]);
 

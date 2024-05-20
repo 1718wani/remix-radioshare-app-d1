@@ -7,11 +7,12 @@ import {
   json,
 } from "@remix-run/cloudflare";
 import { useFetcher, useLoaderData } from "@remix-run/react";
-import { IconX } from "@tabler/icons-react";
+import { IconCheck, IconX } from "@tabler/icons-react";
 import { useCallback, useEffect, useState } from "react";
 import invariant from "tiny-invariant";
 import { LoginNavigateModal } from "~/features/Auth/components/LoginNavigateModal";
 import { authenticator } from "~/features/Auth/services/auth.server";
+import { commitSession, getSession } from "~/features/Auth/session.server";
 import { getHighlights } from "~/features/Highlight/apis/getHighlights";
 import { incrementTotalReplayTimes } from "~/features/Highlight/apis/incrementTotalReplayTimes";
 import { updateHighlight } from "~/features/Highlight/apis/updateHighlight";
@@ -118,15 +119,29 @@ export const loader = async ({
     ? highlightsData.slice(0, -1)
     : highlightsData;
 
-  return json({
-    resultHighlightData,
-    userId,
-    offset,
-    hasNextPage,
-    limit,
-    radioshow,
-    display,
-  });
+  const session = await getSession(request.headers.get("cookie"));
+  const toastMessage = (session.get("googleAuthFlag") as string) || null;
+  const logoutToastMessage = (session.get("logoutFlag") as string) || null;
+  console.log(toastMessage, logoutToastMessage, "messageがあります");
+
+  return json(
+    {
+      toastMessage,
+      logoutToastMessage,
+      resultHighlightData,
+      userId,
+      offset,
+      hasNextPage,
+      limit,
+      radioshow,
+      display,
+    },
+    {
+      headers: {
+        "Set-Cookie": await commitSession(session),
+      },
+    }
+  );
 };
 
 export default function Hightlights() {
@@ -138,6 +153,8 @@ export default function Hightlights() {
     limit,
     radioshow,
     display,
+    toastMessage,
+    logoutToastMessage,
   } = useLoaderData<typeof loader>();
 
   const fetcher = useFetcher<typeof loader>();
@@ -253,6 +270,30 @@ export default function Hightlights() {
     setPlayingHighlightIndex(index);
   };
 
+  useEffect(() => {
+    if (toastMessage === "User Created") {
+      notifications.show({
+        withCloseButton: true,
+        autoClose: 5000,
+        title: "Googleによるログインが完了しました",
+        message: "引き続きご利用ください！",
+        color: "blue",
+        icon: <IconCheck />,
+      });
+    }
+
+    if (logoutToastMessage === "User Logout") {
+      notifications.show({
+        withCloseButton: true,
+        autoClose: 5000,
+        title: "ログアウトしました。",
+        message: "",
+        color: "blue",
+        icon: <IconCheck />,
+      });
+    }
+  }, [toastMessage, logoutToastMessage]);
+
   const handleAction = (
     id: string,
     actionType: "replayed" | "saved" | "liked",
@@ -320,7 +361,7 @@ export default function Hightlights() {
       )}
 
       <Flex justify={"space-between"} m={"md"}>
-        <Title order={2}>ハイライト一覧</Title>
+        <Title order={2}>切り抜き一覧</Title>
         <Select
           withCheckIcon={false}
           w={rem(120)}
