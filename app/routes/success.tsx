@@ -15,11 +15,11 @@ export default function Success() {
       <Center my={"xl"}>
         <Stack>
           <Center>
-            <Title order={2}>ログインが成功しました</Title>
+            <Title order={2}>投稿ありがとうございます！</Title>
           </Center>
 
           <Center>
-            <Link to="/highlights/popular" style={{ textDecoration: "none" }}>
+            <Link to="/highlights/all" style={{ textDecoration: "none" }}>
               <Text
                 size="sm"
                 variant="gradient"
