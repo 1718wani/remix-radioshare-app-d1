@@ -28,13 +28,16 @@ export default function HighlightShareModal({
   close,
   data,
 }: HighlightShareModalProps) {
-  const datas = useRouteLoaderData<typeof loader>("root");
- 
-  const radioshowsData = datas?.radioShows.map((show) => ({
-    value: show.id.toString(),
-    label: show.title,
-  }));
   const [selectedRadioshow, setSelectedRadioshow] = useState("");
+  const datas = useRouteLoaderData<typeof loader>("root");
+
+  const radioshowsData = datas
+    ? datas.radioShows.map((show) => ({
+        value: show.id.toString(),
+        label: show.title,
+      }))
+    : [];
+
   const schema: z.ZodTypeAny = schemaForHighlightShare(radioshowsData);
 
   const [, setIsRadioshowCreateModalOpen] = useAtom(
@@ -77,14 +80,13 @@ export default function HighlightShareModal({
         icon: <IconCheck />,
       });
     }
-  }, [data,setIsShareHighlightModalOpen]);
+  }, [data, setIsShareHighlightModalOpen]);
 
   return (
-    <Modal opened={opened} onClose={close} size={"lg"} zIndex={3000}>
+    <Modal opened={opened} onClose={close} size={"lg"}>
       <Form method="post" action="/highlights" {...getFormProps(form)}>
         <Stack gap="md" mx={"xl"} mb={"xl"}>
           <Title order={2}>切り抜きシェア</Title>
-          <div>{radioshowsData[0]?.label}</div>
           <Autocomplete
             label="番組名"
             placeholder="番組名"
@@ -94,7 +96,6 @@ export default function HighlightShareModal({
             value={selectedRadioshow}
             onChange={setSelectedRadioshow}
             error={radioshowData.errors}
-            limit={10}
           />
           <input type="hidden" name="radioshowData" value={selectedRadioshow} />
           <Link

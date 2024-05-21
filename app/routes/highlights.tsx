@@ -27,7 +27,7 @@ export const loader = async ({request}: LoaderFunctionArgs) => {
   // もしいまのURLが/highlightsの場合/highlights/allにリダイレクトする
   const url = new URL(request.url);
   if (url.pathname === "/highlights") {
-    return redirect("/success");
+    return redirect("/highlights/success");
   }else{
     return null;
   }
