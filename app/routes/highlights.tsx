@@ -95,7 +95,8 @@ export async function action({ request, context }: ActionFunctionArgs) {
     });
     
 
-    const form = await unstable_parseMultipartFormData(request, uploadHandler);
+    // ここが原因
+    const form = await unstable_parseMultipartFormData(request.clone(), uploadHandler);
     // const file = form.get("headerImage");
     // const response = await env.BUCKET.put(
     //   `${radioshowData.title}${new Date().toISOString()}.png`,
