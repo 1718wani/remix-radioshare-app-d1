@@ -89,22 +89,25 @@ export async function action({ request, context }: ActionFunctionArgs) {
 
     // R2に画像をアップロードしてURLを取得
     const env = context.cloudflare.env as Env;
-    const uploadHandler = unstable_createMemoryUploadHandler({
-      maxPartSize: 1024 * 1024 * 10,
-    });
+    if (!env.BUCKET) {
+      return json({ success: false, message: "Bucket not found" });
+    }
+    // const uploadHandler = unstable_createMemoryUploadHandler({
+    //   maxPartSize: 1024 * 1024 * 10,
+    // });
 
-    const form = await unstable_parseMultipartFormData(request, uploadHandler);
-    const file = form.get("headerImage");
-    const response = await env.BUCKET.put(
-      `${radioshowData.title}${new Date().toISOString()}.png`,
-      file
-    );
+    // const form = await unstable_parseMultipartFormData(request, uploadHandler);
+    // const file = form.get("headerImage");
+    // const response = await env.BUCKET.put(
+    //   `${radioshowData.title}${new Date().toISOString()}.png`,
+    //   file
+    // );
 
-    await createRadioshow(
-      { title: radioshowData.title, imageUrl: response?.key ?? "" },
-      context,
-      request
-    );
+    // await createRadioshow(
+    //   { title: radioshowData.title, imageUrl: response?.key ?? "" },
+    //   context,
+    //   request
+    // );
 
     return json({ success: true, message: "番組登録が完了しました" });
   }
