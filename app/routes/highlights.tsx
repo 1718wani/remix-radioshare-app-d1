@@ -92,9 +92,12 @@ export async function action({ request, context }: ActionFunctionArgs) {
     if (!env.BUCKET) {
       return json({ success: false, message: "Bucket not found" });
     }
-    // const uploadHandler = unstable_createMemoryUploadHandler({
-    //   maxPartSize: 1024 * 1024 * 10,
-    // });
+    const uploadHandler = unstable_createMemoryUploadHandler({
+      maxPartSize: 1024 * 1024 * 10,
+    });
+    if (!uploadHandler) {
+      return json({ success: false, message: "uploadHandler not found" });
+    }
 
     // const form = await unstable_parseMultipartFormData(request, uploadHandler);
     // const file = form.get("headerImage");
