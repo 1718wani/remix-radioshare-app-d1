@@ -89,17 +89,13 @@ export async function action({ request, context }: ActionFunctionArgs) {
 
     // R2に画像をアップロードしてURLを取得
     const env = context.cloudflare.env as Env;
-    if (!env.BUCKET) {
-      return json({ success: false, message: "Bucket not found" });
-    }
+    
     const uploadHandler = unstable_createMemoryUploadHandler({
       maxPartSize: 1024 * 1024 * 10,
     });
-    if (!uploadHandler) {
-      return json({ success: false, message: "uploadHandler not found" });
-    }
+    
 
-    // const form = await unstable_parseMultipartFormData(request, uploadHandler);
+    const form = await unstable_parseMultipartFormData(request, uploadHandler);
     // const file = form.get("headerImage");
     // const response = await env.BUCKET.put(
     //   `${radioshowData.title}${new Date().toISOString()}.png`,
