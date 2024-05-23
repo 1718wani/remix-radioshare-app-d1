@@ -1,10 +1,36 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 import { SpotifyEmbedController } from "~/features/Player/types/SpotifyIframeApiTypes";
 
 export function useSpotifyPlayer(onPlaybackEnd: () => void) {
   const [spotifyController, setSpotifyController] =
     useState<SpotifyEmbedController | null>(null);
   const stopAtRef = useRef<number | null>(null);
+
+  const callback = useCallback((controller: SpotifyEmbedController) => {
+    setSpotifyController(controller);
+
+    controller.addListener("ready", () => {
+      console.log("Spotify IframeAPI ready");
+    });
+
+    controller.addListener("playback_update", (e) => {
+      console.log(
+        "Playback update received:",
+        e?.data.position / 1000,
+        stopAtRef.current
+      );
+      if (
+        stopAtRef.current !== null &&
+        e &&
+        e.data.position / 1000 >= stopAtRef.current
+      ) {
+        console.log("Playback end", e.data.position, stopAtRef.current);
+        controller.pause();
+        stopAtRef.current = null; // stopAtRefを更新
+        onPlaybackEnd();
+      }
+    });
+  }, [onPlaybackEnd]);
 
   useEffect(() => {
     const node = document.getElementById("spotify-player");
@@ -15,31 +41,7 @@ export function useSpotifyPlayer(onPlaybackEnd: () => void) {
         width: 0,
         height: 0,
       };
-      const callback = (controller: SpotifyEmbedController) => {
-        setSpotifyController(controller);
-
-        controller.addListener("ready", () => {
-          console.log("Spotify IframeAPI ready");
-        });
-
-        controller.addListener("playback_update", (e) => {
-          console.log(
-            "Playback update received:",
-            e?.data.position / 1000,
-            stopAtRef.current
-          );
-          if (
-            stopAtRef.current !== null &&
-            e &&
-            e.data.position / 1000 >= stopAtRef.current
-          ) {
-            console.log("Playback end", e.data.position, stopAtRef.current);
-            controller.pause();
-            stopAtRef.current = null; // stopAtRefを更新
-            onPlaybackEnd();
-          }
-        });
-      };
+      
       if (element) {
         IFrameAPI.createController(element, options, callback);
       }
@@ -55,7 +57,7 @@ export function useSpotifyPlayer(onPlaybackEnd: () => void) {
         node.parentNode.removeChild(node);
       }
     };
-  }, [onPlaybackEnd]);
+  }, [onPlaybackEnd,callback]);
 
   const playSpotifyHighlight = (
     idOrUri: string,

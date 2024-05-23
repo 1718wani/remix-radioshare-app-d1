@@ -6,6 +6,7 @@ import classes from "../../../styles/pulseNewButton.module.css";
 import { useAtom } from "jotai";
 import { isShareHighlightModalOpenAtom } from "~/features/Player/atoms/isShareHighlightModalOpenAtom";
 import { loader } from "~/root";
+import { isSideMenuOpenAtom } from "~/features/Player/atoms/isSideMenuOpenAtom";
 
 export const ShareButton = () => {
   const data = useRouteLoaderData<typeof loader>("root");
@@ -13,6 +14,7 @@ export const ShareButton = () => {
   const [, setIsShareHighlightModalOpen] = useAtom(
     isShareHighlightModalOpenAtom
   );
+  const [, setMenuOpen] = useAtom(isSideMenuOpenAtom);
 
   return (
     <>
@@ -21,8 +23,10 @@ export const ShareButton = () => {
           if (!data?.user) {
             e.preventDefault();
             console.log("開いている",data);
+            
             open();
           } else {
+            setMenuOpen(false);
             setIsShareHighlightModalOpen(true);
           }
         }}
@@ -30,7 +34,6 @@ export const ShareButton = () => {
         size="md"
         variant="white"
         radius={"md"}
-        // style={{ position: "fixed", right: 30, bottom: 50, zIndex: 3 }}
         key={classes.pulse}
       >
         Share

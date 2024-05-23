@@ -69,12 +69,12 @@ export default function HighlightShareModal({
       });
     }
 
-    if (data.success) {
+    if (data.success && data.message === "切り抜きシェアが完了しました") {
       setIsShareHighlightModalOpen(false);
       notifications.show({
         withCloseButton: true,
         autoClose: 5000,
-        title: "投稿が完了しました",
+        title: "",
         message: data.message,
         color: "blue",
         icon: <IconCheck />,
@@ -83,7 +83,7 @@ export default function HighlightShareModal({
   }, [data, setIsShareHighlightModalOpen]);
 
   return (
-    <Modal opened={opened} onClose={close} size={"lg"}>
+    <Modal opened={opened} onClose={close} size={"lg"} zIndex={3000}>
       <Form method="post" action="/highlights" {...getFormProps(form)}>
         <Stack gap="md" mx={"xl"} mb={"xl"}>
           <Title order={2}>切り抜きシェア</Title>

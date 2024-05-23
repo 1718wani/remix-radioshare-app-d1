@@ -61,12 +61,12 @@ export default function RadioshowCreateModal({ opened, close, data }:RadioshowCr
       });
     }
 
-    if (data.success) {
+    if (data.success && data.message === "番組登録が完了しました") {
       setIsRadioshowCreateModalOpen(false);
       notifications.show({
         withCloseButton: true,
         autoClose: 5000,
-        title: "投稿が完了しました",
+        title: "",
         message: data.message,
         color: "blue",
         icon: <IconCheck />,
@@ -84,7 +84,7 @@ export default function RadioshowCreateModal({ opened, close, data }:RadioshowCr
         onClose={close}
         title="番組名を登録してください"
         size={"lg"}
-        zIndex={3000}
+        zIndex={3001}
       >
         <Form
           method="POST"
