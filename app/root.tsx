@@ -13,6 +13,8 @@ import {
   useLoaderData,
   useMatches,
   Form,
+  useRouteError,
+  Link,
 } from "@remix-run/react";
 import {
   ColorSchemeScript,
@@ -23,6 +25,11 @@ import {
   Divider,
   NavLink,
   Button,
+  Center,
+  Stack,
+  Title,
+  Text,
+  Image,
 } from "@mantine/core";
 import { HeaderComponent } from "./components/HeaderComponent";
 import { Notifications } from "@mantine/notifications";
@@ -53,6 +60,42 @@ export const loader = async ({ context, request }: LoaderFunctionArgs) => {
 
   return json({ radioShows, user }, {});
 };
+
+export function ErrorBoundary() {
+  const error = useRouteError();
+  console.error(error);
+  return (
+    <>
+      <Center my={"xl"}>
+        <Stack>
+          <Center>
+            <Title order={2}>エラーが発生しました!あなたはわるくないです</Title>
+          </Center>
+
+          <Center>
+            <Link to="/highlights/all" style={{ textDecoration: "none" }}>
+              <Text
+                size="sm"
+                variant="gradient"
+                fw={700}
+                gradient={{ from: "blue", to: "blue.3" }}
+              >
+                一覧に戻る
+              </Text>
+            </Link>
+          </Center>
+          <Image
+            width="120"
+            height="auto"
+            fit="cover"
+            src="/errorgirlwithneko.png"
+            alt="success"
+          />
+        </Stack>
+      </Center>
+    </>
+  );
+}
 
 export function Layout({ children }: { children: React.ReactNode }) {
   return (
