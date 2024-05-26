@@ -179,12 +179,6 @@ export default function Hightlights() {
   };
 
   const handleAutoStopHighlight = () => {
-    console.log(
-      "handleAutoStopHighlight",
-      "playingHighlightIndex",
-      playingHighlightIndex
-    );
-
     setPlayingHighlightIndex((prev) => (prev || 0) + 1);
   };
 
@@ -257,7 +251,7 @@ export default function Hightlights() {
   );
 
   useEffect(() => {
-    if (playingHighlightIndex !== null) {
+    if (playingHighlightIndex !== null && playingHighlightIndex < highlightsData.length) {
       playHighlight(
         playingHighlightIndex,
         highlightsData[playingHighlightIndex]
@@ -400,6 +394,7 @@ export default function Hightlights() {
                     description={highlightData.highlight.description || ""}
                     replayUrl={highlightData.highlight.replayUrl}
                     createdAt={highlightData.highlight.createdAt || ""}
+                    createdBy={highlightData.highlight.createdBy || ""}
                     liked={highlightData.userHighlight?.liked || false}
                     saved={highlightData.userHighlight?.saved || false}
                     replayed={highlightData.userHighlight?.replayed || false}
@@ -415,6 +410,7 @@ export default function Hightlights() {
                     onPlay={() => handlePlayHighlight(index)}
                     playing={index === playingHighlightIndex}
                     handleStop={handlePauseHighlight}
+                    
                   />
                 </Grid.Col>
               ))}
