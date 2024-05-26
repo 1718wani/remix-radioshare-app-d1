@@ -69,7 +69,7 @@ export function ErrorBoundary() {
       <Center my={"xl"}>
         <Stack>
           <Center>
-            <Title order={2}>エラーが発生しました!あなたはわるくないです</Title>
+            <Title order={2}>エラーが発生しました!</Title>
           </Center>
 
           <Center>
