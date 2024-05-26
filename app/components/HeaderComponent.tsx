@@ -1,21 +1,15 @@
-import {
-  Box,
-  Flex,
-  Text,
-  Burger,
-} from "@mantine/core";
+import { Box, Flex, Text, Burger } from "@mantine/core";
 import { Link } from "@remix-run/react";
 import { useAtom } from "jotai";
 import { ShareButton } from "~/features/Highlight/components/ShareButton";
-import { menuOpenedAtom } from "~/features/Player/atoms/menuOpendAtom";
+import { isSideMenuOpenAtom } from "~/features/Player/atoms/isSideMenuOpenAtom";
 
 type Props = {
   opened: boolean;
-  
 };
 
 export const HeaderComponent = ({ opened }: Props) => {
-  const [, setMenuOpened] = useAtom(menuOpenedAtom);
+  const [, setMenuOpen] = useAtom(isSideMenuOpenAtom);
   return (
     <Box w={"full"} bg={"blue"} h={"60"}>
       <Flex align={"center"} justify={"space-between"} p={"xs"} px={"sm"}>
@@ -26,10 +20,11 @@ export const HeaderComponent = ({ opened }: Props) => {
         </Link>
         <Flex align={"center"}>
           <ShareButton />
+
           <Burger
             color="white"
             opened={opened}
-            onClick={() => setMenuOpened((prev) => !prev)}
+            onClick={() => setMenuOpen((prev) => !prev)}
             hiddenFrom="sm"
             size="md"
             ml={"sm"}

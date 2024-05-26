@@ -33,8 +33,9 @@ export const loader = async ({request}: LoaderFunctionArgs) => {
   }
 };
 
+
 export async function action({ request, context }: ActionFunctionArgs) {
-  const formData = await request.formData();
+  const formData = await request.clone().formData();
   if (
     formData.get("title") &&
     formData.get("replayUrl") &&
@@ -87,22 +88,28 @@ export async function action({ request, context }: ActionFunctionArgs) {
 
     const radioshowData = submission.value;
 
-    // // R2に画像をアップロードしてURLを取得
-    // const env = context.cloudflare.env as Env;
-    // const uploadHandler = unstable_createMemoryUploadHandler({
-    //   maxPartSize: 1024 * 1024 * 10,
-    // });
+    // R2に画像をアップロードしてURLを取得
+    const env = context.cloudflare.env as Env;
+    
+    const uploadHandler = unstable_createMemoryUploadHandler({
+      maxPartSize: 1024 * 1024 * 10,
+    });
+    
+    // requestをクローンして使用
+    const form = await unstable_parseMultipartFormData(request.clone(), uploadHandler);
+    const file = form.get("headerImage");
 
-    // const form = await unstable_parseMultipartFormData(request, uploadHandler);
-    // const file = form.get("headerImage");
-    // const response = await env.BUCKET.put(
-    //   `${radioshowData.title}${new Date().toISOString()}.png`,
-    //   file
-    // );
+    if (!file) {
+      return json({ success: false, message: "File upload failed" });
+    }
+
+    const response = await env.BUCKET.put(
+      `${radioshowData.title}${new Date().toISOString()}.png`,
+      file
+    );
 
     await createRadioshow(
-      // { title: radioshowData.title, imageUrl: response?.key ?? "" },
-      { title: radioshowData.title, imageUrl: "" },
+      { title: radioshowData.title, imageUrl: response?.key ?? "" },
       context,
       request
     );

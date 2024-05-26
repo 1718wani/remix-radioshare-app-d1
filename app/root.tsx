@@ -13,6 +13,8 @@ import {
   useLoaderData,
   useMatches,
   Form,
+  useRouteError,
+  Link,
 } from "@remix-run/react";
 import {
   ColorSchemeScript,
@@ -23,6 +25,11 @@ import {
   Divider,
   NavLink,
   Button,
+  Center,
+  Stack,
+  Title,
+  Text,
+  Image,
 } from "@mantine/core";
 import { HeaderComponent } from "./components/HeaderComponent";
 import { Notifications } from "@mantine/notifications";
@@ -39,7 +46,7 @@ import { LoaderFunctionArgs } from "@remix-run/cloudflare";
 import { authenticator } from "./features/Auth/services/auth.server";
 import { LoginNavigateModal } from "./features/Auth/components/LoginNavigateModal";
 import { useAtom } from "jotai";
-import { menuOpenedAtom } from "./features/Player/atoms/menuOpendAtom";
+import { isSideMenuOpenAtom } from "./features/Player/atoms/isSideMenuOpenAtom";
 import { GoogleButton } from "./features/Auth/components/GoogleButton";
 import { isRadioshowCreateModalOpenAtom } from "./features/Player/atoms/isRadioshowCreateModalOpenAtom";
 
@@ -53,6 +60,42 @@ export const loader = async ({ context, request }: LoaderFunctionArgs) => {
 
   return json({ radioShows, user }, {});
 };
+
+export function ErrorBoundary() {
+  const error = useRouteError();
+  console.error(error);
+  return (
+    <>
+      <Center my={"xl"}>
+        <Stack>
+          <Center>
+            <Title order={2}>エラーが発生しました!</Title>
+          </Center>
+
+          <Center>
+            <Link to="/highlights/all" style={{ textDecoration: "none" }}>
+              <Text
+                size="sm"
+                variant="gradient"
+                fw={700}
+                gradient={{ from: "blue", to: "blue.3" }}
+              >
+                一覧に戻る
+              </Text>
+            </Link>
+          </Center>
+          <Image
+            width="120"
+            height="auto"
+            fit="cover"
+            src="/errorgirlwithneko.png"
+            alt="success"
+          />
+        </Stack>
+      </Center>
+    </>
+  );
+}
 
 export function Layout({ children }: { children: React.ReactNode }) {
   return (
@@ -84,11 +127,11 @@ export default function App() {
   const { radioShows, user } = useLoaderData<typeof loader>();
   const navigation = useNavigation();
   const [showLoadingOverlay, setShowLoadingOverlay] = useState(false);
-  const [menuOpened] = useAtom(menuOpenedAtom);
+  const [menuOpened] = useAtom(isSideMenuOpenAtom);
   const [, setIsRadioshowCreateModalOpen] = useAtom(
     isRadioshowCreateModalOpenAtom
   );
-  const [, setMenuOpened] = useAtom(menuOpenedAtom);
+  const [, setMenuOpened] = useAtom(isSideMenuOpenAtom);
   const [modalOpened, { open: openModal, close: closeModal }] =
     useDisclosure(false);
   const isMobile = useMediaQuery("(max-width: 48em)");
@@ -184,8 +227,13 @@ export default function App() {
             <span style={{ marginLeft: 4 }}>番組登録</span>
           </Button>
           {user ? (
-            <Form action="/logout" method="post" style={{ margin: 0 }} >
-              <Button type="submit" onClick={() => setMenuOpened(false)} w="100%" bg={"gray.5"}>
+            <Form action="/logout" method="post" style={{ margin: 0 }}>
+              <Button
+                type="submit"
+                onClick={() => setMenuOpened(false)}
+                w="100%"
+                bg={"gray.5"}
+              >
                 <IconLogout stroke={2} />
                 <span style={{ marginLeft: 4 }}>ログアウト</span>
               </Button>
@@ -196,7 +244,12 @@ export default function App() {
               action="/google-sign-in-or-up"
               style={{ margin: 0 }}
             >
-              <GoogleButton type="submit" onClick={() => setMenuOpened(false)} my={"xs"} w={"100%"}>
+              <GoogleButton
+                type="submit"
+                onClick={() => setMenuOpened(false)}
+                my={"xs"}
+                w={"100%"}
+              >
                 Googleアカウントで ログイン or 登録
               </GoogleButton>
             </Form>

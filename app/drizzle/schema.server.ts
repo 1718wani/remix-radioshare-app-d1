@@ -57,7 +57,7 @@ export const userHighlights = sqliteTable(
       .references(() => users.id)
       .notNull(),
     highlightId: text("highlight_id")
-      .references(() => highlights.id)
+      .references(() => highlights.id, { onDelete: "cascade" }) // ここにonDeleteを追加
       .notNull(),
     replayed: integer("played", { mode: "boolean" }).default(false),
     saved: integer("saved", { mode: "boolean" }).default(false),

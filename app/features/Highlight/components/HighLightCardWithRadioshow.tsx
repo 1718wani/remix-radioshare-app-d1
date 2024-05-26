@@ -11,18 +11,20 @@ import {
   Image,
   rem,
 } from "@mantine/core";
-import { Link } from "@remix-run/react";
+import { Form, Link, useRouteLoaderData } from "@remix-run/react";
 import {
   IconBookmark,
   IconHeadphones,
   IconHeart,
   IconPlayerPlayFilled,
   IconPlayerStopFilled,
+  IconTrash,
 } from "@tabler/icons-react";
 import { parseISO, isWithinInterval, add } from "date-fns";
 import { useState } from "react";
 import { customeDomain } from "~/consts/customeDomain";
 import { highlightCardWithRadioshowProps } from "../types/highlightCardWithRadioshowProps";
+import { loader } from "~/root";
 
 export const HighLightCardWithRadioshow = (
   props: highlightCardWithRadioshowProps
@@ -32,6 +34,7 @@ export const HighLightCardWithRadioshow = (
     title,
     description,
     createdAt,
+    createdBy,
     liked,
     saved,
     replayed,
@@ -45,8 +48,11 @@ export const HighLightCardWithRadioshow = (
     onAction,
     onPlay,
     playing,
-    handleStop
+    handleStop,
   } = props;
+
+  const data = useRouteLoaderData<typeof loader>("root");
+  const userId = data?.user;
 
   const correctImageUrl = `${customeDomain}${imageUrl}`;
   const theme = useMantineTheme();
@@ -167,33 +173,53 @@ export const HighLightCardWithRadioshow = (
               {totalReplayTimes}
             </Text>
           </Flex>
-          {playing ? (
-            <Button
-              leftSection={
-                <IconPlayerStopFilled stroke={0.5} width={20} height={20} />
-              }
-              onClick={handleStop}
-              radius="xl"
-              bg={"gray.5"}
-            >
-              停止する
-            </Button>
-          ) : (
-            <Button
-              leftSection={
-                <IconPlayerPlayFilled stroke={0.5} width={20} height={20} />
-              }
-              onClick={() => {
-              
-                onAction(id, "replayed", true);
-                onPlay()
-              }}
-              radius="xl"
-              bg={"blue.5"}
-            >
-              再生する
-            </Button>
-          )}
+          <Flex align={"center"} gap={rem(8)}>
+            {userId === createdBy && (
+              <Form method="post" action="/highlight/delete">
+                <input type="hidden" name="highlightId" value={id} />
+                <ActionIcon
+                  type="submit"
+                  variant="light"
+                  color={theme.colors.red[6]}
+                  radius={"xl"}
+                  onClick={(e) => {
+                    if (!confirm("本当に削除しますか？")) {
+                      e.preventDefault();
+                    }
+                  }}
+                >
+                  <IconTrash size={20} />
+                </ActionIcon>
+              </Form>
+            )}
+
+            {playing ? (
+              <Button
+                leftSection={
+                  <IconPlayerStopFilled stroke={0.5} width={20} height={20} />
+                }
+                onClick={handleStop}
+                radius="xl"
+                bg={"gray.5"}
+              >
+                停止する
+              </Button>
+            ) : (
+              <Button
+                leftSection={
+                  <IconPlayerPlayFilled stroke={0.5} width={20} height={20} />
+                }
+                onClick={() => {
+                  onAction(id, "replayed", true);
+                  onPlay();
+                }}
+                radius="xl"
+                bg={"blue.5"}
+              >
+                再生する
+              </Button>
+            )}
+          </Flex>
         </Flex>
       </Card>
     </>

@@ -16,6 +16,7 @@ export const LoginNavigateModal = ({
       opened={opened}
       onClose={close}
       title="操作を続けるにはログインしてください"
+      zIndex={10000}
     >
       <Stack>
         <Image
