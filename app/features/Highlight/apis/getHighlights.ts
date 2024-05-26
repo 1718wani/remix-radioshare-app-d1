@@ -40,6 +40,7 @@ export const getHighlights = async (
           description: highlights.description,
           radioshowId: highlights.radioshowId,
           createdAt: highlights.createdAt,
+          createdBy: highlights.createdBy,
           startHHmmss: highlights.replayStartTime,
           endHHmmss: highlights.replayEndTime,
         },

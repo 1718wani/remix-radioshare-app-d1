@@ -4,6 +4,7 @@ export type highlightCardWithRadioshowProps = {
     description: string;
     replayUrl: string;
     createdAt: string;
+    createdBy: string;
     liked: boolean;
     saved: boolean;
     replayed: boolean;
