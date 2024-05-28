@@ -83,7 +83,7 @@ export default function HighlightShareModal({
   }, [data, setIsShareHighlightModalOpen]);
 
   return (
-    <Modal opened={opened} onClose={close} size={"lg"} zIndex={3000}>
+    <Modal opened={opened} onClose={close} size={"lg"} zIndex={300}>
       <Form method="post" action="/highlights" {...getFormProps(form)}>
         <Stack gap="md" mx={"xl"} mb={"xl"}>
           <Title order={2}>切り抜きシェア</Title>
