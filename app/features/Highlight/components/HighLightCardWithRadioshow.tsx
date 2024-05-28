@@ -115,7 +115,7 @@ export const HighLightCardWithRadioshow = (
           <Text truncate fz="md" fw={700} mt="sm">
             {title}
           </Text>
-          <Group align={"center"} gap={6}>
+          <Group align={"center"} gap={6} wrap="nowrap">
             <ActionIcon
               variant="subtle"
               color="gray"
