@@ -1,5 +1,6 @@
 export const convertHHMMSSToSeconds = (timeString: string) => {
   if (!timeString) {
+    console.log("timeString is null");
     return; // timeStringがnull、undefined、空文字の場合は何もせずにreturn
   }
 
