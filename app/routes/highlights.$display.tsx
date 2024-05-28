@@ -218,8 +218,10 @@ export default function Hightlights() {
 
       if (
         platform === "spotify" &&
-        convertedStartSeconds &&
-        convertedEndSeconds
+        convertedStartSeconds !== undefined &&
+        convertedEndSeconds !== undefined &&
+        convertedStartSeconds >= 0 &&
+        convertedEndSeconds >= 0
       ) {
         pauseYoutubeHighlight();
         playSpotifyHighlight(
@@ -229,8 +231,10 @@ export default function Hightlights() {
         );
       } else if (
         platform === "youtube" &&
-        convertedStartSeconds &&
-        convertedEndSeconds
+        convertedStartSeconds !== undefined &&
+        convertedEndSeconds !== undefined &&
+        convertedStartSeconds >= 0 &&
+        convertedEndSeconds >= 0
       ) {
         pauseSpotifyHighlight();
         playYoutubeHighlight(
