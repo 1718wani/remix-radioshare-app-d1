@@ -7,6 +7,7 @@ import { useAtom } from "jotai";
 import { isShareHighlightModalOpenAtom } from "~/features/Player/atoms/isShareHighlightModalOpenAtom";
 import { loader } from "~/root";
 import { isSideMenuOpenAtom } from "~/features/Player/atoms/isSideMenuOpenAtom";
+import { IconPencilPlus } from "@tabler/icons-react";
 
 export const ShareButton = () => {
   const data = useRouteLoaderData<typeof loader>("root");
@@ -19,6 +20,7 @@ export const ShareButton = () => {
   return (
     <>
       <Button
+        leftSection={<IconPencilPlus stroke={2} />}
         onClick={(e) => {
           if (!data?.user) {
             e.preventDefault();
@@ -36,7 +38,7 @@ export const ShareButton = () => {
         radius={"md"}
         key={classes.pulse}
       >
-        Share
+        投稿
       </Button>
 
       <LoginNavigateModal opened={opened} close={close} />
