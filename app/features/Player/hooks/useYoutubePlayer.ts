@@ -13,7 +13,6 @@ export function useYouTubePlayer(onStopCallback: () => void) {
   const onPlayerStateChange = useCallback(
     (event: YT.OnStateChangeEvent) => {
       if (event.data === YT.PlayerState.ENDED && !hasEndedRef.current) {
-        console.log("onPlayerStateChange2回呼ばれるか", event);
         hasEndedRef.current = true; // フラグをセット
         onStopCallback();
         setTimeout(() => {
@@ -52,10 +51,10 @@ export function useYouTubePlayer(onStopCallback: () => void) {
   const playYoutubeHighlight = (
     idOrUri: string,
     convertedStartSeconds: number,
-    convertedEndSeconds: number
+    convertedEndSeconds: number 
   ) => {
     if (player) {
-      player.setSize(320, 80);
+      player.setSize(320, 160);
       player.loadVideoById({
         videoId: idOrUri,
         startSeconds: convertedStartSeconds,
