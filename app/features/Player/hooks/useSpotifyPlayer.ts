@@ -66,7 +66,7 @@ export function useSpotifyPlayer(onPlaybackEnd: () => void) {
   ) => {
     console.log("playSpotifyHighlight", convertedEndSeconds);
     if (spotifyController) {
-      spotifyController.setIframeDimensions(320, 80);
+      spotifyController.setIframeDimensions(320, 160);
       spotifyController.loadUri(idOrUri, false, convertedStartSeconds);
       spotifyController.play();
       stopAtRef.current = convertedEndSeconds; // stopAtRefを更新
