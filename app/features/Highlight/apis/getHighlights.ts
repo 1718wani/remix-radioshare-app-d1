@@ -20,7 +20,7 @@ export const getHighlights = async (
     | "totalSavedTimes"
     | "createdAt"
     | string,
-  pick?: "all" | "saved" | "liked" | "notReplayed",
+  pick?: "saved" | "liked" | "notReplayed" | "all",
   radioshowId?: string
 ) => {
   try {
