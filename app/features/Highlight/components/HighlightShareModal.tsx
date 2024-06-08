@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { Form, Link, useRouteLoaderData } from "@remix-run/react";
+import { Form, useRouteLoaderData } from "@remix-run/react";
 import { getFormProps, getInputProps, useForm } from "@conform-to/react";
 import { parseWithZod } from "@conform-to/zod";
 import {
@@ -82,6 +82,11 @@ export default function HighlightShareModal({
     }
   }, [data, setIsShareHighlightModalOpen]);
 
+  const handleOpenRadioshowCreateModal = () => {
+    setIsShareHighlightModalOpen(false);
+    setIsRadioshowCreateModalOpen(true);
+  };
+
   return (
     <Modal opened={opened} onClose={close} size={"lg"} zIndex={300}>
       <Form method="post" action="/highlights" {...getFormProps(form)}>
@@ -98,9 +103,17 @@ export default function HighlightShareModal({
             error={radioshowData.errors}
           />
           <input type="hidden" name="radioshowData" value={selectedRadioshow} />
-          <Link
-            onClick={() => setIsRadioshowCreateModalOpen(true)}
-            style={{ textDecoration: "none", width: "fit-content" }}
+          <button
+            type="button"
+            onClick={handleOpenRadioshowCreateModal}
+            style={{ 
+              textDecoration: "none", 
+              width: "fit-content", 
+              cursor: "pointer", 
+              background: "none", 
+              border: "none", 
+              padding: 0 
+            }}
           >
             <Text
               size="xs"
@@ -110,7 +123,7 @@ export default function HighlightShareModal({
             >
               番組名が見つからない場合はこちらから作成してください
             </Text>
-          </Link>
+          </button>
 
           <TextInput
             {...getInputProps(title, { type: "text" })}

@@ -18,7 +18,6 @@ import { incrementTotalReplayTimes } from "~/features/Highlight/apis/incrementTo
 import { updateHighlight } from "~/features/Highlight/apis/updateHighlight";
 import { EmptyHighlight } from "~/features/Highlight/components/EmptyHighlight";
 import { HighLightCardWithRadioshow } from "~/features/Highlight/components/HighLightCardWithRadioshow";
-import InfiniteScroll from "~/features/Highlight/components/InfiniteScroll";
 import { RadioShowHeader } from "~/features/Highlight/components/RadioShowHeader";
 import { convertHHMMSSToSeconds } from "~/features/Player/functions/convertHHmmssToSeconds";
 import { convertUrlToId } from "~/features/Player/functions/convertUrlToId";
@@ -65,14 +64,20 @@ export const loader = async ({
   context,
   params,
 }: LoaderFunctionArgs) => {
-  // まずUserIdを取得する
   const userId = await authenticator.isAuthenticated(request);
-  // クエリパラメータを取得する
   const url = new URL(request.url);
-  const offset = Number(url.searchParams.get("offset")) || 0;
-  const limit = 13;
-  const display = params.display;
 
+  // offset（どこから取り出すか）を取得 初期値は0
+  const offset = Number(url.searchParams.get("offset")) || 0;
+  // orderBy（ソートキー）を取得 初期値は再生数
+  const orderBy = url.searchParams.get("orderBy") || "totalReplayTimes";
+  // ascOrDesc（ソート順）を取得 初期値は降順
+  const ascOrDesc = url.searchParams.get("ascOrDesc") || "desc";
+  // limit（一覧に表示する数）を取得 初期値は13
+  const limit = 13;
+
+  // display（カテゴリ）を取得 初期値はall
+  const display = params.display;
   invariant(display, "一覧が見つかりません。");
 
   let narrowingBy: "saved" | "liked" | "notReplayed" | "all" | undefined;
@@ -88,15 +93,11 @@ export const loader = async ({
       narrowingBy = "notReplayed";
       break;
     case "all":
-      narrowingBy = "all";
       break;
     default:
       narrowingId = display;
       break;
   }
-
-  const orderBy = url.searchParams.get("orderBy") || "totalReplayTimes";
-  const ascOrDesc = url.searchParams.get("ascOrDesc") || "desc";
 
   const radioshow = await getRadioshowById(narrowingId || "", context);
 
@@ -114,26 +115,17 @@ export const loader = async ({
     throw new Response("Not Found", { status: 404 });
   }
 
-  // 取得限界値と同じ長さのデータを取得できた場合は、次のページがある
-  const hasNextPage = highlightsData.length === limit;
-  // 次のページがあるなら末尾1つを切り取る、最後のページなら取得データをすべて返す
-  const resultHighlightData = hasNextPage
-    ? highlightsData.slice(0, -1)
-    : highlightsData;
-
   const session = await getSession(request.headers.get("cookie"));
   const toastMessage = (session.get("googleAuthFlag") as string) || null;
   const logoutToastMessage = (session.get("logoutFlag") as string) || null;
-  console.log(toastMessage, logoutToastMessage, "messageがあります");
 
   return json(
     {
       toastMessage,
       logoutToastMessage,
-      resultHighlightData,
+      highlightsData,
       userId,
       offset,
-      hasNextPage,
       limit,
       radioshow,
       display,
@@ -148,11 +140,8 @@ export const loader = async ({
 
 export default function Hightlights() {
   const {
-    resultHighlightData: initialHighlightsData,
-    hasNextPage: initialHasNextPage,
-    offset: initialOffset,
+    highlightsData,
     userId,
-    limit,
     radioshow,
     display,
     toastMessage,
@@ -161,27 +150,21 @@ export default function Hightlights() {
 
   const fetcher = useFetcher<typeof loader>();
   const [opened, { open, close }] = useDisclosure(false);
-  const [highlightsData, setHighlightsData] = useState(initialHighlightsData);
-
-  const [hasNextPage, setHasNextPage] = useState(initialHasNextPage);
-  const [offset, setOffset] = useState(initialOffset);
-  const [orderBy, setOrderBy] = useState("totalReplayTimes");
-  const [ascOrDesc, setAscOrDesc] = useState("desc");
   const isMobile = useMediaQuery("(max-width: 768px)");
-  const [playingHighlightIndex, setPlayingHighlightIndex] = useState<
-    number | null
-  >(null);
+  const [playingHighlightId, setPlayingHighlightId] = useState<string | null>(
+    null
+  );
 
   const isEnabledUserAction = userId ? true : false;
 
   const handlePauseHighlight = () => {
-    setPlayingHighlightIndex(null);
+    setPlayingHighlightId(null);
     pauseSpotifyHighlight();
     pauseYoutubeHighlight();
   };
 
   const handleAutoStopHighlight = () => {
-    setPlayingHighlightIndex((prev) => (prev || 0) + 1);
+    setPlayingHighlightId(null);
   };
 
   const { playSpotifyHighlight, pauseSpotifyHighlight } = useSpotifyPlayer(
@@ -193,9 +176,7 @@ export default function Hightlights() {
 
   // 再生する関数
   const playHighlight = useCallback(
-    (index: number, highlightData: (typeof highlightsData)[0]) => {
-      console.log("index", index);
-
+    (highlightData: (typeof highlightsData)[0]) => {
       const { platform, idOrUri } = convertUrlToId(
         highlightData.highlight.replayUrl
       );
@@ -219,31 +200,27 @@ export default function Hightlights() {
       }
 
       if (
-        platform === "spotify" &&
         convertedStartSeconds !== undefined &&
         convertedEndSeconds !== undefined &&
         convertedStartSeconds >= 0 &&
-        convertedEndSeconds >= 0
+        convertedEndSeconds >= 0 &&
+        platform
       ) {
-        pauseYoutubeHighlight();
-        playSpotifyHighlight(
-          idOrUri,
-          convertedStartSeconds,
-          convertedEndSeconds
-        );
-      } else if (
-        platform === "youtube" &&
-        convertedStartSeconds !== undefined &&
-        convertedEndSeconds !== undefined &&
-        convertedStartSeconds >= 0 &&
-        convertedEndSeconds >= 0
-      ) {
-        pauseSpotifyHighlight();
-        playYoutubeHighlight(
-          idOrUri,
-          convertedStartSeconds,
-          convertedEndSeconds
-        );
+        if (platform === "spotify") {
+          pauseYoutubeHighlight();
+          playSpotifyHighlight(
+            idOrUri,
+            convertedStartSeconds,
+            convertedEndSeconds
+          );
+        } else {
+          pauseSpotifyHighlight();
+          playYoutubeHighlight(
+            idOrUri,
+            convertedStartSeconds,
+            convertedEndSeconds
+          );
+        }
       } else {
         console.log("何も再生しない");
       }
@@ -256,18 +233,12 @@ export default function Hightlights() {
     ]
   );
 
-  useEffect(() => {
-    if (playingHighlightIndex !== null && playingHighlightIndex < highlightsData.length) {
-      playHighlight(
-        playingHighlightIndex,
-        highlightsData[playingHighlightIndex]
-      );
-    }
-    console.log("playingHighlightIndex", playingHighlightIndex);
-  }, [playingHighlightIndex, highlightsData, playHighlight]);
-
-  const handlePlayHighlight = (index: number) => {
-    setPlayingHighlightIndex(index);
+  const handlePlayHighlight = (
+    id: string,
+    highlightData: (typeof highlightsData)[0]
+  ) => {
+    playHighlight(highlightData);
+    setPlayingHighlightId(id);
   };
 
   useEffect(() => {
@@ -325,31 +296,10 @@ export default function Hightlights() {
         break;
     }
 
-    setOrderBy(orderBy);
-    setAscOrDesc(ascOrDesc);
-
     fetcher.load(
       `/highlights/${display}?orderBy=${orderBy}&ascOrDesc=${ascOrDesc}&offset=0`
     );
   };
-
-  useEffect(() => {
-    const fetchedData = fetcher.data;
-    if (fetchedData?.resultHighlightData) {
-      if (fetchedData.offset === 0) {
-        // 新しいクエリパラメータでデータをロードした場合、データを置き換える
-        setHighlightsData(fetchedData.resultHighlightData);
-      } else {
-        // ページネーションでデータを追加する場合
-        setHighlightsData((prev) => [
-          ...prev,
-          ...fetchedData.resultHighlightData,
-        ]);
-      }
-      setOffset(fetchedData.offset);
-      setHasNextPage(fetchedData.hasNextPage);
-    }
-  }, [fetcher.data]);
 
   return (
     <>
@@ -374,54 +324,45 @@ export default function Hightlights() {
       </Flex>
       {highlightsData.length > 0 ? (
         <>
-          <InfiniteScroll
-            loadMore={() => {
-              if (fetcher.state === "idle") {
-                fetcher.load(
-                  `/highlights/${display}?orderBy=${orderBy}&ascOrDesc=${ascOrDesc}&offset=${
-                    offset + limit - 1
-                  } `
-                );
-              }
-            }}
-            hasNextPage={hasNextPage}
-          >
-            <Grid mt={10} mb={140} mx={"sm"}>
-              {highlightsData.map((highlightData, index) => (
-                <Grid.Col
+          <Grid mt={10} mb={140} mx={"sm"}>
+            {highlightsData.map((highlightData) => (
+              <Grid.Col
+                key={highlightData.highlight.id}
+                span={{ base: 12, md: 6, lg: 4 }}
+              >
+                <HighLightCardWithRadioshow
                   key={highlightData.highlight.id}
-                  span={{ base: 12, md: 6, lg: 4 }}
-                >
-                  <HighLightCardWithRadioshow
-                    key={highlightData.highlight.id}
-                    id={highlightData.highlight.id}
-                    imageUrl={highlightData.radioshow?.imageUrl || ""}
-                    title={highlightData.highlight.title}
-                    description={highlightData.highlight.description || ""}
-                    replayUrl={highlightData.highlight.replayUrl}
-                    createdAt={highlightData.highlight.createdAt || ""}
-                    createdBy={highlightData.highlight.createdBy || ""}
-                    liked={highlightData.userHighlight?.liked || false}
-                    saved={highlightData.userHighlight?.saved || false}
-                    replayed={highlightData.userHighlight?.replayed || false}
-                    totalReplayTimes={
-                      highlightData.highlight.totalReplayTimes || 0
-                    }
-                    radioshowId={highlightData.highlight.radioshowId || ""}
-                    isEnabledUserAction={isEnabledUserAction}
-                    open={open}
-                    onAction={handleAction}
-                    startHHmmss={highlightData.highlight.startHHmmss}
-                    endHHmmss={highlightData.highlight.endHHmmss}
-                    onPlay={() => handlePlayHighlight(index)}
-                    playing={index === playingHighlightIndex}
-                    handleStop={handlePauseHighlight}
-                    
-                  />
-                </Grid.Col>
-              ))}
-            </Grid>
-          </InfiniteScroll>
+                  id={highlightData.highlight.id}
+                  imageUrl={highlightData.radioshow?.imageUrl || ""}
+                  title={highlightData.highlight.title}
+                  description={highlightData.highlight.description || ""}
+                  replayUrl={highlightData.highlight.replayUrl}
+                  createdAt={highlightData.highlight.createdAt || ""}
+                  createdBy={highlightData.highlight.createdBy || ""}
+                  liked={highlightData.userHighlight?.liked || false}
+                  saved={highlightData.userHighlight?.saved || false}
+                  replayed={highlightData.userHighlight?.replayed || false}
+                  totalReplayTimes={
+                    highlightData.highlight.totalReplayTimes || 0
+                  }
+                  radioshowId={highlightData.highlight.radioshowId || ""}
+                  isEnabledUserAction={isEnabledUserAction}
+                  open={open}
+                  onAction={handleAction}
+                  startHHmmss={highlightData.highlight.startHHmmss}
+                  endHHmmss={highlightData.highlight.endHHmmss}
+                  onPlay={() =>
+                    handlePlayHighlight(
+                      highlightData.highlight.id,
+                      highlightData
+                    )
+                  }
+                  playing={highlightData.highlight.id === playingHighlightId}
+                  handleStop={handlePauseHighlight}
+                />
+              </Grid.Col>
+            ))}
+          </Grid>
         </>
       ) : (
         <EmptyHighlight />
