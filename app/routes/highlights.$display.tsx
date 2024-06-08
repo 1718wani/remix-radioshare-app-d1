@@ -25,6 +25,7 @@ import { updateHighlight } from "~/features/Highlight/apis/updateHighlight";
 import { EmptyHighlight } from "~/features/Highlight/components/EmptyHighlight";
 import { HighLightCardWithRadioshow } from "~/features/Highlight/components/HighLightCardWithRadioshow";
 import { RadioShowHeader } from "~/features/Highlight/components/RadioShowHeader";
+import { HIGHLIGHT_FETCH_LIMIT } from "~/features/Highlight/consts/highlightFetchLimit";
 import { convertHHMMSSToSeconds } from "~/features/Player/functions/convertHHmmssToSeconds";
 import { convertUrlToId } from "~/features/Player/functions/convertUrlToId";
 import { useSpotifyPlayer } from "~/features/Player/hooks/useSpotifyPlayer";
@@ -80,7 +81,7 @@ export const loader = async ({
   // ascOrDesc（ソート順）を取得 初期値は降順
   const ascOrDesc = url.searchParams.get("ascOrDesc") || "desc";
   // limit（一覧に表示する数）を取得 初期値は13
-  const limit = 6;
+  const limit = HIGHLIGHT_FETCH_LIMIT;
 
   // display（カテゴリ）を取得 初期値はall
   const display = params.display;
