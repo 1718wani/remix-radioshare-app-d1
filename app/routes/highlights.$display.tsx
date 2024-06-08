@@ -1,15 +1,21 @@
-import { Box, Flex, Grid, Select, Title, rem } from "@mantine/core";
-import { useDisclosure, useMediaQuery } from "@mantine/hooks";
+import { Box, Button, Flex, Grid, Select, Title, rem } from "@mantine/core";
+import { useDisclosure, useMediaQuery, useOs } from "@mantine/hooks";
 import { notifications } from "@mantine/notifications";
 import {
   ActionFunctionArgs,
   LoaderFunctionArgs,
   json,
 } from "@remix-run/cloudflare";
-import { useFetcher, useLoaderData } from "@remix-run/react";
-import { IconCheck, IconX } from "@tabler/icons-react";
+import { Link, useFetcher, useLoaderData, useNavigate } from "@remix-run/react";
+import {
+  IconCheck,
+  IconChevronLeft,
+  IconChevronRight,
+  IconX,
+} from "@tabler/icons-react";
 import { useCallback, useEffect, useState } from "react";
 import invariant from "tiny-invariant";
+import { prefetchForOS } from "~/consts/prefetchForOS";
 import { LoginNavigateModal } from "~/features/Auth/components/LoginNavigateModal";
 import { authenticator } from "~/features/Auth/services/auth.server";
 import { commitSession, getSession } from "~/features/Auth/session.server";
@@ -74,7 +80,7 @@ export const loader = async ({
   // ascOrDesc（ソート順）を取得 初期値は降順
   const ascOrDesc = url.searchParams.get("ascOrDesc") || "desc";
   // limit（一覧に表示する数）を取得 初期値は13
-  const limit = 13;
+  const limit = 6;
 
   // display（カテゴリ）を取得 初期値はall
   const display = params.display;
@@ -129,6 +135,8 @@ export const loader = async ({
       limit,
       radioshow,
       display,
+      orderBy,
+      ascOrDesc,
     },
     {
       headers: {
@@ -146,9 +154,15 @@ export default function Hightlights() {
     display,
     toastMessage,
     logoutToastMessage,
+    offset,
+    limit,
+    orderBy,
+    ascOrDesc,
   } = useLoaderData<typeof loader>();
 
   const fetcher = useFetcher<typeof loader>();
+  const navigate = useNavigate();
+  const os = useOs();
   const [opened, { open, close }] = useDisclosure(false);
   const isMobile = useMediaQuery("(max-width: 768px)");
   const [playingHighlightId, setPlayingHighlightId] = useState<string | null>(
@@ -296,7 +310,7 @@ export default function Hightlights() {
         break;
     }
 
-    fetcher.load(
+    navigate(
       `/highlights/${display}?orderBy=${orderBy}&ascOrDesc=${ascOrDesc}&offset=0`
     );
   };
@@ -309,7 +323,6 @@ export default function Hightlights() {
           radioshowTitle={radioshow.title || ""}
         />
       )}
-
       <Flex justify={"space-between"} m={"md"}>
         <Title order={2}>切り抜き一覧</Title>
         <Select
@@ -324,7 +337,7 @@ export default function Hightlights() {
       </Flex>
       {highlightsData.length > 0 ? (
         <>
-          <Grid mt={10} mb={140} mx={"sm"}>
+          <Grid mt={10} mx={"sm"}>
             {highlightsData.map((highlightData) => (
               <Grid.Col
                 key={highlightData.highlight.id}
@@ -367,7 +380,6 @@ export default function Hightlights() {
       ) : (
         <EmptyHighlight />
       )}
-
       <Box
         style={{
           position: "fixed",
@@ -379,7 +391,6 @@ export default function Hightlights() {
       >
         <div id="embed-iframe"></div>
       </Box>
-
       <Box
         style={{
           position: "fixed",
@@ -389,8 +400,53 @@ export default function Hightlights() {
           zIndex: 3,
         }}
       >
-        <div id="youtube-iframe"></div>
+        <div
+          style={{
+            borderRadius: "14px",
+            overflow: "hidden",
+          }}
+          id="youtube-iframe"
+        ></div>
       </Box>
+      <Flex justify="space-between" mt="md" mx={"sm"} mb={rem(204)}>
+        <Button
+          size="xs"
+          component={Link}
+          to={`/highlights/${display}?orderBy=${orderBy}&ascOrDesc=${ascOrDesc}&offset=${Math.max(
+            0,
+            offset - limit
+          )}`}
+          disabled={offset === 0}
+          variant="subtle"
+          leftSection={<IconChevronLeft />}
+          onClick={(e) => {
+            if (offset === 0) {
+              e.preventDefault(); // offsetが0の場合、リンクのデフォルト動作を防ぐ（この制御がないとButtonとしてはdisableになるが、リンクとして動作してしまう）
+            }
+          }}
+          prefetch={prefetchForOS(os)}
+        >
+          もどる
+        </Button>
+        <Button
+          size="xs"
+          component={Link}
+          to={`/highlights/${display}?orderBy=${orderBy}&ascOrDesc=${ascOrDesc}&offset=${
+            offset + limit
+          }`}
+          variant="subtle"
+          rightSection={<IconChevronRight />}
+          disabled={highlightsData.length < limit}
+          onClick={(e) => {
+            if (highlightsData.length < limit) {
+              e.preventDefault(); // highlightsDataの長さがlimit未満の場合、リンクのデフォルト動作を防ぐ(この制御がないとButtonとしてはdisableになるが、リンクとして動作してしまう)
+            }
+          }}
+          prefetch={prefetchForOS(os)}
+        >
+          つぎへ
+        </Button>
+      </Flex>
 
       <LoginNavigateModal opened={opened} close={close} />
     </>
