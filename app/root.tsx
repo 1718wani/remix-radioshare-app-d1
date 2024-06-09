@@ -15,6 +15,8 @@ import {
   Form,
   useRouteError,
   Link,
+  useRouteLoaderData,
+  useNavigate,
 } from "@remix-run/react";
 import {
   ColorSchemeScript,
@@ -37,7 +39,7 @@ import { useEffect, useState } from "react";
 import { useDisclosure, useMediaQuery } from "@mantine/hooks";
 import {
   IconBookmark,
-  IconLogout,
+  IconLogout2,
   IconMusicPlus,
   IconRadio,
 } from "@tabler/icons-react";
@@ -48,17 +50,28 @@ import { LoginNavigateModal } from "./features/Auth/components/LoginNavigateModa
 import { useAtom } from "jotai";
 import { isSideMenuOpenAtom } from "./features/Player/atoms/isSideMenuOpenAtom";
 import { GoogleButton } from "./features/Auth/components/GoogleButton";
-import { isRadioshowCreateModalOpenAtom } from "./features/Player/atoms/isRadioshowCreateModalOpenAtom";
+import { getToastFromSession } from "./features/Notification/functions/getToastFromSession.server";
+import { commitSession } from "./features/Auth/session.server";
+import { useToastNotifications } from "./features/Notification/hooks/useToastNotifications";
+import { loader as highlightsLoader } from "~/routes/highlights.$display";
 
 export const loader = async ({ context, request }: LoaderFunctionArgs) => {
   const radioShows = await getRadioshows(context, 0);
   const user = await authenticator.isAuthenticated(request, {});
+  const { toastMessage, session } = await getToastFromSession(request);
 
   if (!radioShows) {
     throw new Response("Not Found", { status: 404 });
   }
 
-  return json({ radioShows, user }, {});
+  return json(
+    { radioShows, user, toastMessage },
+    {
+      headers: {
+        "Set-Cookie": await commitSession(session),
+      },
+    }
+  );
 };
 
 export function ErrorBoundary() {
@@ -124,20 +137,22 @@ export function Layout({ children }: { children: React.ReactNode }) {
 }
 
 export default function App() {
-  const { radioShows, user } = useLoaderData<typeof loader>();
+  const { radioShows, user, toastMessage } = useLoaderData<typeof loader>();
   const navigation = useNavigation();
   const [showLoadingOverlay, setShowLoadingOverlay] = useState(false);
-  const [menuOpened] = useAtom(isSideMenuOpenAtom);
-  const [, setIsRadioshowCreateModalOpen] = useAtom(
-    isRadioshowCreateModalOpenAtom
-  );
-  const [, setMenuOpened] = useAtom(isSideMenuOpenAtom);
+  const [menuOpened,setMenuOpened] = useAtom(isSideMenuOpenAtom);
   const [modalOpened, { open: openModal, close: closeModal }] =
     useDisclosure(false);
   const isMobile = useMediaQuery("(max-width: 48em)");
+  const navigate = useNavigate();
 
   const matches = useMatches();
   const currentPath = matches[matches.length - 1]?.pathname ?? "";
+
+  useToastNotifications(toastMessage);
+  const highlightLoaderData = useRouteLoaderData<typeof highlightsLoader>(
+    "routes/highlights.$display"
+  );
 
   // ちらつき防止に遅延させて
   useEffect(() => {
@@ -216,7 +231,7 @@ export default function App() {
                 console.log("開いている");
                 openModal();
               } else {
-                setIsRadioshowCreateModalOpen(true);
+                navigate(`/highlights/${highlightLoaderData?.display}/radio-create`);
               }
             }}
             w="100%"
@@ -234,7 +249,7 @@ export default function App() {
                 w="100%"
                 bg={"gray.5"}
               >
-                <IconLogout stroke={2} />
+                <IconLogout2 stroke={2} />
                 <span style={{ marginLeft: 4 }}>ログアウト</span>
               </Button>
             </Form>
