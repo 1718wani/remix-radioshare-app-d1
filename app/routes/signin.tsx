@@ -22,7 +22,7 @@ import { GoogleButton } from "~/features/Auth/components/GoogleButton";
 
 export const loader = async ({ request }: LoaderFunctionArgs) => {
   await authenticator.isAuthenticated(request, {
-    successRedirect: "/highlights/popular",
+    successRedirect: "/highlights/all",
   });
 
   const session = await getSession(request.headers.get("cookie"));
@@ -64,7 +64,7 @@ export async function action({ request, context }: ActionFunctionArgs) {
       if (isEmailExisting === null) {
         return json({
           success: false,
-          message: "このメールアドレスは存在しません",
+          message: "メールアドレスかパスワードが間違っています",
           submission: submission.reply(),
         });
       }
@@ -89,7 +89,7 @@ export async function action({ request, context }: ActionFunctionArgs) {
       } catch (error) {
         return json({
           success: false,
-          message: "パスワードが異なっています",
+          message: "メールアドレスかパスワードが間違っています",
           submission: submission.reply(),
         });
       }

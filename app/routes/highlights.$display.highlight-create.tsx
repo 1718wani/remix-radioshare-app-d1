@@ -1,6 +1,4 @@
-import { useState, useEffect } from "react";
-import { Form, useRouteLoaderData } from "@remix-run/react";
-import { getFormProps, getInputProps, useForm } from "@conform-to/react";
+import { useForm, getFormProps, getInputProps } from "@conform-to/react";
 import { parseWithZod } from "@conform-to/zod";
 import {
   Autocomplete,
@@ -10,42 +8,77 @@ import {
   Text,
   TextInput,
   Textarea,
-  Title,
 } from "@mantine/core";
-import { notifications } from "@mantine/notifications";
-import { IconCheck, IconX } from "@tabler/icons-react";
 import { TimeInput } from "@mantine/dates";
+import { useDisclosure } from "@mantine/hooks";
+import { ActionFunctionArgs, json } from "@remix-run/cloudflare";
+import {
+  useRouteLoaderData,
+  Form,
+  useActionData,
+  useNavigate,
+} from "@remix-run/react";
+import { useState } from "react";
 import { z } from "zod";
+import { createHighlight } from "~/features/Highlight/apis/createHighlight";
+import { validateHighlightData } from "~/features/Highlight/functions/validateHighlightData";
 import { schemaForHighlightShare } from "~/features/Highlight/types/schemaForHighlightShare";
-import { HighlightShareModalProps } from "~/routes/highlights";
-import { useAtom } from "jotai";
-import { isRadioshowCreateModalOpenAtom } from "~/features/Player/atoms/isRadioshowCreateModalOpenAtom";
-import { isShareHighlightModalOpenAtom } from "~/features/Player/atoms/isShareHighlightModalOpenAtom";
-import { loader } from "~/root";
+import { useToastForFormAction } from "~/features/Notification/hooks/useToastForFormAction";
+import { getAllRadioshows } from "~/features/Radioshow/apis/getAllRadioshows";
+import { loader as rootLoader } from "~/root";
+import { loader as highlightsLoader } from "~/routes/highlights.$display";
 
-export default function HighlightShareModal({
-  opened,
-  close,
-  data,
-}: HighlightShareModalProps) {
+export const action = async ({ request, context }: ActionFunctionArgs) => {
+  const formData = await request.formData();
+  const radioshows = await getAllRadioshows(context);
+  const radioshowsData = radioshows.map((show) => ({
+    value: show.id.toString(),
+    label: show.title,
+  }));
+  const schema: z.ZodTypeAny = schemaForHighlightShare(radioshowsData);
+
+  const submission = parseWithZod(formData, { schema });
+
+  if (submission.status !== "success") {
+    return json({
+      success: false,
+      message: "データの送信に失敗しました",
+      submission: submission.reply(),
+    });
+  }
+
+  const highlightData = submission.value;
+
+  // highlightDataがcreateHighlightType型に合致するか検証
+  try {
+    validateHighlightData(highlightData);
+  } catch (error) {
+    return json({ success: false, message: (error as Error).message });
+  }
+
+  await createHighlight(highlightData, request, context);
+
+  return json({ success: true, message: "切り抜きシェアが完了しました" });
+};
+
+export default function HighlightCreate() {
   const [selectedRadioshow, setSelectedRadioshow] = useState("");
-  const datas = useRouteLoaderData<typeof loader>("root");
+  const [opened, { close }] = useDisclosure(true);
+  const routeLoaderData = useRouteLoaderData<typeof rootLoader>("root");
+  const highlightLoaderData = useRouteLoaderData<typeof highlightsLoader>(
+    "routes/highlights.$display"
+  );
+  const actionData = useActionData<typeof action>();
+  const navigate = useNavigate();
 
-  const radioshowsData = datas
-    ? datas.radioShows.map((show) => ({
+  const radioshowsData = routeLoaderData
+    ? routeLoaderData.radioShows.map((show) => ({
         value: show.id.toString(),
         label: show.title,
       }))
     : [];
 
   const schema: z.ZodTypeAny = schemaForHighlightShare(radioshowsData);
-
-  const [, setIsRadioshowCreateModalOpen] = useAtom(
-    isRadioshowCreateModalOpenAtom
-  );
-  const [, setIsShareHighlightModalOpen] = useAtom(
-    isShareHighlightModalOpenAtom
-  );
 
   const [
     form,
@@ -56,42 +89,27 @@ export default function HighlightShareModal({
     },
   });
 
-  useEffect(() => {
-    if (!data) return;
-    if (!data.success) {
-      notifications.show({
-        withCloseButton: true,
-        autoClose: 5000,
-        title: "送信に失敗しました",
-        message: data.message,
-        color: "red",
-        icon: <IconX />,
-      });
-    }
-
-    if (data.success && data.message === "切り抜きシェアが完了しました") {
-      setIsShareHighlightModalOpen(false);
-      notifications.show({
-        withCloseButton: true,
-        autoClose: 5000,
-        title: "",
-        message: data.message,
-        color: "blue",
-        icon: <IconCheck />,
-      });
-    }
-  }, [data, setIsShareHighlightModalOpen]);
-
   const handleOpenRadioshowCreateModal = () => {
-    setIsShareHighlightModalOpen(false);
-    setIsRadioshowCreateModalOpen(true);
+    navigate(`/highlights/${highlightLoaderData?.display}/radio-create`);
   };
 
+  const handleCloseModal = () => {
+    close();
+    navigate(`/highlights/${highlightLoaderData?.display}`);
+  };
+
+  useToastForFormAction({ actionData});
+
   return (
-    <Modal opened={opened} onClose={close} size={"lg"} zIndex={300}>
-      <Form method="post" action="/highlights" {...getFormProps(form)}>
+    <Modal
+      title="切り抜きシェア"
+      opened={opened}
+      onClose={handleCloseModal}
+      size={"lg"}
+      zIndex={300}
+    >
+      <Form method="post" {...getFormProps(form)}>
         <Stack gap="md" mx={"xl"} mb={"xl"}>
-          <Title order={2}>切り抜きシェア</Title>
           <Autocomplete
             label="番組名"
             placeholder="番組名"
@@ -106,13 +124,13 @@ export default function HighlightShareModal({
           <button
             type="button"
             onClick={handleOpenRadioshowCreateModal}
-            style={{ 
-              textDecoration: "none", 
-              width: "fit-content", 
-              cursor: "pointer", 
-              background: "none", 
-              border: "none", 
-              padding: 0 
+            style={{
+              textDecoration: "none",
+              width: "fit-content",
+              cursor: "pointer",
+              background: "none",
+              border: "none",
+              padding: 0,
             }}
           >
             <Text
