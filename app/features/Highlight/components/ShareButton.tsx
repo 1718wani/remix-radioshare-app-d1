@@ -1,10 +1,8 @@
 import { Button } from "@mantine/core";
-import { useRouteLoaderData } from "@remix-run/react";
+import { useLocation, useNavigate, useRouteLoaderData } from "@remix-run/react";
 import { useDisclosure } from "@mantine/hooks";
 import { LoginNavigateModal } from "~/features/Auth/components/LoginNavigateModal";
-import classes from "../../../styles/pulseNewButton.module.css";
 import { useAtom } from "jotai";
-import { isShareHighlightModalOpenAtom } from "~/features/Player/atoms/isShareHighlightModalOpenAtom";
 import { loader } from "~/root";
 import { isSideMenuOpenAtom } from "~/features/Player/atoms/isSideMenuOpenAtom";
 import { IconPencilPlus } from "@tabler/icons-react";
@@ -12,9 +10,9 @@ import { IconPencilPlus } from "@tabler/icons-react";
 export const ShareButton = () => {
   const data = useRouteLoaderData<typeof loader>("root");
   const [opened, { open, close }] = useDisclosure(false);
-  const [, setIsShareHighlightModalOpen] = useAtom(
-    isShareHighlightModalOpenAtom
-  );
+  const navigate = useNavigate();
+  const {pathname} = useLocation()
+
   const [, setMenuOpen] = useAtom(isSideMenuOpenAtom);
 
   return (
@@ -24,19 +22,16 @@ export const ShareButton = () => {
         onClick={(e) => {
           if (!data?.user) {
             e.preventDefault();
-            console.log("開いている",data);
-            
             open();
           } else {
             setMenuOpen(false);
-            setIsShareHighlightModalOpen(true);
+            navigate(`${pathname}/highlight-create`);
           }
         }}
         className={"pulse-new-button"}
         size="md"
         variant="white"
         radius={"md"}
-        key={classes.pulse}
       >
         投稿
       </Button>
