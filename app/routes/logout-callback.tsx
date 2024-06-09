@@ -1,12 +1,8 @@
 import { LoaderFunctionArgs, redirect } from "@remix-run/cloudflare";
-import { getSession, commitSession } from "~/features/Auth/session.server";
+import { setToastInSession } from "~/features/Notification/functions/setToastInSession.server";
 
 export const loader = async ({ request }: LoaderFunctionArgs) => {
-  const session = await getSession(request.headers.get("cookie"));
-  session.flash("logoutFlag", `User Logout`);
-  const headers = new Headers({ "Set-Cookie": await commitSession(session) });
-  console.log("これ呼ばれる？", session.data);
-
+  const headers = await setToastInSession(request , "UserLogout");
   return redirect("/highlights/all", {
     headers,
   });
