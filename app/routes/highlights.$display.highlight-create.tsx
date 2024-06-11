@@ -3,13 +3,15 @@ import { parseWithZod } from "@conform-to/zod";
 import {
   Autocomplete,
   Button,
+  Flex,
   Modal,
+  Select,
   Stack,
   Text,
   TextInput,
   Textarea,
+  rem,
 } from "@mantine/core";
-import { TimeInput } from "@mantine/dates";
 import { useDisclosure } from "@mantine/hooks";
 import { ActionFunctionArgs, json } from "@remix-run/cloudflare";
 import {
@@ -30,6 +32,7 @@ import { loader as highlightsLoader } from "~/routes/highlights.$display";
 
 export const action = async ({ request, context }: ActionFunctionArgs) => {
   const formData = await request.formData();
+  console.log(formData, "formData");
   const radioshows = await getAllRadioshows(context);
   const radioshowsData = radioshows.map((show) => ({
     value: show.id.toString(),
@@ -48,6 +51,7 @@ export const action = async ({ request, context }: ActionFunctionArgs) => {
   }
 
   const highlightData = submission.value;
+  console.log(highlightData, "highlightData");
 
   // highlightDataがcreateHighlightType型に合致するか検証
   try {
@@ -82,7 +86,18 @@ export default function HighlightCreate() {
 
   const [
     form,
-    { title, description, replayUrl, radioshowData, startSeconds, endSeconds },
+    {
+      title,
+      description,
+      replayUrl,
+      radioshowData,
+      startHours,
+      startMinutes,
+      startSeconds,
+      endHours,
+      endMinutes,
+      endSeconds,
+    },
   ] = useForm({
     onValidate({ formData }) {
       return parseWithZod(formData, { schema });
@@ -98,7 +113,16 @@ export default function HighlightCreate() {
     navigate(`/highlights/${highlightLoaderData?.display}`);
   };
 
-  useToastForFormAction({ actionData});
+  useToastForFormAction({ actionData });
+
+  const hours = Array.from({ length: 4 }, (_, i) => ({
+    value: i.toString().padStart(2, "0"),
+    label: i.toString().padStart(2, "0"),
+  }));
+  const minutesAndSeconds = Array.from({ length: 60 }, (_, i) => ({
+    value: i.toString().padStart(2, "0"),
+    label: i.toString().padStart(2, "0"),
+  }));
 
   return (
     <Modal
@@ -139,7 +163,7 @@ export default function HighlightCreate() {
               fw={700}
               gradient={{ from: "blue", to: "blue.3" }}
             >
-              番組名が見つからない場合はこちらから作成してください
+              番組名が見つからない場合はこちらから作成
             </Text>
           </button>
 
@@ -169,22 +193,85 @@ export default function HighlightCreate() {
             error={replayUrl.errors}
             required
           />
-          <TimeInput
-            {...getInputProps(startSeconds, { type: "text" })}
-            name="startSeconds"
-            defaultValue={"00:00:00"}
-            error={startSeconds.errors}
-            label="開始時間を選択してください"
-            withSeconds
-          />
-          <TimeInput
-            {...getInputProps(endSeconds, { type: "text" })}
-            name="endSeconds"
-            defaultValue={"00:00:00"}
-            error={endSeconds.errors}
-            label="終了時間を選択してください"
-            withSeconds
-          />
+          <Stack gap={rem(3)}>
+            <Text size="sm">開始時間</Text>
+            <Flex gap={"xs"} align={"center"}>
+              <Select
+                {...getInputProps(startHours, { type: "text" })}
+                name="startHours"
+                data={hours}
+                defaultValue={"00"}
+                withCheckIcon={false}
+                clearable={false}
+                allowDeselect={false}
+              />
+              <Text>:</Text>
+              <Select
+                {...getInputProps(startMinutes, { type: "text" })}
+                name="startMinutes"
+                data={minutesAndSeconds}
+                defaultValue={"00"}
+                withCheckIcon={false}
+                clearable={false}
+                allowDeselect={false}
+              />
+              <Text>:</Text>
+              <Select
+                {...getInputProps(startSeconds, { type: "text" })}
+                name="startSeconds"
+                data={minutesAndSeconds}
+                defaultValue={"00"}
+                withCheckIcon={false}
+                clearable={false}
+                allowDeselect={false}
+              />
+            </Flex>
+          </Stack>
+
+          <Stack gap={rem(3)}>
+            <Text size="sm">終了時間</Text>
+            <Flex gap={"xs"} align={"center"}>
+              <Select
+                {...getInputProps(endHours, { type: "text" })}
+                name="endHours"
+                data={hours}
+                defaultValue={"00"}
+                withCheckIcon={false}
+                clearable={false}
+                allowDeselect={false}
+              />
+              <Text>:</Text>
+              <Select
+                {...getInputProps(endMinutes, { type: "text" })}
+                name="endMinutes"
+                data={minutesAndSeconds}
+                defaultValue={"00"}
+                withCheckIcon={false}
+                clearable={false}
+                allowDeselect={false}
+              />
+              <Text>:</Text>
+              <Select
+                {...getInputProps(endSeconds, { type: "text" })}
+                name="endSeconds"
+                data={minutesAndSeconds}
+                defaultValue={"00"}
+                withCheckIcon={false}
+                clearable={false}
+                allowDeselect={false}
+              />
+            </Flex>
+            {(startHours.errors ||
+              startMinutes.errors ||
+              startSeconds.errors ||
+              endHours.errors ||
+              endMinutes.errors ||
+              endSeconds.errors) && (
+              <Text size="xs" c={"red"}>
+                開始時間は終了時間より前に設定してください
+              </Text>
+            )}
+          </Stack>
 
           <Button fullWidth type="submit">
             切り抜きをシェア

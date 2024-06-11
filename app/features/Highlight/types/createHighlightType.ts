@@ -3,6 +3,10 @@ export interface createHighlightType {
   description: string;
   replayUrl: string;
   radioshowData: string;
-  startSeconds:string;
-  endSeconds:string;
+  startSeconds: string;
+  endSeconds: string;
+  startMinutes: string;
+  endMinutes: string;
+  startHours: string;
+  endHours: string;
 }
