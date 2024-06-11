@@ -57,8 +57,8 @@ import { loader as highlightsLoader } from "~/routes/highlights.$display";
 
 export const loader = async ({ context, request }: LoaderFunctionArgs) => {
   const radioShows = await getRadioshows(context, 0);
-  const user = await authenticator.isAuthenticated(request, {});
   const { toastMessage, session } = await getToastFromSession(request);
+  const user = await authenticator.isAuthenticated(request, {});
 
   if (!radioShows) {
     throw new Response("Not Found", { status: 404 });
@@ -115,7 +115,10 @@ export function Layout({ children }: { children: React.ReactNode }) {
     <html lang="en">
       <head>
         <meta charSet="utf-8" />
-        <meta name="viewport" content="width=device-width,initial-scale=1" />
+        <meta
+          name="viewport"
+          content="width=device-width,initial-scale=1,user-scalable=no"
+        />
         <script
           defer
           src="https://cloud.umami.is/script.js"
@@ -140,7 +143,7 @@ export default function App() {
   const { radioShows, user, toastMessage } = useLoaderData<typeof loader>();
   const navigation = useNavigation();
   const [showLoadingOverlay, setShowLoadingOverlay] = useState(false);
-  const [menuOpened,setMenuOpened] = useAtom(isSideMenuOpenAtom);
+  const [menuOpened, setMenuOpened] = useAtom(isSideMenuOpenAtom);
   const [modalOpened, { open: openModal, close: closeModal }] =
     useDisclosure(false);
   const isMobile = useMediaQuery("(max-width: 48em)");
@@ -231,7 +234,9 @@ export default function App() {
                 console.log("開いている");
                 openModal();
               } else {
-                navigate(`/highlights/${highlightLoaderData?.display}/radio-create`);
+                navigate(
+                  `/highlights/${highlightLoaderData?.display}/radio-create`
+                );
               }
             }}
             w="100%"
