@@ -34,26 +34,40 @@ export const schemaForHighlightShare = (
             message: "選択された番組名は一覧に含まれていません",
           }
         )
-        // ステップ2: バリデーション成功後に値を変換
         .transform((value) => {
-          // `radioshowsData`から対応する`value`（ID）を見つける
           const matchingShow = radioshowsData.find(
             (show) => show.label === value
           );
-          // 見つかった場合はその`value`（ID）を返す
           return matchingShow ? matchingShow.value : undefined;
         }),
-      startSeconds: z.string({ required_error: "開始時間を入力してください" }),
-      endSeconds: z.string({ required_error: "終了時間を入力してください" }),
+      startHours: z.string({
+        required_error: "開始時間（時）を入力してください",
+      }),
+      startMinutes: z.string({
+        required_error: "開始時間（分）を入力してください",
+      }),
+      startSeconds: z.string({
+        required_error: "開始時間（秒）を入力してください",
+      }),
+      endHours: z.string({
+        required_error: "終了時間（時）を入力してください",
+      }),
+      endMinutes: z.string({
+        required_error: "終了時間（分）を入力してください",
+      }),
+      endSeconds: z.string({
+        required_error: "終了時間（秒）を入力してください",
+      }),
     })
     .refine(
       (args) => {
-        const { startSeconds, endSeconds } = args;
-        const startSecondsData = convertHHMMSSToSeconds(startSeconds);
-        const endSecondsData = convertHHMMSSToSeconds(endSeconds);
-        return (
-          (startSecondsData ?? 0) < (endSecondsData ?? 0)
+        const startSecondsData = convertHHMMSSToSeconds(
+          `${args.startHours}:${args.startMinutes}:${args.startSeconds}`
         );
+        const endSecondsData = convertHHMMSSToSeconds(
+          `${args.endHours}:${args.endMinutes}:${args.endSeconds}`
+        );
+        return (startSecondsData ?? 0) < (endSecondsData ?? 0);
       },
       {
         message: "終了時間は開始時間よりあとの時間にしてください",
