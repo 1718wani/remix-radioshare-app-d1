@@ -1,5 +1,5 @@
 import { Box, Button, Flex, Grid, Select, Title, rem } from "@mantine/core";
-import { useDisclosure, useMediaQuery, useOs } from "@mantine/hooks";
+import { useDisclosure, useMediaQuery } from "@mantine/hooks";
 import { notifications } from "@mantine/notifications";
 import {
   ActionFunctionArgs,
@@ -14,7 +14,6 @@ import {
 } from "@tabler/icons-react";
 import { useCallback, useState } from "react";
 import invariant from "tiny-invariant";
-import { prefetchForOS } from "~/consts/prefetchForOS";
 import { LoginNavigateModal } from "~/features/Auth/components/LoginNavigateModal";
 import { authenticator } from "~/features/Auth/services/auth.server";
 import { getHighlights } from "~/features/Highlight/apis/getHighlights";
@@ -29,6 +28,7 @@ import { convertUrlToId } from "~/features/Player/functions/convertUrlToId";
 import { useSpotifyPlayer } from "~/features/Player/hooks/useSpotifyPlayer";
 import { useYouTubePlayer } from "~/features/Player/hooks/useYoutubePlayer";
 import { getRadioshowById } from "~/features/Radioshow/apis/getRadioshowById";
+import { useIsMobile } from "~/hooks/useIsMobile";
 
 export const action = async ({ request, context }: ActionFunctionArgs) => {
   const formData = await request.formData();
@@ -149,7 +149,7 @@ export default function Hightlights() {
 
   const fetcher = useFetcher<typeof loader>();
   const navigate = useNavigate();
-  const os = useOs();
+  const isMobileOS = useIsMobile();
   const [opened, { open, close }] = useDisclosure(false);
   const isMobile = useMediaQuery("(max-width: 768px)");
   const [playingHighlightId, setPlayingHighlightId] = useState<string | null>(
@@ -388,7 +388,7 @@ export default function Hightlights() {
               e.preventDefault(); // offsetが0の場合、リンクのデフォルト動作を防ぐ（この制御がないとButtonとしてはdisableになるが、リンクとして動作してしまう）
             }
           }}
-          prefetch={prefetchForOS(os)}
+          prefetch={isMobileOS ? "viewport" : "intent"}
         >
           もどる
         </Button>
@@ -406,7 +406,7 @@ export default function Hightlights() {
               e.preventDefault(); // highlightsDataの長さがlimit未満の場合、リンクのデフォルト動作を防ぐ(この制御がないとButtonとしてはdisableになるが、リンクとして動作してしまう)
             }
           }}
-          prefetch={prefetchForOS(os)}
+          prefetch={isMobileOS ? "viewport" : "intent"}
         >
           つぎへ
         </Button>
