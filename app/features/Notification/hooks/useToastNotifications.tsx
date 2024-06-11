@@ -2,7 +2,10 @@ import { notifications } from "@mantine/notifications";
 import { IconCheck } from "@tabler/icons-react";
 import { useEffect } from "react";
 
-export type NotificationFlagType = "UserLogout" | "UserLogin";
+export type NotificationFlagType =
+  | "UserLogout"
+  | "UserLogin"
+  | "HighlightDeleted";
 
 export const useToastNotifications = (
   notificationFlag: NotificationFlagType | null
@@ -26,6 +29,17 @@ export const useToastNotifications = (
           autoClose: 5000,
           title: "ログインしました。",
           message: "ようこそ！",
+          color: "blue",
+          icon: <IconCheck />,
+        });
+        break;
+
+      case "HighlightDeleted":
+        notifications.show({
+          withCloseButton: true,
+          autoClose: 5000,
+          title: "切り抜きを削除しました。",
+          message: "",
           color: "blue",
           icon: <IconCheck />,
         });
