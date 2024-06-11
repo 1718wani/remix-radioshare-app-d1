@@ -27,6 +27,7 @@ import { validateHighlightData } from "~/features/Highlight/functions/validateHi
 import { schemaForHighlightShare } from "~/features/Highlight/types/schemaForHighlightShare";
 import { useToastForFormAction } from "~/features/Notification/hooks/useToastForFormAction";
 import { getAllRadioshows } from "~/features/Radioshow/apis/getAllRadioshows";
+import { useIsMobile } from "~/hooks/useIsMobile";
 import { loader as rootLoader } from "~/root";
 import { loader as highlightsLoader } from "~/routes/highlights.$display";
 
@@ -74,6 +75,7 @@ export default function HighlightCreate() {
   );
   const actionData = useActionData<typeof action>();
   const navigate = useNavigate();
+  const isMobileOS = useIsMobile();
 
   const radioshowsData = routeLoaderData
     ? routeLoaderData.radioShows.map((show) => ({
@@ -139,7 +141,6 @@ export default function HighlightCreate() {
             placeholder="番組名"
             data={radioshowsData}
             maxDropdownHeight={200}
-            required
             value={selectedRadioshow}
             onChange={setSelectedRadioshow}
             error={radioshowData.errors}
@@ -173,7 +174,6 @@ export default function HighlightCreate() {
             placeholder="コーナー名/発言の内容など"
             label="タイトル"
             error={title.errors}
-            required
           />
 
           <Textarea
@@ -181,7 +181,7 @@ export default function HighlightCreate() {
             name="description"
             defaultValue={""}
             placeholder="切り抜きの説明"
-            label="説明"
+            label="説明（オプション）"
             error={description.errors}
           />
 
@@ -191,7 +191,6 @@ export default function HighlightCreate() {
             placeholder="https://www.youtube.com/watch,https://open.spotify.com/episode"
             label="再生用リンク(SpotifyかYoutubeのみ)"
             error={replayUrl.errors}
-            required
           />
           <Stack gap={rem(3)}>
             <Text size="sm">開始時間</Text>
@@ -204,6 +203,7 @@ export default function HighlightCreate() {
                 withCheckIcon={false}
                 clearable={false}
                 allowDeselect={false}
+                onFocus={(e) => isMobileOS ? e.target.blur() : null}
               />
               <Text>:</Text>
               <Select
@@ -214,6 +214,7 @@ export default function HighlightCreate() {
                 withCheckIcon={false}
                 clearable={false}
                 allowDeselect={false}
+                onFocus={(e) => isMobileOS ? e.target.blur() : null}
               />
               <Text>:</Text>
               <Select
@@ -224,6 +225,7 @@ export default function HighlightCreate() {
                 withCheckIcon={false}
                 clearable={false}
                 allowDeselect={false}
+                onFocus={(e) => isMobileOS ? e.target.blur() : null}
               />
             </Flex>
           </Stack>
@@ -239,6 +241,7 @@ export default function HighlightCreate() {
                 withCheckIcon={false}
                 clearable={false}
                 allowDeselect={false}
+                onFocus={(e) => isMobileOS ? e.target.blur() : null}
               />
               <Text>:</Text>
               <Select
@@ -249,6 +252,7 @@ export default function HighlightCreate() {
                 withCheckIcon={false}
                 clearable={false}
                 allowDeselect={false}
+                onFocus={(e) => isMobileOS ? e.target.blur() : null}
               />
               <Text>:</Text>
               <Select
@@ -259,6 +263,7 @@ export default function HighlightCreate() {
                 withCheckIcon={false}
                 clearable={false}
                 allowDeselect={false}
+                onFocus={(e) => isMobileOS ? e.target.blur() : null}
               />
             </Flex>
             {(startHours.errors ||

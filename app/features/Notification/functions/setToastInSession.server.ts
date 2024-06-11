@@ -8,7 +8,6 @@ export const setToastInSession = async (
   notificationFlag: NotificationFlagType,
   userId?: string
 ) => {
-  console.log("setToastInSessionで受け取ったuserId", userId);
   const session = await getSession(request.headers.get("cookie"));
   if (userId) {
     session.set(authenticator.sessionKey, userId);
