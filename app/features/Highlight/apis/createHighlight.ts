@@ -16,12 +16,23 @@ export const createHighlight = async (
       replayUrl,
       radioshowData,
       startSeconds,
+      startMinutes,
+      startHours,
       endSeconds,
+      endMinutes,
+      endHours,
     } = formData;
     const userId = await authenticator.isAuthenticated(request);
     if (!userId) {
       throw new Error("User not authenticated");
     }
+
+    const formatTime = (hours: string, minutes: string, seconds: string) => {
+      return `${hours}:${minutes}:${seconds}`;
+    };
+
+    const replayStartTime = formatTime(startHours, startMinutes, startSeconds);
+    const replayEndTime = formatTime(endHours, endMinutes, endSeconds);
 
     const db = drizzle(context.cloudflare.env.DB);
     await db
@@ -32,8 +43,8 @@ export const createHighlight = async (
         replayUrl,
         createdBy: userId,
         radioshowId: radioshowData,
-        replayStartTime: startSeconds,
-        replayEndTime: endSeconds,
+        replayStartTime,
+        replayEndTime,
       })
       .execute();
 
