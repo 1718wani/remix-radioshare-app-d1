@@ -121,8 +121,8 @@ export function Layout({ children }: { children: React.ReactNode }) {
         />
         <script
           defer
-          src="https://cloud.umami.is/script.js"
-          data-website-id="49980e45-bfa5-43c2-b62f-b84d2c376148"
+          src="https://umami-olive.vercel.app/script.js"
+          data-website-id="80fdd0d2-ba41-46b9-a91d-4e5180dd27d3"
         ></script>
         <Meta />
         <Links />
