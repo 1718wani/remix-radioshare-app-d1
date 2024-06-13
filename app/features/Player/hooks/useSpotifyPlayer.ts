@@ -35,7 +35,7 @@ export function useSpotifyPlayer(onPlaybackEnd: () => void) {
   useEffect(() => {
     const node = document.getElementById("spotify-player");
     window.onSpotifyIframeApiReady = (IFrameAPI) => {
-      const element = document.getElementById("embed-iframe");
+      const element = document.getElementById("spotify-iframe");
       const options = {
         uri: "spotify:episode:7makk4oTQel546B0PZlDM5",
         width: 0,
