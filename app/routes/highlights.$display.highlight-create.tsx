@@ -33,7 +33,6 @@ import { loader as highlightsLoader } from "~/routes/highlights.$display";
 
 export const action = async ({ request, context }: ActionFunctionArgs) => {
   const formData = await request.formData();
-  console.log(formData, "formData");
   const radioshows = await getAllRadioshows(context);
   const radioshowsData = radioshows.map((show) => ({
     value: show.id.toString(),
@@ -52,8 +51,7 @@ export const action = async ({ request, context }: ActionFunctionArgs) => {
   }
 
   const highlightData = submission.value;
-  console.log(highlightData, "highlightData");
-
+  
   // highlightDataがcreateHighlightType型に合致するか検証
   try {
     validateHighlightData(highlightData);
