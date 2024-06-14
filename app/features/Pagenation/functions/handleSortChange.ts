@@ -1,7 +1,8 @@
 import { NavigateFunction } from "@remix-run/react";
+import { SortOptionType } from "../types/sortOptionsType";
 
 export const handleSortChange = (
-  sortOption: "再生数順" | "再生数少順" | "新しい順" | "古い順" | null,
+  sortOption: SortOptionType | null,
   display: string,
   navigate: NavigateFunction
 ) => {

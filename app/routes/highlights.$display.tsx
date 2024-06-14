@@ -11,7 +11,7 @@ import {
   useLoaderData,
   useNavigate,
 } from "@remix-run/react";
-import {  useState } from "react";
+import { useState } from "react";
 import invariant from "tiny-invariant";
 import { PaginationBar } from "~/features/Pagenation/components/PaginationBar";
 import { LoginNavigateModal } from "~/features/Auth/components/LoginNavigateModal";
@@ -27,6 +27,8 @@ import { getRadioshowById } from "~/features/Radioshow/apis/getRadioshowById";
 import { handleSortChange } from "~/features/Pagenation/functions/handleSortChange";
 import { FixedBox } from "~/features/Player/components/FixedBox";
 import { usePlayHighlight } from "~/features/Player/hooks/usePlayHighlight";
+import { SORT_OPTIONS } from "~/features/Pagenation/consts/sortOptions";
+import { SortOptionType } from "~/features/Pagenation/types/sortOptionsType";
 
 export const action = async ({ request, context }: ActionFunctionArgs) => {
   const formData = await request.formData();
@@ -151,18 +153,18 @@ export default function Hightlights() {
 
   const isEnabledUserAction = userId ? true : false;
 
-  const handlePauseHighlight = () => {
-    setPlayingHighlightId(null);
-    pauseSpotifyHighlight();
-    pauseYoutubeHighlight();
-  };
-
   const handleAutoStopHighlight = () => {
     setPlayingHighlightId(null);
   };
 
   const { playHighlight, pauseSpotifyHighlight, pauseYoutubeHighlight } =
     usePlayHighlight(handleAutoStopHighlight);
+
+  const handlePauseHighlight = () => {
+    setPlayingHighlightId(null);
+    pauseSpotifyHighlight();
+    pauseYoutubeHighlight();
+  };
 
   const handlePlayHighlight = (
     id: string,
@@ -180,6 +182,19 @@ export default function Hightlights() {
     fetcher.submit({ id, [actionType]: value.toString() }, { method: "post" });
   };
 
+  // ソートオプションのマッピング
+const sortOptionsMap: { [key: string]: string } = {
+  totalReplayTimes: SORT_OPTIONS.TOTAL_REPLAY_TIMES,
+  totalReplayTimesAsc: SORT_OPTIONS.TOTAL_REPLAY_TIMES_ASC,
+  newest: SORT_OPTIONS.NEWEST,
+  oldest: SORT_OPTIONS.OLDEST,
+};
+
+// defaultValueを設定
+const defaultSortOption =
+  sortOptionsMap[orderBy + (ascOrDesc === "asc" ? "Asc" : "")] || SORT_OPTIONS.TOTAL_REPLAY_TIMES;
+
+
   return (
     <>
       <Outlet />
@@ -194,18 +209,13 @@ export default function Hightlights() {
         <Select
           withCheckIcon={false}
           w={rem(120)}
-          data={["再生数順", "再生数少順", "新しい順", "古い順"]}
-          defaultValue={"再生数順"}
+          data={Object.values(SORT_OPTIONS)}
+          defaultValue={defaultSortOption}
           clearable={false}
           allowDeselect={false}
           onChange={(sortOption) =>
             handleSortChange(
-              sortOption as
-                | "再生数順"
-                | "再生数少順"
-                | "新しい順"
-                | "古い順"
-                | null,
+              sortOption as SortOptionType | null,
               display,
               navigate
             )
