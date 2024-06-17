@@ -72,16 +72,11 @@ export const loader = async ({
   const userId = await authenticator.isAuthenticated(request);
   const url = new URL(request.url);
 
-  // offset（どこから取り出すか）を取得 初期値は0
   const offset = Number(url.searchParams.get("offset")) || 0;
-  // orderBy（ソートキー）を取得 初期値は再生数
   const orderBy = url.searchParams.get("orderBy") || "totalReplayTimes";
-  // ascOrDesc（ソート順）を取得 初期値は降順
   const ascOrDesc = url.searchParams.get("ascOrDesc") || "desc";
-  // limit（一覧に表示する数）を取得 初期値は13
   const limit = HIGHLIGHT_FETCH_LIMIT;
 
-  // display（カテゴリ）を取得 初期値はall
   const display = params.display;
   invariant(display, "一覧が見つかりません。");
 
@@ -182,18 +177,16 @@ export default function Hightlights() {
     fetcher.submit({ id, [actionType]: value.toString() }, { method: "post" });
   };
 
-  // ソートオプションのマッピング
-const sortOptionsMap: { [key: string]: string } = {
-  totalReplayTimes: SORT_OPTIONS.TOTAL_REPLAY_TIMES,
-  totalReplayTimesAsc: SORT_OPTIONS.TOTAL_REPLAY_TIMES_ASC,
-  newest: SORT_OPTIONS.NEWEST,
-  oldest: SORT_OPTIONS.OLDEST,
-};
+  const sortOptionsMap: { [key: string]: string } = {
+    totalReplayTimes: SORT_OPTIONS.TOTAL_REPLAY_TIMES,
+    totalReplayTimesAsc: SORT_OPTIONS.TOTAL_REPLAY_TIMES_ASC,
+    newest: SORT_OPTIONS.NEWEST,
+    oldest: SORT_OPTIONS.OLDEST,
+  };
 
-// defaultValueを設定
-const defaultSortOption =
-  sortOptionsMap[orderBy + (ascOrDesc === "asc" ? "Asc" : "")] || SORT_OPTIONS.TOTAL_REPLAY_TIMES;
-
+  const defaultSortOption =
+    sortOptionsMap[orderBy + (ascOrDesc === "asc" ? "Asc" : "")] ||
+    SORT_OPTIONS.TOTAL_REPLAY_TIMES;
 
   return (
     <>
