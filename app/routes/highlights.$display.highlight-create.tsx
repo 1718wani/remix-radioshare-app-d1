@@ -19,6 +19,7 @@ import {
   Form,
   useActionData,
   useNavigate,
+  useNavigation,
 } from "@remix-run/react";
 import { useState } from "react";
 import { z } from "zod";
@@ -33,7 +34,6 @@ import { loader as highlightsLoader } from "~/routes/highlights.$display";
 
 export const action = async ({ request, context }: ActionFunctionArgs) => {
   const formData = await request.formData();
-  console.log(formData, "formData");
   const radioshows = await getAllRadioshows(context);
   const radioshowsData = radioshows.map((show) => ({
     value: show.id.toString(),
@@ -52,7 +52,6 @@ export const action = async ({ request, context }: ActionFunctionArgs) => {
   }
 
   const highlightData = submission.value;
-  console.log(highlightData, "highlightData");
 
   // highlightDataがcreateHighlightType型に合致するか検証
   try {
@@ -75,6 +74,10 @@ export default function HighlightCreate() {
   );
   const actionData = useActionData<typeof action>();
   const navigate = useNavigate();
+  const navigation = useNavigation();
+  const isSubmitting =
+    navigation.formAction ===
+    `/highlights/${highlightLoaderData?.display}/highlight-create`;
   const isMobileOS = useIsMobile();
 
   const radioshowsData = routeLoaderData
@@ -135,153 +138,159 @@ export default function HighlightCreate() {
       zIndex={300}
     >
       <Form method="post" {...getFormProps(form)}>
-        <Stack gap="md" mx={"xl"} mb={"xl"}>
-          <Autocomplete
-            label="番組名"
-            placeholder="番組名"
-            data={radioshowsData}
-            maxDropdownHeight={200}
-            value={selectedRadioshow}
-            onChange={setSelectedRadioshow}
-            error={radioshowData.errors}
-          />
-          <input type="hidden" name="radioshowData" value={selectedRadioshow} />
-          <button
-            type="button"
-            onClick={handleOpenRadioshowCreateModal}
-            style={{
-              textDecoration: "none",
-              width: "fit-content",
-              cursor: "pointer",
-              background: "none",
-              border: "none",
-              padding: 0,
-            }}
-          >
-            <Text
-              size="xs"
-              variant="gradient"
-              fw={700}
-              gradient={{ from: "blue", to: "blue.3" }}
+       
+          <Stack gap="md" mx={"xl"} mb={"xl"}>
+            <Autocomplete
+              label="番組名"
+              placeholder="番組名"
+              data={radioshowsData}
+              maxDropdownHeight={200}
+              value={selectedRadioshow}
+              onChange={setSelectedRadioshow}
+              error={radioshowData.errors}
+            />
+            <input
+              type="hidden"
+              name="radioshowData"
+              value={selectedRadioshow}
+            />
+            <button
+              type="button"
+              onClick={handleOpenRadioshowCreateModal}
+              style={{
+                textDecoration: "none",
+                width: "fit-content",
+                cursor: "pointer",
+                background: "none",
+                border: "none",
+                padding: 0,
+              }}
             >
-              番組名が見つからない場合はこちらから作成
-            </Text>
-          </button>
-
-          <TextInput
-            {...getInputProps(title, { type: "text" })}
-            name="title"
-            placeholder="コーナー名/発言の内容など"
-            label="タイトル"
-            error={title.errors}
-          />
-
-          <Textarea
-            {...getInputProps(description, { type: "text" })}
-            name="description"
-            defaultValue={""}
-            placeholder="切り抜きの説明"
-            label="説明（オプション）"
-            error={description.errors}
-          />
-
-          <TextInput
-            {...getInputProps(replayUrl, { type: "url" })}
-            name="replayUrl"
-            placeholder="https://www.youtube.com/watch,https://open.spotify.com/episode"
-            label="再生用リンク(SpotifyかYoutubeのみ)"
-            error={replayUrl.errors}
-          />
-          <Stack gap={rem(3)}>
-            <Text size="sm">開始時間</Text>
-            <Flex gap={"xs"} align={"center"}>
-              <Select
-                {...getInputProps(startHours, { type: "text" })}
-                name="startHours"
-                data={hours}
-                defaultValue={"00"}
-                withCheckIcon={false}
-                clearable={false}
-                allowDeselect={false}
-                onFocus={(e) => isMobileOS ? e.target.blur() : null}
-              />
-              <Text>:</Text>
-              <Select
-                {...getInputProps(startMinutes, { type: "text" })}
-                name="startMinutes"
-                data={minutesAndSeconds}
-                defaultValue={"00"}
-                withCheckIcon={false}
-                clearable={false}
-                allowDeselect={false}
-                onFocus={(e) => isMobileOS ? e.target.blur() : null}
-              />
-              <Text>:</Text>
-              <Select
-                {...getInputProps(startSeconds, { type: "text" })}
-                name="startSeconds"
-                data={minutesAndSeconds}
-                defaultValue={"00"}
-                withCheckIcon={false}
-                clearable={false}
-                allowDeselect={false}
-                onFocus={(e) => isMobileOS ? e.target.blur() : null}
-              />
-            </Flex>
-          </Stack>
-
-          <Stack gap={rem(3)}>
-            <Text size="sm">終了時間</Text>
-            <Flex gap={"xs"} align={"center"}>
-              <Select
-                {...getInputProps(endHours, { type: "text" })}
-                name="endHours"
-                data={hours}
-                defaultValue={"00"}
-                withCheckIcon={false}
-                clearable={false}
-                allowDeselect={false}
-                onFocus={(e) => isMobileOS ? e.target.blur() : null}
-              />
-              <Text>:</Text>
-              <Select
-                {...getInputProps(endMinutes, { type: "text" })}
-                name="endMinutes"
-                data={minutesAndSeconds}
-                defaultValue={"00"}
-                withCheckIcon={false}
-                clearable={false}
-                allowDeselect={false}
-                onFocus={(e) => isMobileOS ? e.target.blur() : null}
-              />
-              <Text>:</Text>
-              <Select
-                {...getInputProps(endSeconds, { type: "text" })}
-                name="endSeconds"
-                data={minutesAndSeconds}
-                defaultValue={"00"}
-                withCheckIcon={false}
-                clearable={false}
-                allowDeselect={false}
-                onFocus={(e) => isMobileOS ? e.target.blur() : null}
-              />
-            </Flex>
-            {(startHours.errors ||
-              startMinutes.errors ||
-              startSeconds.errors ||
-              endHours.errors ||
-              endMinutes.errors ||
-              endSeconds.errors) && (
-              <Text size="xs" c={"red"}>
-                開始時間は終了時間より前に設定してください
+              <Text
+                size="xs"
+                variant="gradient"
+                fw={700}
+                gradient={{ from: "blue", to: "blue.3" }}
+              >
+                番組名が見つからない場合はこちらから作成
               </Text>
-            )}
-          </Stack>
+            </button>
 
-          <Button fullWidth type="submit">
-            切り抜きをシェア
-          </Button>
-        </Stack>
+            <TextInput
+              {...getInputProps(title, { type: "text" })}
+              name="title"
+              placeholder="コーナー名/発言の内容など"
+              label="タイトル"
+              error={title.errors}
+            />
+
+            <Textarea
+              {...getInputProps(description, { type: "text" })}
+              name="description"
+              defaultValue={""}
+              placeholder="切り抜きの説明"
+              label="説明（オプション）"
+              error={description.errors}
+            />
+
+            <TextInput
+              {...getInputProps(replayUrl, { type: "url" })}
+              name="replayUrl"
+              placeholder="https://www.youtube.com/watch,https://open.spotify.com/episode"
+              label="再生用リンク(SpotifyかYoutubeのみ)"
+              error={replayUrl.errors}
+            />
+            <Stack gap={rem(3)}>
+              <Text size="sm">開始時間</Text>
+              <Flex gap={"xs"} align={"center"}>
+                <Select
+                  {...getInputProps(startHours, { type: "text" })}
+                  name="startHours"
+                  data={hours}
+                  defaultValue={"00"}
+                  withCheckIcon={false}
+                  clearable={false}
+                  allowDeselect={false}
+                  onFocus={(e) => (isMobileOS ? e.target.blur() : null)}
+                />
+                <Text>:</Text>
+                <Select
+                  {...getInputProps(startMinutes, { type: "text" })}
+                  name="startMinutes"
+                  data={minutesAndSeconds}
+                  defaultValue={"00"}
+                  withCheckIcon={false}
+                  clearable={false}
+                  allowDeselect={false}
+                  onFocus={(e) => (isMobileOS ? e.target.blur() : null)}
+                />
+                <Text>:</Text>
+                <Select
+                  {...getInputProps(startSeconds, { type: "text" })}
+                  name="startSeconds"
+                  data={minutesAndSeconds}
+                  defaultValue={"00"}
+                  withCheckIcon={false}
+                  clearable={false}
+                  allowDeselect={false}
+                  onFocus={(e) => (isMobileOS ? e.target.blur() : null)}
+                />
+              </Flex>
+            </Stack>
+
+            <Stack gap={rem(3)}>
+              <Text size="sm">終了時間</Text>
+              <Flex gap={"xs"} align={"center"}>
+                <Select
+                  {...getInputProps(endHours, { type: "text" })}
+                  name="endHours"
+                  data={hours}
+                  defaultValue={"00"}
+                  withCheckIcon={false}
+                  clearable={false}
+                  allowDeselect={false}
+                  onFocus={(e) => (isMobileOS ? e.target.blur() : null)}
+                />
+                <Text>:</Text>
+                <Select
+                  {...getInputProps(endMinutes, { type: "text" })}
+                  name="endMinutes"
+                  data={minutesAndSeconds}
+                  defaultValue={"00"}
+                  withCheckIcon={false}
+                  clearable={false}
+                  allowDeselect={false}
+                  onFocus={(e) => (isMobileOS ? e.target.blur() : null)}
+                />
+                <Text>:</Text>
+                <Select
+                  {...getInputProps(endSeconds, { type: "text" })}
+                  name="endSeconds"
+                  data={minutesAndSeconds}
+                  defaultValue={"00"}
+                  withCheckIcon={false}
+                  clearable={false}
+                  allowDeselect={false}
+                  onFocus={(e) => (isMobileOS ? e.target.blur() : null)}
+                />
+              </Flex>
+              {(startHours.errors ||
+                startMinutes.errors ||
+                startSeconds.errors ||
+                endHours.errors ||
+                endMinutes.errors ||
+                endSeconds.errors) && (
+                <Text size="xs" c={"red"}>
+                  開始時間は終了時間より前に設定してください
+                </Text>
+              )}
+            </Stack>
+
+            <Button loading={isSubmitting} loaderProps={{type:"oval"}} fullWidth type="submit">
+              切り抜きをシェア
+            </Button>
+          </Stack>
+        
       </Form>
     </Modal>
   );

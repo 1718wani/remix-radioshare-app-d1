@@ -1,26 +1,16 @@
+import { SerializeFrom } from "@remix-run/cloudflare";
+import { loader as highlightsLoader } from "app/routes/highlights.$display"
+
 export type highlightCardWithRadioshowProps = {
-    id: string;
-    title: string;
-    description: string;
-    replayUrl: string;
-    createdAt: string;
-    createdBy: string;
-    liked: boolean;
-    saved: boolean;
-    replayed: boolean;
-    imageUrl: string;
-    radioshowId: string;
-    totalReplayTimes: number;
-    isEnabledUserAction: boolean;
-    startHHmmss: string;
-    endHHmmss: string;
-    open: () => void;
-    onAction: (
-      id: string,
-      actionType: "replayed" | "saved" | "liked",
-      value: boolean
-    ) => void;
-    onPlay: () => void;
-    playing:boolean;
-    handleStop:() => void;
+  highlightData: SerializeFrom<typeof highlightsLoader>["highlightsData"][number];
+  isEnabledUserAction: boolean;
+  open: () => void;
+  onAction: (
+    id: string,
+    actionType: "replayed" | "saved" | "liked",
+    value: boolean
+  ) => void;
+  onPlay: () => void;
+  playing: boolean;
+  handleStop: () => void;
   };

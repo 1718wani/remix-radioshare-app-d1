@@ -8,8 +8,14 @@ import {
   unstable_createMemoryUploadHandler,
   unstable_parseMultipartFormData,
 } from "@remix-run/cloudflare";
-import { Form, useActionData, useNavigate, useRouteLoaderData } from "@remix-run/react";
-import {  IconPhoto } from "@tabler/icons-react";
+import {
+  Form,
+  useActionData,
+  useNavigate,
+  useNavigation,
+  useRouteLoaderData,
+} from "@remix-run/react";
+import { IconPhoto } from "@tabler/icons-react";
 import { useToastForFormAction } from "~/features/Notification/hooks/useToastForFormAction";
 import { createRadioshow } from "~/features/Radioshow/apis/createRadioshow";
 import { radioshowCreateschema } from "~/features/Radioshow/types/radioshowCreateSchema";
@@ -70,11 +76,15 @@ export default function RadioshowCreate() {
     },
   });
   const [opened, { close }] = useDisclosure(true);
-  const navigate = useNavigate();
-  const actionData = useActionData<typeof action>();
   const highlightLoaderData = useRouteLoaderData<typeof highlightsLoader>(
     "routes/highlights.$display"
   );
+  const navigate = useNavigate();
+  const navigation = useNavigation();
+  const isSubmitting =
+    navigation.formAction ===
+    `/highlights/${highlightLoaderData?.display}/radio-create`;
+  const actionData = useActionData<typeof action>();
 
   const handleCloseModal = () => {
     close();
@@ -116,7 +126,12 @@ export default function RadioshowCreate() {
               placeholder="画像を選択してください"
               error={headerImage.errors}
             />
-            <Button fullWidth type="submit">
+            <Button
+              loading={isSubmitting}
+              loaderProps={{ type: "oval" }}
+              fullWidth
+              type="submit"
+            >
               新規登録
             </Button>
           </Stack>

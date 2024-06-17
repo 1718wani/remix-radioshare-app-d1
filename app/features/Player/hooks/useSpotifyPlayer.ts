@@ -6,42 +6,53 @@ export function useSpotifyPlayer(onPlaybackEnd: () => void) {
     useState<SpotifyEmbedController | null>(null);
   const stopAtRef = useRef<number | null>(null);
 
-  const callback = useCallback((controller: SpotifyEmbedController) => {
-    setSpotifyController(controller);
+  const callback = useCallback(
+    (controller: SpotifyEmbedController) => {
+      setSpotifyController(controller);
 
-    controller.addListener("ready", () => {
-      console.log("Spotify IframeAPI ready");
-    });
+      controller.addListener("ready", () => {
+        console.log("Spotify IframeAPI ready");
+      });
 
-    controller.addListener("playback_update", (e) => {
-      console.log(
-        "Playback update received:",
-        e?.data.position / 1000,
-        stopAtRef.current
-      );
-      if (
-        stopAtRef.current !== null &&
-        e &&
-        e.data.position / 1000 >= stopAtRef.current
-      ) {
-        console.log("Playback end", e.data.position, stopAtRef.current);
-        controller.pause();
-        stopAtRef.current = null; // stopAtRefを更新
-        onPlaybackEnd();
-      }
-    });
-  }, [onPlaybackEnd]);
+      controller.addListener("playback_update", (e) => {
+        console.log(
+          "Playback update received:",
+          e?.data.position || 0 / 1000,
+          stopAtRef.current
+        );
+        if (
+          stopAtRef.current !== null &&
+          e &&
+          e.data.position / 1000 >= stopAtRef.current
+        ) {
+          console.log("Playback end", e.data.position, stopAtRef.current);
+          controller.pause();
+          stopAtRef.current = null; // stopAtRefを更新
+          onPlaybackEnd();
+        }
+      });
+    },
+    [onPlaybackEnd]
+  );
 
   useEffect(() => {
+    if (spotifyController) {
+      return;
+    }
+
     const node = document.getElementById("spotify-player");
     window.onSpotifyIframeApiReady = (IFrameAPI) => {
-      const element = document.getElementById("embed-iframe");
+      const element = document.getElementById("spotify-iframe");
       const options = {
         uri: "spotify:episode:7makk4oTQel546B0PZlDM5",
         width: 0,
         height: 0,
+        onStop: () => {
+          console.log("Playback end");
+          onPlaybackEnd();
+        },
       };
-      
+
       if (element) {
         IFrameAPI.createController(element, options, callback);
       }
@@ -57,19 +68,21 @@ export function useSpotifyPlayer(onPlaybackEnd: () => void) {
         node.parentNode.removeChild(node);
       }
     };
-  }, [onPlaybackEnd,callback]);
+  }, [onPlaybackEnd, callback, spotifyController]);
 
   const playSpotifyHighlight = (
     idOrUri: string,
     convertedStartSeconds: number,
     convertedEndSeconds: number
   ) => {
-    console.log("playSpotifyHighlight", convertedEndSeconds);
     if (spotifyController) {
       spotifyController.setIframeDimensions(320, 160);
-      spotifyController.loadUri(idOrUri, false, convertedStartSeconds);
       spotifyController.play();
-      stopAtRef.current = convertedEndSeconds; // stopAtRefを更新
+      spotifyController.loadUri(idOrUri, false, convertedStartSeconds);
+      setTimeout(() => {
+        spotifyController.play();
+        stopAtRef.current = convertedEndSeconds;
+      }, 800);
     }
   };
 
