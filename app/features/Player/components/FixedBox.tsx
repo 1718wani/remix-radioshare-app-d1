@@ -3,9 +3,10 @@ import { useMediaQuery } from "@mantine/hooks";
 
 interface FixedBoxProps {
   id: "youtube-iframe" | "spotify-iframe";
+  divProps?: React.HTMLAttributes<HTMLDivElement>;
 }
 
-export const FixedBox: React.FC<FixedBoxProps> = ({ id }: FixedBoxProps) => {
+export const FixedBox: React.FC<FixedBoxProps> = ({ id,divProps }: FixedBoxProps) => {
   const isMobile = useMediaQuery("(max-width: 768px)");
 
   return (
@@ -22,6 +23,7 @@ export const FixedBox: React.FC<FixedBoxProps> = ({ id }: FixedBoxProps) => {
         style={{
           borderRadius: id === "youtube-iframe" ? "14px" : undefined,
           overflow: id === "youtube-iframe" ? "hidden" : undefined,
+          ...divProps?.style, 
         }}
         id={id}
       ></div>

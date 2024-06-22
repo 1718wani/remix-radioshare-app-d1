@@ -245,8 +245,14 @@ export default function Hightlights() {
       ) : (
         <EmptyHighlight />
       )}
-      <FixedBox id="spotify-iframe" />
-      <FixedBox id="youtube-iframe" />
+      <FixedBox
+        id="spotify-iframe"
+        divProps={{ "aria-label": "Spotify再生中コンテンツ" }}
+      />
+      <FixedBox
+        id="youtube-iframe"
+        divProps={{ "aria-label": "Youtube再生中コンテンツ" }}
+      />
       <PaginationBar
         display={display}
         orderBy={orderBy}

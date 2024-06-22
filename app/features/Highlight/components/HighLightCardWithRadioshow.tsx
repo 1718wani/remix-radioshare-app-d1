@@ -80,11 +80,17 @@ export const HighLightCardWithRadioshow = (
     <>
       <Card withBorder padding="md" radius="md" mx={"sm"}>
         <Card.Section mb={"sm"}>
-          <Link to={`/highlights/${highlightData.highlight.radioshowId}`}>
+          <Link
+            to={`/highlights/${highlightData.highlight.radioshowId}`}
+            aria-label={`${
+              highlightData.highlight.title || "番組"
+            }のページに遷移する`}
+          >
             <Image
               src={correctImageUrl}
               fallbackSrc="/radiowaiting.png"
               h={160}
+              alt={`${highlightData.radioshow?.title || 'ラジオ番組'}のサムネイル画像`}
             />
           </Link>
         </Card.Section>
@@ -117,6 +123,7 @@ export const HighLightCardWithRadioshow = (
                 "liked",
                 highlightData.userHighlight?.liked || false
               )}
+              aria-label={likedState ? "いいねを取り消す" : "いいねする"}
             >
               {likedState ? (
                 <IconHeart
@@ -135,6 +142,7 @@ export const HighLightCardWithRadioshow = (
                 "saved",
                 highlightData.userHighlight?.saved || false
               )}
+              aria-label={savedState ? "保存を取り消す" : "保存する"}
             >
               {savedState ? (
                 <IconBookmark
@@ -192,6 +200,7 @@ export const HighLightCardWithRadioshow = (
                       e.preventDefault();
                     }
                   }}
+                  aria-label="切り抜きを削除"
                 >
                   <IconTrash size={20} />
                 </ActionIcon>
