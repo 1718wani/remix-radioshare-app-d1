@@ -3,6 +3,7 @@ import { useDisclosure } from "@mantine/hooks";
 import {
   ActionFunctionArgs,
   LoaderFunctionArgs,
+  MetaFunction,
   json,
 } from "@remix-run/cloudflare";
 import {
@@ -29,6 +30,48 @@ import { FixedBox } from "~/features/Player/components/FixedBox";
 import { usePlayHighlight } from "~/features/Player/hooks/usePlayHighlight";
 import { SORT_OPTIONS } from "~/features/Pagenation/consts/sortOptions";
 import { SortOptionType } from "~/features/Pagenation/types/sortOptionsType";
+
+export const meta: MetaFunction<typeof loader> = ({ data }) => {
+  if (!data) {
+    return [
+      { title: "切り抜き一覧 | アプリケーション名" },
+      { name: "description", content: "ラジオ番組の切り抜き一覧ページです。" },
+    ];
+  }
+
+  const { display, radioshow } = data;
+
+  // displayの値に基づいてタイトルを設定
+  let title = "切り抜き一覧";
+  switch (display) {
+    case "saved":
+      title = "保存済み切り抜き";
+      break;
+    case "liked":
+      title = "いいねした切り抜き";
+      break;
+    case "notReplayed":
+      title = "未再生の切り抜き";
+      break;
+    case "all":
+      title = "すべての切り抜き";
+      break;
+    default:
+      // radioshowがある場合は番組名を表示
+      if (radioshow) {
+        title = `${radioshow.title}の切り抜き`;
+      }
+      break;
+  }
+
+  return [
+    { title: `${title} | アプリケーション名` },
+    {
+      name: "description",
+      content: `${title}のページです。お気に入りの切り抜きを見つけましょう。`,
+    },
+  ];
+};
 
 export const action = async ({ request, context }: ActionFunctionArgs) => {
   const formData = await request.formData();
@@ -200,6 +243,7 @@ export default function Hightlights() {
       <Flex justify={"space-between"} m={"md"}>
         <Title order={2}>切り抜き一覧</Title>
         <Select
+          label="並び替え"
           withCheckIcon={false}
           w={rem(120)}
           data={Object.values(SORT_OPTIONS)}
@@ -245,8 +289,16 @@ export default function Hightlights() {
       ) : (
         <EmptyHighlight />
       )}
-      <FixedBox id="spotify-iframe" />
-      <FixedBox id="youtube-iframe" />
+      <FixedBox
+        id="spotify-iframe"
+        title="Spotify再生中コンテンツ"
+        divProps={{ "aria-label": "Spotify再生中コンテンツ" }}
+      />
+      <FixedBox
+        id="youtube-iframe"
+        title="Youtube再生中コンテンツ"
+        divProps={{ "aria-label": "Youtube再生中コンテンツ" }}
+      />
       <PaginationBar
         display={display}
         orderBy={orderBy}

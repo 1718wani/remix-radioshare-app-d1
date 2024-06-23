@@ -11,13 +11,14 @@ export const ShareButton = () => {
   const data = useRouteLoaderData<typeof loader>("root");
   const [opened, { open, close }] = useDisclosure(false);
   const navigate = useNavigate();
-  const {pathname} = useLocation()
+  const { pathname } = useLocation();
 
   const [, setMenuOpen] = useAtom(isSideMenuOpenAtom);
 
   return (
     <>
       <Button
+        aria-label="新しく切り抜きを投稿"
         leftSection={<IconPencilPlus stroke={2} />}
         onClick={(e) => {
           if (!data?.user) {

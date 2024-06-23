@@ -102,7 +102,7 @@ export function ErrorBoundary() {
             height="auto"
             fit="cover"
             src="/errorgirlwithneko.png"
-            alt="success"
+            alt="エラーを表す女の子のイラスト"
           />
         </Stack>
       </Center>
@@ -112,13 +112,14 @@ export function ErrorBoundary() {
 
 export function Layout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="en">
+    <html lang="ja">
       <head>
         <meta charSet="utf-8" />
         <meta
           name="viewport"
-          content="width=device-width,initial-scale=1,user-scalable=no"
+          content="width=device-width,initial-scale=1"
         />
+        <title>RadiShare</title>
         <script
           defer
           src="https://umami-olive.vercel.app/script.js"
@@ -202,16 +203,18 @@ export default function App() {
           }}
         >
           <NavLink
-            href="/"
+            href="/highlights/all"
             label="一覧"
             leftSection={<IconRadio stroke={2} />}
             active={currentPath === "/highlights/all"}
+            aria-current={currentPath === "/highlights/all" ? "page" : undefined}
           />
           <NavLink
             href="/highlights/saved"
             label="保存済み"
             leftSection={<IconBookmark stroke={2} />}
             active={currentPath === "/highlights/saved"}
+            aria-current={currentPath === "/highlights/saved" ? "page" : undefined}
           />
           <Divider my="sm" />
           <ScrollArea style={{ height: "72%" }}>
@@ -221,6 +224,7 @@ export default function App() {
                 href={`/highlights/${show.id}`}
                 label={show.title}
                 active={currentPath === `/highlights/${show.id}`}
+                aria-current={currentPath === `/highlights/${show.id}` ? "page" : undefined}
               />
             ))}
           </ScrollArea>
@@ -242,6 +246,7 @@ export default function App() {
             w="100%"
             bg={"blue.5"}
             mb={"sm"}
+            aria-label="新規番組登録"
           >
             <IconMusicPlus stroke={2} />
             <span style={{ marginLeft: 4 }}>番組登録</span>
@@ -253,6 +258,7 @@ export default function App() {
                 onClick={() => setMenuOpened(false)}
                 w="100%"
                 bg={"gray.5"}
+                aria-label="ログアウト"
               >
                 <IconLogout2 stroke={2} />
                 <span style={{ marginLeft: 4 }}>ログアウト</span>
@@ -269,6 +275,7 @@ export default function App() {
                 onClick={() => setMenuOpened(false)}
                 my={"xs"}
                 w={"100%"}
+                aria-label="Googleアカウントでログイン、もしくは登録"
               >
                 Googleアカウントで ログイン or 登録
               </GoogleButton>

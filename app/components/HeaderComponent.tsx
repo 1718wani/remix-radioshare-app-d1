@@ -15,7 +15,7 @@ export const HeaderComponent = ({ opened }: Props) => {
       <Flex align={"center"} justify={"space-between"} p={"xs"} px={"sm"}>
         <Link to={"/"} style={{ textDecoration: "none" }}>
           <Text fw={800} fs="italic" size="xl" c={"gray.1"}>
-            RadiMoment
+            RadiShare
           </Text>
         </Link>
         <Flex align={"center"}>

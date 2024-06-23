@@ -24,12 +24,16 @@ export const LoginNavigateModal = ({
           height="auto"
           fit="cover"
           src="/beforelogingirl.png"
-          alt="beforelogin"
+          alt="ログイン画面の女の子の画像"
         />
         <Center>
           <Stack>
             <Form method="post" action="/google-sign-in-or-up" onClick={close}>
-              <GoogleButton type="submit" my={"md"}>
+              <GoogleButton
+                aria-label="Googleアカウントでログイン or 登録"
+                type="submit"
+                my={"md"}
+              >
                 Googleアカウントで ログイン or 登録
               </GoogleButton>
             </Form>
