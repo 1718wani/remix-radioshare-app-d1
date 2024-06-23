@@ -32,6 +32,12 @@ import { useIsMobile } from "~/hooks/useIsMobile";
 import { loader as rootLoader } from "~/root";
 import { loader as highlightsLoader } from "~/routes/highlights.$display";
 
+export const meta: MetaFunction = () => {
+  return [
+    { title: "切り抜きシェア | RadiShare" },
+    { name: "description", content: "新しい切り抜きを投稿するページです。ラジオ番組の切り抜きをシェアしましょう。" },
+  ];
+};
 
 export const action = async ({ request, context }: ActionFunctionArgs) => {
   const formData = await request.formData();
