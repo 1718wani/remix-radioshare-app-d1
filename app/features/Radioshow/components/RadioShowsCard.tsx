@@ -20,6 +20,7 @@ export const RadioShowsCard = (props: props) => {
             src={correctImageUrl}
             fallbackSrc="https://placehold.co/600x400?text=Placeholder"
             h={160}
+            alt={`${title}のサムネイル画像`}
           />
         </Card.Section>
 

@@ -15,19 +15,13 @@ export function useSpotifyPlayer(onPlaybackEnd: () => void) {
       });
 
       controller.addListener("playback_update", (e) => {
-        console.log(
-          "Playback update received:",
-          e?.data.position || 0 / 1000,
-          stopAtRef.current
-        );
         if (
           stopAtRef.current !== null &&
           e &&
           e.data.position / 1000 >= stopAtRef.current
         ) {
-          console.log("Playback end", e.data.position, stopAtRef.current);
           controller.pause();
-          stopAtRef.current = null; // stopAtRefを更新
+          stopAtRef.current = null; 
           onPlaybackEnd();
         }
       });

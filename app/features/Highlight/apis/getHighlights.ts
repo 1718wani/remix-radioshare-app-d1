@@ -45,6 +45,7 @@ export const getHighlights = async (
           endHHmmss: highlights.replayEndTime,
         },
         radioshow: {
+          title: radioshows.title,
           imageUrl: radioshows.imageUrl,
         },
         userHighlight: {

@@ -4,6 +4,7 @@ import { rem, Modal, Stack, TextInput, FileInput, Button } from "@mantine/core";
 import { useDisclosure } from "@mantine/hooks";
 import {
   ActionFunctionArgs,
+  MetaFunction,
   json,
   unstable_createMemoryUploadHandler,
   unstable_parseMultipartFormData,
@@ -20,6 +21,13 @@ import { useToastForFormAction } from "~/features/Notification/hooks/useToastFor
 import { createRadioshow } from "~/features/Radioshow/apis/createRadioshow";
 import { radioshowCreateschema } from "~/features/Radioshow/types/radioshowCreateSchema";
 import { loader as highlightsLoader } from "~/routes/highlights.$display";
+
+export const meta: MetaFunction = () => {
+  return [
+    { title: "切り抜きシェア | RadiShare" },
+    { name: "description", content: "新しいラジオ番組を登録するページです。" },
+  ];
+};
 
 export async function action({ request, context }: ActionFunctionArgs) {
   const formData = await request.clone().formData();
