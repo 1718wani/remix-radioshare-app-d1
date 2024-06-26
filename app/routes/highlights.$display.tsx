@@ -243,7 +243,6 @@ export default function Hightlights() {
       <Flex justify={"space-between"} m={"md"}>
         <Title order={2}>切り抜き一覧</Title>
         <Select
-          label="並び替え"
           withCheckIcon={false}
           w={rem(120)}
           data={Object.values(SORT_OPTIONS)}
@@ -257,6 +256,7 @@ export default function Hightlights() {
               navigate
             )
           }
+          aria-label="並び替え"
         />
       </Flex>
       {highlightsData.length > 0 ? (

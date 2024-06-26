@@ -82,9 +82,7 @@ export default function HighlightCreate() {
   const actionData = useActionData<typeof action>();
   const navigate = useNavigate();
   const navigation = useNavigation();
-  const isSubmitting =
-    navigation.formAction ===
-    `/highlights/${highlightLoaderData?.display}/highlight-create`;
+  const isSubmitting = navigation.state === "submitting";
   const isMobileOS = useIsMobile();
 
   const radioshowsData = routeLoaderData
