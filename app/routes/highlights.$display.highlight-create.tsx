@@ -1,5 +1,5 @@
 import { useForm, getFormProps, getInputProps } from "@conform-to/react";
-import { parseWithZod } from "@conform-to/zod";
+import { getZodConstraint, parseWithZod } from "@conform-to/zod";
 import {
   Autocomplete,
   Button,
@@ -106,6 +106,8 @@ export default function HighlightCreate() {
     defaultRadioshow ? defaultRadioshow.label : ""
   );
 
+  const [isEndTimeUnset, setIsEndTimeUnset] = useState(true);
+
   const schema: z.ZodTypeAny = schemaForHighlightShare(radioshowsData);
 
   const [
@@ -123,6 +125,7 @@ export default function HighlightCreate() {
       endSeconds,
     },
   ] = useForm({
+    constraint: getZodConstraint(schema),
     onValidate({ formData }) {
       return parseWithZod(formData, { schema });
     },
@@ -226,6 +229,21 @@ export default function HighlightCreate() {
                 clearable={false}
                 allowDeselect={false}
                 onFocus={(e) => (isMobileOS ? e.target.blur() : null)}
+                onChange={(value) => {
+                  if (isEndTimeUnset) {
+                    console.log(
+                      endHours.name,
+                      value,
+                      "これが値",
+                      typeof value,
+                      endHours.value
+                    );
+                    form.update({
+                      name: endHours.name,
+                      value: value || "00",
+                    });
+                  }
+                }}
               />
               <Text>:</Text>
               <Select
@@ -237,6 +255,21 @@ export default function HighlightCreate() {
                 clearable={false}
                 allowDeselect={false}
                 onFocus={(e) => (isMobileOS ? e.target.blur() : null)}
+                onChange={(value) => {
+                  if (isEndTimeUnset) {
+                    console.log(
+                      endMinutes.name,
+                      value,
+                      "これが値",
+                      typeof value,
+                      endMinutes.value
+                    );
+                    form.update({
+                      name: endMinutes.name,
+                      value: value || "00",
+                    });
+                  }
+                }}
               />
               <Text>:</Text>
               <Select
@@ -256,10 +289,11 @@ export default function HighlightCreate() {
             <Text size="sm">終了時間</Text>
             <Flex gap={"xs"} align={"center"}>
               <Select
+                defaultValue="00"
+                onChange={() => setIsEndTimeUnset(false)}
                 {...getInputProps(endHours, { type: "text" })}
                 name="endHours"
                 data={hours}
-                defaultValue={"00"}
                 withCheckIcon={false}
                 clearable={false}
                 allowDeselect={false}
@@ -267,15 +301,16 @@ export default function HighlightCreate() {
               />
               <Text>:</Text>
               <Select
+                defaultValue="00"
+                onChange={() => setIsEndTimeUnset(false)}
                 {...getInputProps(endMinutes, { type: "text" })}
                 name="endMinutes"
                 data={minutesAndSeconds}
-                defaultValue={"00"}
                 withCheckIcon={false}
                 clearable={false}
                 allowDeselect={false}
                 onFocus={(e) => (isMobileOS ? e.target.blur() : null)}
-              />
+              ></Select>
               <Text>:</Text>
               <Select
                 {...getInputProps(endSeconds, { type: "text" })}
