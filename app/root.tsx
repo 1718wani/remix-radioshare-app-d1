@@ -8,7 +8,6 @@ import {
   Outlet,
   Scripts,
   ScrollRestoration,
-  useNavigation,
   json,
   useLoaderData,
   useMatches,
@@ -17,26 +16,25 @@ import {
   Link,
   useRouteLoaderData,
   useNavigate,
+  useNavigation,
+  NavLink as RemixNavLink,
 } from "@remix-run/react";
 import {
   ColorSchemeScript,
-  LoadingOverlay,
   MantineProvider,
   AppShell,
   ScrollArea,
   Divider,
-  NavLink,
   Button,
   Center,
   Stack,
   Title,
   Text,
   Image,
+  NavLink as MantineNavLink,
 } from "@mantine/core";
-import { HeaderComponent } from "./components/HeaderComponent";
 import { Notifications } from "@mantine/notifications";
-import { useEffect, useState } from "react";
-import { useDisclosure, useMediaQuery } from "@mantine/hooks";
+import { useDisclosure } from "@mantine/hooks";
 import {
   IconBookmark,
   IconLogout2,
@@ -54,6 +52,8 @@ import { getToastFromSession } from "./features/Notification/functions/getToastF
 import { commitSession } from "./features/Auth/session.server";
 import { useToastNotifications } from "./features/Notification/hooks/useToastNotifications";
 import { loader as highlightsLoader } from "~/routes/highlights.$display";
+import { HighlightsSkeleton } from "./features/Navigation/components/HighlightsSkeleton";
+import { HeaderComponent } from "./components/HeaderComponent";
 
 export const loader = async ({ context, request }: LoaderFunctionArgs) => {
   const radioShows = await getRadioshows(context, 0);
@@ -115,10 +115,7 @@ export function Layout({ children }: { children: React.ReactNode }) {
     <html lang="ja">
       <head>
         <meta charSet="utf-8" />
-        <meta
-          name="viewport"
-          content="width=device-width,initial-scale=1"
-        />
+        <meta name="viewport" content="width=device-width,initial-scale=1" />
         <title>RadiShare</title>
         <script
           defer
@@ -142,13 +139,14 @@ export function Layout({ children }: { children: React.ReactNode }) {
 
 export default function App() {
   const { radioShows, user, toastMessage } = useLoaderData<typeof loader>();
-  const navigation = useNavigation();
-  const [showLoadingOverlay, setShowLoadingOverlay] = useState(false);
   const [menuOpened, setMenuOpened] = useAtom(isSideMenuOpenAtom);
   const [modalOpened, { open: openModal, close: closeModal }] =
     useDisclosure(false);
-  const isMobile = useMediaQuery("(max-width: 48em)");
+  const [, setMenuOpen] = useAtom(isSideMenuOpenAtom);
   const navigate = useNavigate();
+  const navigation = useNavigation();
+  const isNavigating = navigation.state === "loading";
+  const isSubmitting = navigation.state === "submitting";
 
   const matches = useMatches();
   const currentPath = matches[matches.length - 1]?.pathname ?? "";
@@ -158,28 +156,8 @@ export default function App() {
     "routes/highlights.$display"
   );
 
-  // ちらつき防止に遅延させて
-  useEffect(() => {
-    let timeoutId: number;
-    if (navigation.state === "loading") {
-      timeoutId = window.setTimeout(() => setShowLoadingOverlay(true), 200);
-    } else {
-      // navigation.stateが"loading"ではない場合、LoadingOverlayを即座に非表示にする
-      setShowLoadingOverlay(false);
-    }
-
-    // コンポーネントのアンマウント時、またはnavigation.stateが変更された時にタイマーをクリアする
-    return () => clearTimeout(timeoutId);
-  }, [navigation.state]);
-
   return (
     <>
-      <LoadingOverlay
-        visible={showLoadingOverlay}
-        zIndex={2000}
-        overlayProps={{ radius: "sm", blur: 2 }}
-        loaderProps={{ color: "blue", type: "bars" }}
-      />
       <Notifications />
 
       <AppShell
@@ -198,33 +176,38 @@ export default function App() {
 
         <AppShell.Navbar
           p="xs"
-          style={{
-            ...(isMobile ? { zIndex: 203 } : {}),
-          }}
         >
-          <NavLink
-            href="/highlights/all"
+          <MantineNavLink
+            component={RemixNavLink}
+            to="/highlights/all"
             label="一覧"
+            aria-current={
+              currentPath === "/highlights/all" ? "page" : undefined
+            }
             leftSection={<IconRadio stroke={2} />}
-            active={currentPath === "/highlights/all"}
-            aria-current={currentPath === "/highlights/all" ? "page" : undefined}
           />
-          <NavLink
-            href="/highlights/saved"
+
+          <MantineNavLink
+            component={RemixNavLink}
+            to="/highlights/saved"
             label="保存済み"
+            aria-current={
+              currentPath === "/highlights/saved" ? "page" : undefined
+            }
             leftSection={<IconBookmark stroke={2} />}
-            active={currentPath === "/highlights/saved"}
-            aria-current={currentPath === "/highlights/saved" ? "page" : undefined}
           />
           <Divider my="sm" />
           <ScrollArea style={{ height: "72%" }}>
             {radioShows.map((show) => (
-              <NavLink
+              <MantineNavLink
+                onClick={() => setMenuOpen(false)}
+                component={RemixNavLink}
                 key={show.id}
-                href={`/highlights/${show.id}`}
+                to={`/highlights/${show.id}`}
                 label={show.title}
-                active={currentPath === `/highlights/${show.id}`}
-                aria-current={currentPath === `/highlights/${show.id}` ? "page" : undefined}
+                aria-current={
+                  currentPath === `/highlights/${show.id}` ? "page" : undefined
+                }
               />
             ))}
           </ScrollArea>
@@ -254,6 +237,7 @@ export default function App() {
           {user ? (
             <Form action="/logout" method="post" style={{ margin: 0 }}>
               <Button
+                loading={isSubmitting}
                 type="submit"
                 onClick={() => setMenuOpened(false)}
                 w="100%"
@@ -284,7 +268,7 @@ export default function App() {
         </AppShell.Navbar>
 
         <AppShell.Main>
-          <Outlet />
+          {isNavigating ? <HighlightsSkeleton /> : <Outlet />}
         </AppShell.Main>
       </AppShell>
       <LoginNavigateModal opened={modalOpened} close={closeModal} />
