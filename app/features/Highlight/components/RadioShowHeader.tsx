@@ -30,12 +30,13 @@ export const RadioShowHeader = ({
           opacity={0.85}
           h={160}
           style={{ position: "absolute", top: 0, left: 0, right: 0 }}
+          zIndex={0}
         />
         <Box>
           <Title
             order={3}
             c={"gray.0"}
-            style={{ position: "absolute", left: 0, bottom: 0, zIndex: 202 }}
+            style={{ position: "absolute", left: 0, bottom: 0 }}
             p={8}
           >
             {radioshowTitle}

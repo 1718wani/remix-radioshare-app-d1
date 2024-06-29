@@ -17,7 +17,6 @@ export const FixedBox: React.FC<FixedBoxProps> = ({ id,divProps,title }: FixedBo
         right: isMobile ? "50%" : "3%",
         transform: isMobile ? "translateX(50%)" : "none",
         bottom: "3%",
-        zIndex: 3,
       }}
     >
       <div

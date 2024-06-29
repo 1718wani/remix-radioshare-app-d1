@@ -157,7 +157,6 @@ export default function HighlightCreate() {
       opened={opened}
       onClose={handleCloseModal}
       size={"lg"}
-      zIndex={300}
     >
       <Form method="post" {...getFormProps(form)}>
         <Stack gap="md" mx={"xl"} mb={"xl"}>

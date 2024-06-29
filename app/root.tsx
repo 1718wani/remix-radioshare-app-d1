@@ -34,7 +34,7 @@ import {
   NavLink as MantineNavLink,
 } from "@mantine/core";
 import { Notifications } from "@mantine/notifications";
-import { useDisclosure, useMediaQuery } from "@mantine/hooks";
+import { useDisclosure } from "@mantine/hooks";
 import {
   IconBookmark,
   IconLogout2,
@@ -142,10 +142,11 @@ export default function App() {
   const [menuOpened, setMenuOpened] = useAtom(isSideMenuOpenAtom);
   const [modalOpened, { open: openModal, close: closeModal }] =
     useDisclosure(false);
-  const isMobile = useMediaQuery("(max-width: 48em)");
+  const [, setMenuOpen] = useAtom(isSideMenuOpenAtom);
   const navigate = useNavigate();
   const navigation = useNavigation();
   const isNavigating = navigation.state === "loading";
+  const isSubmitting = navigation.state === "submitting";
 
   const matches = useMatches();
   const currentPath = matches[matches.length - 1]?.pathname ?? "";
@@ -175,9 +176,6 @@ export default function App() {
 
         <AppShell.Navbar
           p="xs"
-          style={{
-            ...(isMobile ? { zIndex: 203 } : {}),
-          }}
         >
           <MantineNavLink
             component={RemixNavLink}
@@ -202,6 +200,7 @@ export default function App() {
           <ScrollArea style={{ height: "72%" }}>
             {radioShows.map((show) => (
               <MantineNavLink
+                onClick={() => setMenuOpen(false)}
                 component={RemixNavLink}
                 key={show.id}
                 to={`/highlights/${show.id}`}
@@ -238,6 +237,7 @@ export default function App() {
           {user ? (
             <Form action="/logout" method="post" style={{ margin: 0 }}>
               <Button
+                loading={isSubmitting}
                 type="submit"
                 onClick={() => setMenuOpened(false)}
                 w="100%"
