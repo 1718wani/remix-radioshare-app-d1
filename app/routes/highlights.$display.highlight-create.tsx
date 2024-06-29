@@ -26,6 +26,7 @@ import { useState } from "react";
 import { z } from "zod";
 import { createHighlight } from "~/features/Highlight/apis/createHighlight";
 import { validateHighlightData } from "~/features/Highlight/functions/validateHighlightData";
+
 import { schemaForHighlightShare } from "~/features/Highlight/types/schemaForHighlightShare";
 import { useToastForFormAction } from "~/features/Notification/hooks/useToastForFormAction";
 import { getAllRadioshows } from "~/features/Radioshow/apis/getAllRadioshows";
@@ -157,6 +158,7 @@ export default function HighlightCreate() {
       opened={opened}
       onClose={handleCloseModal}
       size={"lg"}
+      fullScreen={isMobileOS}
     >
       <Form method="post" {...getFormProps(form)}>
         <Stack gap="md" mx={"xl"} mb={"xl"}>
@@ -168,8 +170,154 @@ export default function HighlightCreate() {
             value={selectedRadioshow}
             onChange={setSelectedRadioshow}
             error={radioshowData.errors}
+            size="md"
           />
           <input type="hidden" name="radioshowData" value={selectedRadioshow} />
+
+          <TextInput
+            {...getInputProps(title, { type: "text" })}
+            name="title"
+            placeholder="コーナー名/発言の内容など"
+            label="タイトル"
+            error={title.errors}
+            size="md"
+          />
+
+          <Textarea
+            {...getInputProps(description, { type: "text" })}
+            name="description"
+            defaultValue={""}
+            placeholder="切り抜きの説明"
+            label="説明（オプション）"
+            error={description.errors}
+            size="md"
+          />
+
+          <TextInput
+            {...getInputProps(replayUrl, { type: "url" })}
+            name="replayUrl"
+            placeholder="https://www.youtube.com/watch,https://open.spotify.com/episode"
+            label="再生用リンク(SpotifyかYoutubeのみ)"
+            error={replayUrl.errors}
+            size="md"
+          />
+          <Stack gap={rem(3)}>
+            <Text size="md" fw={500}>
+              開始時間
+            </Text>
+            <Flex gap={"xs"} align={"center"}>
+              <Select
+                {...getInputProps(startHours, { type: "text" })}
+                name="startHours"
+                data={hours}
+                defaultValue={"00"}
+                withCheckIcon={false}
+                clearable={false}
+                allowDeselect={false}
+                onChange={(value) => {
+                  if (isEndTimeUnset) {
+                    form.update({
+                      name: endHours.name,
+                      value: value || "00",
+                    });
+                  }
+                }}
+                size="md"
+              />
+              <Text>:</Text>
+              <Select
+                {...getInputProps(startMinutes, { type: "text" })}
+                name="startMinutes"
+                data={minutesAndSeconds}
+                defaultValue={"00"}
+                withCheckIcon={false}
+                clearable={false}
+                allowDeselect={false}
+                onChange={(value) => {
+                  if (isEndTimeUnset) {
+                    form.update({
+                      name: endMinutes.name,
+                      value: value || "00",
+                    });
+                  }
+                }}
+                size="md"
+              />
+              <Text>:</Text>
+              <Select
+                {...getInputProps(startSeconds, { type: "text" })}
+                name="startSeconds"
+                data={minutesAndSeconds}
+                defaultValue={"00"}
+                withCheckIcon={false}
+                clearable={false}
+                allowDeselect={false}
+                size="md"
+              />
+            </Flex>
+          </Stack>
+
+          <Stack gap={rem(3)}>
+            <Text size="md" fw={500}>
+              終了時間
+            </Text>
+            <Flex gap={"xs"} align={"center"}>
+              <Select
+                defaultValue="00"
+                onChange={() => setIsEndTimeUnset(false)}
+                {...getInputProps(endHours, { type: "text" })}
+                name="endHours"
+                data={hours}
+                withCheckIcon={false}
+                clearable={false}
+                allowDeselect={false}
+                size="md"
+              />
+              <Text>:</Text>
+              <Select
+                defaultValue="00"
+                onChange={() => setIsEndTimeUnset(false)}
+                {...getInputProps(endMinutes, { type: "text" })}
+                name="endMinutes"
+                data={minutesAndSeconds}
+                withCheckIcon={false}
+                clearable={false}
+                allowDeselect={false}
+                size="md"
+              />
+              <Text>:</Text>
+              <Select
+                {...getInputProps(endSeconds, { type: "text" })}
+                name="endSeconds"
+                data={minutesAndSeconds}
+                defaultValue={"00"}
+                withCheckIcon={false}
+                clearable={false}
+                allowDeselect={false}
+                size="md"
+              />
+            </Flex>
+            {(startHours.errors ||
+              startMinutes.errors ||
+              startSeconds.errors ||
+              endHours.errors ||
+              endMinutes.errors ||
+              endSeconds.errors) && (
+              <Text size="xs" c={"red"}>
+                開始時間は終了時間より前に設定してください
+              </Text>
+            )}
+          </Stack>
+
+          <Button
+            size="md"
+            loading={isSubmitting}
+            loaderProps={{ type: "oval" }}
+            fullWidth
+            type="submit"
+          >
+            切り抜きをシェア
+          </Button>
           <button
             type="button"
             onClick={handleOpenRadioshowCreateModal}
@@ -191,157 +339,6 @@ export default function HighlightCreate() {
               番組名が見つからない場合はこちらから作成
             </Text>
           </button>
-
-          <TextInput
-            {...getInputProps(title, { type: "text" })}
-            name="title"
-            placeholder="コーナー名/発言の内容など"
-            label="タイトル"
-            error={title.errors}
-          />
-
-          <Textarea
-            {...getInputProps(description, { type: "text" })}
-            name="description"
-            defaultValue={""}
-            placeholder="切り抜きの説明"
-            label="説明（オプション）"
-            error={description.errors}
-          />
-
-          <TextInput
-            {...getInputProps(replayUrl, { type: "url" })}
-            name="replayUrl"
-            placeholder="https://www.youtube.com/watch,https://open.spotify.com/episode"
-            label="再生用リンク(SpotifyかYoutubeのみ)"
-            error={replayUrl.errors}
-          />
-          <Stack gap={rem(3)}>
-            <Text size="sm">開始時間</Text>
-            <Flex gap={"xs"} align={"center"}>
-              <Select
-                {...getInputProps(startHours, { type: "text" })}
-                name="startHours"
-                data={hours}
-                defaultValue={"00"}
-                withCheckIcon={false}
-                clearable={false}
-                allowDeselect={false}
-                onFocus={(e) => (isMobileOS ? e.target.blur() : null)}
-                onChange={(value) => {
-                  if (isEndTimeUnset) {
-                    console.log(
-                      endHours.name,
-                      value,
-                      "これが値",
-                      typeof value,
-                      endHours.value
-                    );
-                    form.update({
-                      name: endHours.name,
-                      value: value || "00",
-                    });
-                  }
-                }}
-              />
-              <Text>:</Text>
-              <Select
-                {...getInputProps(startMinutes, { type: "text" })}
-                name="startMinutes"
-                data={minutesAndSeconds}
-                defaultValue={"00"}
-                withCheckIcon={false}
-                clearable={false}
-                allowDeselect={false}
-                onFocus={(e) => (isMobileOS ? e.target.blur() : null)}
-                onChange={(value) => {
-                  if (isEndTimeUnset) {
-                    console.log(
-                      endMinutes.name,
-                      value,
-                      "これが値",
-                      typeof value,
-                      endMinutes.value
-                    );
-                    form.update({
-                      name: endMinutes.name,
-                      value: value || "00",
-                    });
-                  }
-                }}
-              />
-              <Text>:</Text>
-              <Select
-                {...getInputProps(startSeconds, { type: "text" })}
-                name="startSeconds"
-                data={minutesAndSeconds}
-                defaultValue={"00"}
-                withCheckIcon={false}
-                clearable={false}
-                allowDeselect={false}
-                onFocus={(e) => (isMobileOS ? e.target.blur() : null)}
-              />
-            </Flex>
-          </Stack>
-
-          <Stack gap={rem(3)}>
-            <Text size="sm">終了時間</Text>
-            <Flex gap={"xs"} align={"center"}>
-              <Select
-                defaultValue="00"
-                onChange={() => setIsEndTimeUnset(false)}
-                {...getInputProps(endHours, { type: "text" })}
-                name="endHours"
-                data={hours}
-                withCheckIcon={false}
-                clearable={false}
-                allowDeselect={false}
-                onFocus={(e) => (isMobileOS ? e.target.blur() : null)}
-              />
-              <Text>:</Text>
-              <Select
-                defaultValue="00"
-                onChange={() => setIsEndTimeUnset(false)}
-                {...getInputProps(endMinutes, { type: "text" })}
-                name="endMinutes"
-                data={minutesAndSeconds}
-                withCheckIcon={false}
-                clearable={false}
-                allowDeselect={false}
-                onFocus={(e) => (isMobileOS ? e.target.blur() : null)}
-              ></Select>
-              <Text>:</Text>
-              <Select
-                {...getInputProps(endSeconds, { type: "text" })}
-                name="endSeconds"
-                data={minutesAndSeconds}
-                defaultValue={"00"}
-                withCheckIcon={false}
-                clearable={false}
-                allowDeselect={false}
-                onFocus={(e) => (isMobileOS ? e.target.blur() : null)}
-              />
-            </Flex>
-            {(startHours.errors ||
-              startMinutes.errors ||
-              startSeconds.errors ||
-              endHours.errors ||
-              endMinutes.errors ||
-              endSeconds.errors) && (
-              <Text size="xs" c={"red"}>
-                開始時間は終了時間より前に設定してください
-              </Text>
-            )}
-          </Stack>
-
-          <Button
-            loading={isSubmitting}
-            loaderProps={{ type: "oval" }}
-            fullWidth
-            type="submit"
-          >
-            切り抜きをシェア
-          </Button>
         </Stack>
       </Form>
     </Modal>
