@@ -1,6 +1,15 @@
 import { useForm, getFormProps, getInputProps } from "@conform-to/react";
 import { parseWithZod } from "@conform-to/zod";
-import { rem, Modal, Stack, TextInput, FileInput, Button } from "@mantine/core";
+import {
+  rem,
+  Modal,
+  Stack,
+  TextInput,
+  FileInput,
+  Button,
+  Image,
+  AspectRatio,
+} from "@mantine/core";
 import { useDisclosure } from "@mantine/hooks";
 import {
   ActionFunctionArgs,
@@ -17,6 +26,7 @@ import {
   useRouteLoaderData,
 } from "@remix-run/react";
 import { IconPhoto } from "@tabler/icons-react";
+import { useState } from "react";
 import { useToastForFormAction } from "~/features/Notification/hooks/useToastForFormAction";
 import { createRadioshow } from "~/features/Radioshow/apis/createRadioshow";
 import { radioshowCreateschema } from "~/features/Radioshow/types/radioshowCreateSchema";
@@ -78,6 +88,7 @@ export async function action({ request, context }: ActionFunctionArgs) {
 }
 
 export default function RadioshowCreate() {
+  const [previewImage, setPreviewImage] = useState<string | null>(null);
   const [form, { title, headerImage }] = useForm({
     onValidate({ formData }) {
       return parseWithZod(formData, { schema: radioshowCreateschema });
@@ -99,6 +110,18 @@ export default function RadioshowCreate() {
     navigate(`/highlights/${highlightLoaderData?.display}`);
   };
 
+  const handleFileChange = (file: File | null) => {
+    if (file) {
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setPreviewImage(reader.result as string);
+      };
+      reader.readAsDataURL(file);
+    } else {
+      setPreviewImage(null);
+    }
+  };
+
   useToastForFormAction({ actionData });
 
   const icon = (
@@ -111,7 +134,6 @@ export default function RadioshowCreate() {
         onClose={handleCloseModal}
         title="番組名を登録してください"
         size={"lg"}
-        zIndex={3001}
       >
         <Form
           method="post"
@@ -125,6 +147,7 @@ export default function RadioshowCreate() {
               label="番組タイトル"
               placeholder="番組名"
               error={title.errors}
+              size="md"
             />
             <FileInput
               name="headerImage"
@@ -133,12 +156,25 @@ export default function RadioshowCreate() {
               label="ヘッダー画像"
               placeholder="画像を選択してください"
               error={headerImage.errors}
+              size="md"
+              onChange={handleFileChange}
             />
+            {previewImage && (
+              <AspectRatio ratio={24 / 9} >
+                <Image
+                  src={previewImage}
+                  alt="Header image preview"
+                  fit="contain"
+                  radius="md"
+                />
+              </AspectRatio>
+            )}
             <Button
               loading={isSubmitting}
               loaderProps={{ type: "oval" }}
               fullWidth
               type="submit"
+              size="md"
             >
               新規登録
             </Button>
