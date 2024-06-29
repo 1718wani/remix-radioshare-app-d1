@@ -13,7 +13,11 @@ import {
   rem,
 } from "@mantine/core";
 import { useDisclosure } from "@mantine/hooks";
-import { ActionFunctionArgs, MetaFunction, json } from "@remix-run/cloudflare";
+import {
+  ActionFunctionArgs,
+  MetaFunction,
+  json,
+} from "@remix-run/cloudflare";
 import {
   useRouteLoaderData,
   Form,
@@ -74,8 +78,16 @@ export const action = async ({ request, context }: ActionFunctionArgs) => {
   }
 
   await createHighlight(highlightData, request, context);
+  const redirectUrl = `/highlights/all?orderBy=createdAt&ascOrDesc=desc&offset=0`;
+  const jsonData = { success: true, message: "切り抜きシェアが完了しました" };
 
-  return json({ success: true, message: "切り抜きシェアが完了しました" });
+  const headers = new Headers();
+  headers.set("Location", redirectUrl);
+
+  return json(jsonData, {
+    status: 303,
+    headers: headers,
+  });
 };
 
 export default function HighlightCreate() {

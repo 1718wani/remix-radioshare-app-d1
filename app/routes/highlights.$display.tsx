@@ -220,16 +220,20 @@ export default function Hightlights() {
     fetcher.submit({ id, [actionType]: value.toString() }, { method: "post" });
   };
 
-  const sortOptionsMap: { [key: string]: string } = {
-    totalReplayTimes: SORT_OPTIONS.TOTAL_REPLAY_TIMES,
-    totalReplayTimesAsc: SORT_OPTIONS.TOTAL_REPLAY_TIMES_ASC,
-    newest: SORT_OPTIONS.NEWEST,
-    oldest: SORT_OPTIONS.OLDEST,
+  
+
+  // デフォルトのソートオプションを決定する関数
+  const getDefaultSortOption = (orderBy: string, ascOrDesc: string): SortOptionType => {
+    if (orderBy === "totalReplayTimes") {
+      return ascOrDesc === "desc" ? SORT_OPTIONS.TOTAL_REPLAY_TIMES : SORT_OPTIONS.TOTAL_REPLAY_TIMES_ASC;
+    } else if (orderBy === "createdAt") {
+      return ascOrDesc === "desc" ? SORT_OPTIONS.NEWEST : SORT_OPTIONS.OLDEST;
+    }
+    // デフォルトのケース
+    return SORT_OPTIONS.TOTAL_REPLAY_TIMES;
   };
 
-  const defaultSortOption =
-    sortOptionsMap[orderBy + (ascOrDesc === "asc" ? "Asc" : "")] ||
-    SORT_OPTIONS.TOTAL_REPLAY_TIMES;
+  const defaultSortOption = getDefaultSortOption(orderBy, ascOrDesc);
 
   return (
     <>
