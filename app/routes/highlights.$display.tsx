@@ -1,9 +1,9 @@
 import { Flex, Grid, Select, Title, rem } from "@mantine/core";
 import { useDisclosure } from "@mantine/hooks";
 import {
-  ActionFunctionArgs,
-  LoaderFunctionArgs,
-  MetaFunction,
+  type ActionFunctionArgs,
+  type LoaderFunctionArgs,
+  type MetaFunction,
   json,
 } from "@remix-run/cloudflare";
 import {
@@ -14,7 +14,6 @@ import {
 } from "@remix-run/react";
 import { useState } from "react";
 import invariant from "tiny-invariant";
-import { PaginationBar } from "~/features/Pagenation/components/PaginationBar";
 import { LoginNavigateModal } from "~/features/Auth/components/LoginNavigateModal";
 import { authenticator } from "~/features/Auth/services/auth.server";
 import { getHighlights } from "~/features/Highlight/apis/getHighlights";
@@ -24,12 +23,13 @@ import { EmptyHighlight } from "~/features/Highlight/components/EmptyHighlight";
 import { HighLightCardWithRadioshow } from "~/features/Highlight/components/HighLightCardWithRadioshow";
 import { RadioShowHeader } from "~/features/Highlight/components/RadioShowHeader";
 import { HIGHLIGHT_FETCH_LIMIT } from "~/features/Highlight/consts/highlightFetchLimit";
-import { getRadioshowById } from "~/features/Radioshow/apis/getRadioshowById";
+import { PaginationBar } from "~/features/Pagenation/components/PaginationBar";
+import { SORT_OPTIONS } from "~/features/Pagenation/consts/sortOptions";
 import { handleSortChange } from "~/features/Pagenation/functions/handleSortChange";
+import type { SortOptionType } from "~/features/Pagenation/types/sortOptionsType";
 import { FixedBox } from "~/features/Player/components/FixedBox";
 import { usePlayHighlight } from "~/features/Player/hooks/usePlayHighlight";
-import { SORT_OPTIONS } from "~/features/Pagenation/consts/sortOptions";
-import { SortOptionType } from "~/features/Pagenation/types/sortOptionsType";
+import { getRadioshowById } from "~/features/Radioshow/apis/getRadioshowById";
 
 export const meta: MetaFunction<typeof loader> = ({ data }) => {
   if (!data) {
@@ -189,7 +189,7 @@ export default function Hightlights() {
     null
   );
 
-  const isEnabledUserAction = userId ? true : false;
+  const isEnabledUserAction = !!userId;
 
   const handleAutoStopHighlight = () => {
     setPlayingHighlightId(null);
@@ -220,13 +220,17 @@ export default function Hightlights() {
     fetcher.submit({ id, [actionType]: value.toString() }, { method: "post" });
   };
 
-  
-
   // デフォルトのソートオプションを決定する関数
-  const getDefaultSortOption = (orderBy: string, ascOrDesc: string): SortOptionType => {
+  const getDefaultSortOption = (
+    orderBy: string,
+    ascOrDesc: string
+  ): SortOptionType => {
     if (orderBy === "totalReplayTimes") {
-      return ascOrDesc === "desc" ? SORT_OPTIONS.TOTAL_REPLAY_TIMES : SORT_OPTIONS.TOTAL_REPLAY_TIMES_ASC;
-    } else if (orderBy === "createdAt") {
+      return ascOrDesc === "desc"
+        ? SORT_OPTIONS.TOTAL_REPLAY_TIMES
+        : SORT_OPTIONS.TOTAL_REPLAY_TIMES_ASC;
+    }
+    if (orderBy === "createdAt") {
       return ascOrDesc === "desc" ? SORT_OPTIONS.NEWEST : SORT_OPTIONS.OLDEST;
     }
     // デフォルトのケース

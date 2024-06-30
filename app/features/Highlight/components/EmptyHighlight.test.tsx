@@ -1,11 +1,11 @@
-import { describe, expect, test } from "vitest";
 import { screen } from "@testing-library/react";
-import { EmptyHighlight } from "./EmptyHighlight";
+import { describe, expect, test } from "vitest";
 import { render } from "~/test/render";
+import { EmptyHighlight } from "./EmptyHighlight";
 
 describe(EmptyHighlight, () => {
-  test("配列が空の場合レンダリングされる", () => {
-    render(<EmptyHighlight />);
-    expect(screen.getByText("まだ登録されていません")).toBeInTheDocument();
-  });
+	test("配列が空の場合レンダリングされる", () => {
+		render(<EmptyHighlight />);
+		expect(screen.getByText("まだ登録されていません")).toBeInTheDocument();
+	});
 });
