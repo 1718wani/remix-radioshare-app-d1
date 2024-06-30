@@ -1,4 +1,6 @@
 {
   "window.zoomLevel": -0.5,
-  "editor.codeActionsOnSave": ["source.addMissingImports"]
+  "editor.codeActionsOnSave": ["source.addMissingImports"],
+  "editor.defaultFormatter": "biomejs.biome",
+	"editor.formatOnSave": true,
 }

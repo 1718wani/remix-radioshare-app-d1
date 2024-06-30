@@ -1,39 +1,35 @@
-import { AuthorizationError } from "remix-auth";
+import type { AppLoadContext } from "@remix-run/cloudflare";
 import bcrypt from "bcryptjs";
-import { AppLoadContext } from "@remix-run/cloudflare";
-import { users } from "~/drizzle/schema.server";
-import { drizzle } from "drizzle-orm/d1";
 import { eq } from "drizzle-orm";
-
+import { drizzle } from "drizzle-orm/d1";
+import { AuthorizationError } from "remix-auth";
+import { users } from "~/drizzle/schema.server";
 
 export async function signIn(
-  email: string,
-  password: string,
-  context: AppLoadContext
+	email: string,
+	password: string,
+	context: AppLoadContext,
 ) {
-  const db = drizzle(context.cloudflare.env.DB);
-  const user = await db
-    .select()
-    .from(users)
-    .where(eq(users.email, email))
-    .execute()
-    .then((rows) => rows[0]);
+	const db = drizzle(context.cloudflare.env.DB);
+	const user = await db
+		.select()
+		.from(users)
+		.where(eq(users.email, email))
+		.execute()
+		.then((rows) => rows[0]);
 
-  if (!user) {
-    console.log("you entered a wrong email");
-    throw new AuthorizationError();
-  }
+	if (!user) {
+		throw new AuthorizationError();
+	}
 
-  const passwordsMatch = await bcrypt.compare(
-    password,
-    user.password as string
-  );
+	const passwordsMatch = await bcrypt.compare(
+		password,
+		user.password as string,
+	);
 
-  console.log(passwordsMatch, "passwordmatch");
+	if (!passwordsMatch) {
+		throw new AuthorizationError();
+	}
 
-  if (!passwordsMatch) {
-    throw new AuthorizationError();
-  }
-
-  return user.id;
+	return user.id;
 }

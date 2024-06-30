@@ -1,10 +1,10 @@
-import { ActionFunctionArgs, redirect } from "@remix-run/cloudflare";
+import { type ActionFunctionArgs, redirect } from "@remix-run/cloudflare";
 import { authenticator } from "~/features/Auth/services/auth.server";
 
 export async function action({ request, context }: ActionFunctionArgs) {
-  await authenticator.authenticate("google", request, {
-    context: context,
-  });
+	await authenticator.authenticate("google", request, {
+		context: context,
+	});
 
-  return redirect("/highlights/all", {});
+	return redirect("/highlights/all", {});
 }

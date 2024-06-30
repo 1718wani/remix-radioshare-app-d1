@@ -1,3 +1,3 @@
-import { SORT_OPTIONS } from "../consts/sortOptions";
+import type { SORT_OPTIONS } from "../consts/sortOptions";
 
-export type SortOptionType = typeof SORT_OPTIONS[keyof typeof SORT_OPTIONS];
+export type SortOptionType = (typeof SORT_OPTIONS)[keyof typeof SORT_OPTIONS];
