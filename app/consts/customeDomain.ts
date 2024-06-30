@@ -1,1 +1,1 @@
-export const customeDomain = "https://aikunapp.org/"
+export const customeDomain = "https://aikunapp.org/";

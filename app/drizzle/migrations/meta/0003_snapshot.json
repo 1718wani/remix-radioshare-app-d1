@@ -1,13 +1,13 @@
 {
-  "version": "6",
-  "dialect": "sqlite",
-  "id": "87c4eeb5-72a4-454b-9a3c-ef91d92d9eae",
-  "prevId": "a71ec251-678d-41c0-a0d8-4b4facbbd459",
-  "tables": {},
-  "enums": {},
-  "_meta": {
-    "schemas": {},
-    "tables": {},
-    "columns": {}
-  }
+	"version": "6",
+	"dialect": "sqlite",
+	"id": "87c4eeb5-72a4-454b-9a3c-ef91d92d9eae",
+	"prevId": "a71ec251-678d-41c0-a0d8-4b4facbbd459",
+	"tables": {},
+	"enums": {},
+	"_meta": {
+		"schemas": {},
+		"tables": {},
+		"columns": {}
+	}
 }

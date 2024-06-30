@@ -1,48 +1,48 @@
 {
-  "version": "6",
-  "dialect": "sqlite",
-  "entries": [
-    {
-      "idx": 0,
-      "version": "6",
-      "when": 1715960016763,
-      "tag": "0000_quick_echo",
-      "breakpoints": true
-    },
-    {
-      "idx": 1,
-      "version": "6",
-      "when": 1715960078608,
-      "tag": "0001_daffy_captain_cross",
-      "breakpoints": true
-    },
-    {
-      "idx": 2,
-      "version": "6",
-      "when": 1715960680631,
-      "tag": "0002_amusing_the_captain",
-      "breakpoints": true
-    },
-    {
-      "idx": 3,
-      "version": "6",
-      "when": 1715960692787,
-      "tag": "0003_rainy_stingray",
-      "breakpoints": true
-    },
-    {
-      "idx": 4,
-      "version": "6",
-      "when": 1715962098452,
-      "tag": "0004_nifty_giant_girl",
-      "breakpoints": true
-    },
-    {
-      "idx": 5,
-      "version": "6",
-      "when": 1716645069227,
-      "tag": "0005_lying_alice",
-      "breakpoints": true
-    }
-  ]
+	"version": "6",
+	"dialect": "sqlite",
+	"entries": [
+		{
+			"idx": 0,
+			"version": "6",
+			"when": 1715960016763,
+			"tag": "0000_quick_echo",
+			"breakpoints": true
+		},
+		{
+			"idx": 1,
+			"version": "6",
+			"when": 1715960078608,
+			"tag": "0001_daffy_captain_cross",
+			"breakpoints": true
+		},
+		{
+			"idx": 2,
+			"version": "6",
+			"when": 1715960680631,
+			"tag": "0002_amusing_the_captain",
+			"breakpoints": true
+		},
+		{
+			"idx": 3,
+			"version": "6",
+			"when": 1715960692787,
+			"tag": "0003_rainy_stingray",
+			"breakpoints": true
+		},
+		{
+			"idx": 4,
+			"version": "6",
+			"when": 1715962098452,
+			"tag": "0004_nifty_giant_girl",
+			"breakpoints": true
+		},
+		{
+			"idx": 5,
+			"version": "6",
+			"when": 1716645069227,
+			"tag": "0005_lying_alice",
+			"breakpoints": true
+		}
+	]
 }

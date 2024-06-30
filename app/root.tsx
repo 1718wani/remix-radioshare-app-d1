@@ -3,57 +3,57 @@
 import "@mantine/core/styles.css";
 import "@mantine/notifications/styles.css";
 import {
+  AppShell,
+  Button,
+  Center,
+  ColorSchemeScript,
+  Divider,
+  Image,
+  NavLink as MantineNavLink,
+  MantineProvider,
+  ScrollArea,
+  Stack,
+  Text,
+  Title,
+} from "@mantine/core";
+import { useDisclosure } from "@mantine/hooks";
+import { Notifications } from "@mantine/notifications";
+import type { LoaderFunctionArgs } from "@remix-run/cloudflare";
+import {
+  Form,
+  Link,
   Links,
   Meta,
   Outlet,
+  NavLink as RemixNavLink,
   Scripts,
   ScrollRestoration,
   json,
   useLoaderData,
   useMatches,
-  Form,
-  useRouteError,
-  Link,
-  useRouteLoaderData,
   useNavigate,
   useNavigation,
-  NavLink as RemixNavLink,
+  useRouteError,
+  useRouteLoaderData,
 } from "@remix-run/react";
-import {
-  ColorSchemeScript,
-  MantineProvider,
-  AppShell,
-  ScrollArea,
-  Divider,
-  Button,
-  Center,
-  Stack,
-  Title,
-  Text,
-  Image,
-  NavLink as MantineNavLink,
-} from "@mantine/core";
-import { Notifications } from "@mantine/notifications";
-import { useDisclosure } from "@mantine/hooks";
 import {
   IconBookmark,
   IconLogout2,
   IconMusicPlus,
   IconRadio,
 } from "@tabler/icons-react";
-import { getRadioshows } from "./features/Radioshow/apis/getRadioshows";
-import { LoaderFunctionArgs } from "@remix-run/cloudflare";
-import { authenticator } from "./features/Auth/services/auth.server";
-import { LoginNavigateModal } from "./features/Auth/components/LoginNavigateModal";
 import { useAtom } from "jotai";
-import { isSideMenuOpenAtom } from "./features/Player/atoms/isSideMenuOpenAtom";
-import { GoogleButton } from "./features/Auth/components/GoogleButton";
-import { getToastFromSession } from "./features/Notification/functions/getToastFromSession.server";
-import { commitSession } from "./features/Auth/session.server";
-import { useToastNotifications } from "./features/Notification/hooks/useToastNotifications";
-import { loader as highlightsLoader } from "~/routes/highlights.$display";
-import { HighlightsSkeleton } from "./features/Navigation/components/HighlightsSkeleton";
+import type { loader as highlightsLoader } from "~/routes/highlights.$display";
 import { HeaderComponent } from "./components/HeaderComponent";
+import { GoogleButton } from "./features/Auth/components/GoogleButton";
+import { LoginNavigateModal } from "./features/Auth/components/LoginNavigateModal";
+import { authenticator } from "./features/Auth/services/auth.server";
+import { commitSession } from "./features/Auth/session.server";
+import { HighlightsSkeleton } from "./features/Navigation/components/HighlightsSkeleton";
+import { getToastFromSession } from "./features/Notification/functions/getToastFromSession.server";
+import { useToastNotifications } from "./features/Notification/hooks/useToastNotifications";
+import { isSideMenuOpenAtom } from "./features/Player/atoms/isSideMenuOpenAtom";
+import { getRadioshows } from "./features/Radioshow/apis/getRadioshows";
 
 export const loader = async ({ context, request }: LoaderFunctionArgs) => {
   const radioShows = await getRadioshows(context, 0);
@@ -118,10 +118,10 @@ export function Layout({ children }: { children: React.ReactNode }) {
         <meta name="viewport" content="width=device-width,initial-scale=1" />
         <title>RadiShare</title>
         <script
-          defer
+          defer={true}
           src="https://umami-olive.vercel.app/script.js"
           data-website-id="80fdd0d2-ba41-46b9-a91d-4e5180dd27d3"
-        ></script>
+        />
         <Meta />
         <Links />
         <ColorSchemeScript />
@@ -174,9 +174,7 @@ export default function App() {
           </div>
         </AppShell.Header>
 
-        <AppShell.Navbar
-          p="xs"
-        >
+        <AppShell.Navbar p="xs">
           <MantineNavLink
             component={RemixNavLink}
             to="/highlights/all"
@@ -216,14 +214,13 @@ export default function App() {
           <Button
             mt={"sm"}
             onClick={(e) => {
-              if (!user) {
-                e.preventDefault();
-                console.log("開いている");
-                openModal();
-              } else {
+              if (user) {
                 navigate(
                   `/highlights/${highlightLoaderData?.display}/radio-create`
                 );
+              } else {
+                e.preventDefault();
+                openModal();
               }
             }}
             w="100%"
