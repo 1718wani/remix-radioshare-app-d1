@@ -99,6 +99,11 @@ export async function action({ request, context }: ActionFunctionArgs) {
 				successRedirect: "/highlights/all",
 				context: context,
 			});
+		default:
+			return json({
+				success: false,
+				message: "アクションが不正です",
+			});
 	}
 }
 

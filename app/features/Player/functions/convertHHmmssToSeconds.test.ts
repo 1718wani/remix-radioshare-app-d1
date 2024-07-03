@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { convertHHMMSSToSeconds } from "./convertHHmmssToSeconds.ts";
+import { convertHHMMSSToSeconds } from "~/features/Player/functions/convertHHmmssToSeconds";
 
 describe("convertHHMMSSToSeconds", () => {
 	// 正常系のテスト

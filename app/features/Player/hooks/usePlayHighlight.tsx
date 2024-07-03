@@ -5,7 +5,7 @@ import type { highlightCardWithRadioshowProps } from "~/features/Highlight/types
 import { convertHHMMSSToSeconds } from "~/features/Player/functions/convertHHmmssToSeconds";
 import { convertUrlToId } from "~/features/Player/functions/convertUrlToId";
 import { useSpotifyPlayer } from "~/features/Player/hooks/useSpotifyPlayer";
-import { useYouTubePlayer } from "./useYoutubePlayer";
+import { useYouTubePlayer } from "~/features/Player/hooks/useYoutubePlayer";
 
 export function usePlayHighlight(onPlaybackEnd: () => void) {
 	const { playSpotifyHighlight, pauseSpotifyHighlight } =
