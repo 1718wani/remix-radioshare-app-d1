@@ -1,5 +1,5 @@
 import type { NavigateFunction } from "@remix-run/react";
-import type { SortOptionType } from "../types/sortOptionsType";
+import type { SortOptionType } from "~/features/Pagenation/types/sortOptionsType";
 
 export const handleSortChange = (
 	sortOption: SortOptionType | null,
@@ -25,6 +25,8 @@ export const handleSortChange = (
 		case "古い順":
 			orderBy = "createdAt";
 			ascOrDesc = "asc";
+			break;
+		default:
 			break;
 	}
 

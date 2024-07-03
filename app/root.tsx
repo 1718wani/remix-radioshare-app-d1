@@ -77,7 +77,6 @@ export const loader = async ({ context, request }: LoaderFunctionArgs) => {
 
 export function ErrorBoundary() {
 	const error = useRouteError();
-	console.error(error);
 	return (
 		<>
 			<Center my={"xl"}>
@@ -184,6 +183,7 @@ export default function App() {
 				<AppShell.Navbar p="xs">
 					<MantineNavLink
 						component={RemixNavLink}
+						onClick={() => setMenuOpen(false)}
 						to="/highlights/all"
 						label="一覧"
 						aria-current={
@@ -194,6 +194,7 @@ export default function App() {
 
 					<MantineNavLink
 						component={RemixNavLink}
+						onClick={() => setMenuOpen(false)}
 						to="/highlights/saved"
 						label="保存済み"
 						aria-current={
