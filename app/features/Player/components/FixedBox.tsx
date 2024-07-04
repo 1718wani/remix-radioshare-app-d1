@@ -21,6 +21,7 @@ export const FixedBox: React.FC<FixedBoxProps> = ({
 				right: isMobile ? "50%" : "3%",
 				transform: isMobile ? "translateX(50%)" : "none",
 				bottom: "3%",
+				zIndex: 1,
 			}}
 		>
 			<div
@@ -31,7 +32,7 @@ export const FixedBox: React.FC<FixedBoxProps> = ({
 				}}
 				title={title} // タイトルを追加
 				id={id}
-			></div>
+			/>
 		</Box>
 	);
 };
