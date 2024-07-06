@@ -60,14 +60,6 @@ export const meta: MetaFunction = () => {
 	return [
 		{ title: "RadiShare" },
 		{
-			property: "og:title",
-			content: "RadiShare",
-		},
-		{
-			property: "og:description",
-			content: "RadiShareはラジオ切り抜きシェアサービスです。",
-		},
-		{
 			property: "og:image",
 			content: "https://aikunapp.org/radishare-header.png",
 		},
