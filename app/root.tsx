@@ -135,6 +135,12 @@ export function Layout({ children }: { children: React.ReactNode }) {
 				<meta charSet="utf-8" />
 				<meta name="viewport" content="width=device-width,initial-scale=1" />
 				<title>RadiShare</title>
+				<meta
+					property="og:image"
+					content="https://aikunapp.org/radishare-header.png"
+				/>
+				<meta property="og:image:width" content="1200" />
+				<meta property="og:image:height" content="630" />
 				<script
 					defer={true}
 					src="https://umami-olive.vercel.app/script.js"
