@@ -38,6 +38,18 @@ export const meta: MetaFunction<typeof loader> = ({ data }) => {
 		return [
 			{ title: "切り抜き一覧 | アプリケーション名" },
 			{ name: "description", content: "ラジオ番組の切り抜き一覧ページです。" },
+			{
+				property: "og:title",
+				content: "RadiShare",
+			},
+			{
+				property: "og:description",
+				content: "RadiShareはラジオ切り抜きシェアサービスです。",
+			},
+			{
+				property: "og:image",
+				content: "https://aikunapp.org/radishare-header.png",
+			},
 		];
 	}
 
