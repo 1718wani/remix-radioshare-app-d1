@@ -23,8 +23,8 @@ import {
 import { add, isWithinInterval, parseISO } from "date-fns";
 import { useState } from "react";
 import { customeDomain } from "~/consts/customeDomain";
+import type { highlightCardWithRadioshowProps } from "~/features/Highlight/types/highlightCardWithRadioshowProps";
 import type { loader } from "~/root";
-import type { highlightCardWithRadioshowProps } from "../types/highlightCardWithRadioshowProps";
 
 export const HighLightCardWithRadioshow = (
 	props: highlightCardWithRadioshowProps,

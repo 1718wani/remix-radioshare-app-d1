@@ -19,7 +19,7 @@ import {
 } from "@mantine/core";
 import { useDisclosure } from "@mantine/hooks";
 import { Notifications } from "@mantine/notifications";
-import type { LoaderFunctionArgs } from "@remix-run/cloudflare";
+import type { LoaderFunctionArgs, MetaFunction } from "@remix-run/cloudflare";
 import {
 	Form,
 	Link,
@@ -55,6 +55,24 @@ import { getRadioshows } from "~/features/Radioshow/apis/getRadioshows";
 import type { loader as highlightsLoader } from "~/routes/highlights.$display";
 import { authenticator } from "./features/Auth/services/auth.server";
 import { commitSession } from "./features/Auth/session.server";
+
+export const meta: MetaFunction = () => {
+	return [
+		{ title: "RadiShare" },
+		{
+			property: "og:title",
+			content: "RadiShare",
+		},
+		{
+			property: "og:description",
+			content: "RadiShareはラジオ切り抜きシェアサービスです。",
+		},
+		{
+			property: "og:image",
+			content: "https://aikunapp.org/radishare-header.png",
+		},
+	];
+};
 
 export const loader = async ({ context, request }: LoaderFunctionArgs) => {
 	const radioShows = await getRadioshows(context, 0);
