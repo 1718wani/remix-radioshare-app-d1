@@ -12,6 +12,18 @@ export const meta: MetaFunction = () => {
 			content:
 				"お気に入りのラジオ番組の切り抜きを共有し、新しい発見をしよう。RadiShareは、ラジオファンのためのコミュニティプラットフォームです。",
 		},
+		{
+			property: "og:title",
+			content: "RadiShare",
+		},
+		{
+			property: "og:description",
+			content: "RadiShareはラジオ切り抜きシェアサービスです。",
+		},
+		{
+			property: "og:image",
+			content: "https://aikunapp.org/radishare-header.png",
+		},
 	];
 };
 
