@@ -69,7 +69,7 @@ export const meta: MetaFunction = () => {
 		},
 		{
 			property: "og:image",
-			content: "https://www.jacobparis.com/images/og.png",
+			content: "https://aikunapp.org/radishare-header.png",
 		},
 	];
 };
