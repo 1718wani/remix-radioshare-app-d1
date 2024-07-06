@@ -135,6 +135,13 @@ export function Layout({ children }: { children: React.ReactNode }) {
 				<meta charSet="utf-8" />
 				<meta name="viewport" content="width=device-width,initial-scale=1" />
 				<title>RadiShare</title>
+				<meta property="og:type" content="website" />
+				<meta property="og:url" content="https://aikunapp.org" />
+				<meta property="og:title" content="RadiShare" />
+				<meta
+					property="og:description"
+					content="ラジオ切り抜きのシェアプラットフォーム"
+				/>
 				<meta
 					property="og:image"
 					content="https://aikunapp.org/radishare-header.png"
